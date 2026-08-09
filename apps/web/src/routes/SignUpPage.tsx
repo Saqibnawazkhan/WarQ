@@ -9,6 +9,33 @@ import { Button, Chip, Field } from '../ui/index.ts';
 
 type AccountKind = 'organization' | 'individual_teacher';
 
+/**
+ * Turns an auth error into something the person in front of the screen can act on.
+ *
+ * The raw messages are written for whoever is operating the service, not for
+ * whoever is trying to register — "email rate limit exceeded" tells a teacher
+ * nothing about what they should do next.
+ */
+function explainSignUpFailure(message: string): string {
+  if (/already registered|already been registered/i.test(message)) {
+    return 'An account already exists for that email address. Sign in instead, or reset the password.';
+  }
+
+  if (/rate limit/i.test(message)) {
+    return 'Too many accounts have been created in the last hour. Wait a few minutes and try again — nothing you entered was lost.';
+  }
+
+  if (/password/i.test(message)) {
+    return 'That password is too short. Use at least 8 characters.';
+  }
+
+  if (/invalid|valid email/i.test(message)) {
+    return 'That email address does not look right. Check it and try again.';
+  }
+
+  return `Your account could not be created: ${message}`;
+}
+
 const KINDS: readonly { value: AccountKind; label: string; blurb: string }[] = [
   {
     value: 'organization',
@@ -69,11 +96,7 @@ export function SignUpPage() {
     });
 
     if (signUpError) {
-      setError(
-        /already registered/i.test(signUpError.message)
-          ? 'An account already exists for that email address. Sign in instead.'
-          : signUpError.message,
-      );
+      setError(explainSignUpFailure(signUpError.message));
       setSubmitting(false);
       return;
     }
