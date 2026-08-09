@@ -1,0 +1,31 @@
+{
+  "name": "@warq/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Warq web application — Main Admin, Organization Admin and Teacher dashboards.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p tsconfig.json --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src vite.config.ts",
+    "clean": "rimraf dist .turbo"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "5.101.4",
+    "@warq/core": "*",
+    "@warq/tokens": "*",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-router-dom": "7.18.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.3",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@vitejs/plugin-react": "6.0.5",
+    "tailwindcss": "4.3.3",
+    "vite": "8.2.1"
+  }
+}

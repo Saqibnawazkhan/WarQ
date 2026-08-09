@@ -1,0 +1,27 @@
+{
+  "name": "@warq/tokens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Warq design tokens — one palette compiled for both web and native.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./tokens.css": "./dist/tokens.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/build-css.mjs",
+    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src",
+    "test": "node --test \"test/*.test.mjs\"",
+    "clean": "rimraf dist"
+  }
+}

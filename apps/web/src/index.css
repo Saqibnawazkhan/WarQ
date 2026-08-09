@@ -1,0 +1,90 @@
+@import 'tailwindcss';
+@import '@warq/tokens/tokens.css';
+
+/*
+ * Maps the Warq tokens onto Tailwind's theme.
+ *
+ * `inline` means the generated utilities reference the custom property rather
+ * than copying its value, so switching `data-accent` on <html> repaints the app
+ * without rebuilding the stylesheet.
+ */
+@theme inline {
+  --color-accent: var(--warq-brand-accent);
+  --color-accent-hover: var(--warq-brand-accent-hover);
+  --color-on-accent: var(--warq-brand-on-accent);
+
+  --color-ink: var(--warq-ink-strong);
+  --color-ink-base: var(--warq-ink-base);
+  --color-ink-muted: var(--warq-ink-muted);
+  --color-ink-faint: var(--warq-ink-faint);
+
+  --color-canvas: var(--warq-surface-canvas);
+  --color-raised: var(--warq-surface-raised);
+  --color-sunken: var(--warq-surface-sunken);
+  --color-hover: var(--warq-surface-hover);
+  --color-track: var(--warq-surface-track);
+  --color-meter: var(--warq-surface-meter);
+  --color-inverse: var(--warq-surface-inverse);
+
+  --color-line: var(--warq-border-base);
+  --color-line-input: var(--warq-border-input);
+  --color-line-subtle: var(--warq-border-subtle);
+  --color-line-faint: var(--warq-border-faint);
+  --color-line-hover: var(--warq-border-hover);
+
+  --color-active: var(--warq-status-active);
+  --color-pending: var(--warq-status-pending);
+  --color-expiring: var(--warq-status-expiring-soon);
+  --color-expired: var(--warq-status-expired);
+  --color-suspended: var(--warq-status-suspended);
+  --color-info: var(--warq-status-info);
+
+  --font-display: var(--warq-font-display);
+  --font-sans: var(--warq-font-body);
+  --font-mono: var(--warq-font-mono);
+
+  --radius-pill: var(--warq-radius-full);
+  --radius-control: var(--warq-radius-md);
+  --radius-field: var(--warq-radius-lg);
+  --radius-tile: var(--warq-radius-xl);
+  --radius-stat: var(--warq-radius-2xl);
+  --radius-card: var(--warq-radius-3xl);
+  --radius-sheet: var(--warq-radius-4xl);
+
+  --shadow-card: var(--warq-shadow-card);
+  --shadow-thumb: var(--warq-shadow-thumb);
+  --shadow-action: var(--warq-shadow-action);
+  --shadow-drawer: var(--warq-shadow-drawer);
+  --shadow-toast: var(--warq-shadow-toast);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--warq-surface-canvas);
+    color: var(--warq-ink-strong);
+    font-family: var(--warq-font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Keyboard users must always be able to see where they are. */
+  :focus-visible {
+    outline: 2px solid var(--warq-brand-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

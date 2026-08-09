@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box} body{margin:0;background:#F6F6F9;font-family:'Public Sans',sans-serif;color:#17173A}
+a{color:#4338CA} a:hover{color:#3730A3}
+input:focus{outline:none}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes drawerIn{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;">
+<div style="width:232px;flex:none;background:#17173A;color:#fff;display:flex;flex-direction:column;padding:20px 14px;position:sticky;top:0;height:100vh;">
+  <div style="display:flex;align-items:center;gap:10px;padding:4px 10px 22px;">
+    <div style="width:34px;height:34px;border-radius:11px;background:{{ accent }};display:flex;align-items:center;justify-content:center;font-family:Sora,sans-serif;font-size:16px;font-weight:800;">E</div>
+    <div>
+      <div style="font-family:Sora,sans-serif;font-size:14.5px;font-weight:800;">EDU Manager</div>
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.08em;">Main Admin</div>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:3px;">
+    <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="4">
+      <div onClick="{{ n.go }}" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:11px;cursor:pointer;background:{{ n.bg }};color:{{ n.fg }};font-size:13px;font-weight:700;" style-hover="background:rgba(255,255,255,0.08);">
+        <span style="font-family:Sora,sans-serif;font-size:13px;width:16px;text-align:center;">{{ n.glyph }}</span>{{ n.label }}
+        <sc-if value="{{ n.badge }}" hint-placeholder-val="{{ false }}"><span style="margin-left:auto;background:#D97706;color:#fff;font-size:10.5px;font-weight:800;border-radius:99px;padding:2px 7px;">{{ n.badgeN }}</span></sc-if>
+      </div>
+    </sc-for>
+  </div>
+  <div style="margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px 10px 2px;border-top:1px solid rgba(255,255,255,0.1);">
+    <div style="width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-family:Sora,sans-serif;font-size:12px;font-weight:700;">ZH</div>
+    <div>
+      <div style="font-size:12px;font-weight:700;">Zeeshan Haider</div>
+      <div style="font-size:10.5px;color:rgba(255,255,255,0.45);">admin@edumanager.pk</div>
+    </div>
+  </div>
+</div>
+<div style="flex:1;min-width:0;padding:26px 32px 40px;">
+
+<sc-if value="{{ isDash }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:18px;">
+  <div>
+    <div style="font-size:11px;font-weight:700;color:#8A8AA3;text-transform:uppercase;letter-spacing:0.09em;">Friday · 8 Aug 2026</div>
+    <div style="font-family:Sora,sans-serif;font-size:24px;font-weight:700;margin-top:2px;">Platform overview</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+    <sc-for list="{{ dashStats }}" as="d" hint-placeholder-count="4">
+      <div style="background:#fff;border:1px solid #E7E7EF;border-radius:18px;padding:16px;">
+        <div style="font-family:Sora,sans-serif;font-size:26px;font-weight:700;color:{{ d.color }};">{{ d.v }}</div>
+        <div style="font-size:12px;font-weight:600;color:#8A8AA3;margin-top:3px;">{{ d.label }}</div>
+        <div style="font-size:11px;font-weight:600;color:#B0B0C3;margin-top:1px;">{{ d.sub }}</div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:12px;align-items:start;">
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="background:#fff;border:1px solid #E7E7EF;border-radius:20px;padding:18px;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;">
+          <div style="font-family:Sora,sans-serif;font-size:15px;font-weight:700;">Pending approvals</div>
+          <div style="font-size:12px;font-weight:700;color:#D97706;">{{ pendingN }} waiting</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <sc-for list="{{ pendingRows }}" as="p" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:12px;border:1px solid #F0F0F6;border-radius:14px;padding:11px 13px;">
+              <div style="width:36px;height:36px;border-radius:12px;background:#D9770614;color:#D97706;display:flex;align-items:center;justify-content:center;font-family:Sora,sans-serif;font-size:12.5px;font-weight:700;flex:none;">{{ p.initials }}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13.5px;font-weight:700;">{{ p.name }}</div>
+                <div style="font-size:11.5px;color:#8A8AA3;">{{ p.meta }}</div>
+              </div>
+              <div onClick="{{ p.reject }}" style="font-size:12px;font-weight:700;color:#DC2626;border:1px solid #F3C4C4;border-radius:10px;padding:7px 13px;cursor:pointer;" style-hover="background:#DC26260A;">Reject</div>
+              <div onClick="{{ p.approve }}" style="font-size:12px;font-weight:700;color:#fff;background:#16A34A;border-radius:10px;padding:7px 13px;cursor:pointer;" style-hover="opacity:0.92;">Approve</div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ noPending }}" hint-placeholder-val="{{ false }}"><div style="font-size:12.5px;color:#8A8AA3;padding:6px 2px;">All caught up — no pending requests.</div></sc-if>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #E7E7EF;border-radius:20px;padding:18px;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;">
+          <div style="font-family:Sora,sans-serif;font-size:15px;font-weight:700;">Expiring soon</div>
+          <div onClick="{{ notifyAll }}" style="font-size:12px;font-weight:700;color:{{ accent }};cursor:pointer;">Notify all</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <sc-for list="{{ expiringRows }}" as="e" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:12px;border:1px solid #F0F0F6;border-radius:14px;padding:11px 13px;">
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13.5px;font-weight:700;">{{ e.name }}</div>
+                <div style="font-size:11.5px;color:#8A8AA3;">{{ e.meta }}</div>
+              </div>
+              <div style="font-size:12px;font-weight:800;color:#EA580C;">{{ e.days }}</div>
+              <div onClick="{{ e.notify }}" style="font-size:12px;font-weight:700;color:#43436B;border:1px solid #E3E3EC;border-radius:10px;padding:7px 13px;cursor:pointer;" style-hover="border-color:#C9C9DB;">Notify</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="background:#fff;border:1px solid #E7E7EF;border-radius:20px;padding:18px;">
+        <div style="font-family:Sora,sans-serif;font-size:15px;font-weight:700;margin-bottom:14px;">Subscriptions by plan</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <sc-for list="{{ planBars }}" as="b" hint-placeholder-count="3">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:5px;"><span>{{ b.label }}</span><span style="color:#8A8AA3;">{{ b.n }}</span></div>
+              <div style="height:8px;border-radius:99px;background:#EFEFF5;overflow:hidden;"><div style="height:100%;border-radius:99px;background:{{ b.color }};width:{{ b.w }};"></div></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #E7E7EF;border-radius:20px;padding:18px;">
+        <div style="font-family:Sora,sans-serif;font-size:15px;font-weight:700;margin-bottom:12px;">Recent activity</div>
+        <div style="display:flex;flex-direction:column;gap:11px;">
+          <sc-for list="{{ adminActivity }}" as="a" hint-placeholder-count="4">
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <div style="width:7px;height:7px;border-radius:99px;background:{{ a.color }};margin-top:5px;flex:none;"></div>
+              <div style="flex:1;font-size:12.5px;color:#43436B;line-height:1.45;">{{ a.text }}</div>
+              <div style="font-size:11px;color:#B0B0C3;flex:none;">{{ a.time }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isOrgs }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:14px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;">
+    <div style="font-family:Sora,sans-serif;font-size:24px;font-weight:700;">Organizations</div>
+    <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #E7E7EF;border-radius:12px;padding:0 12px;height:40px;width:260px;">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#8A8AA3" stroke-width="1.6"></circle><path d="M11 11l3.5 3.5" stroke="#8A8AA3" stroke-width="1.6" stroke-linecap="round"></path></svg>
+      <input value="{{ orgSearch }}" onChange="{{ setOrgSearch }}" placeholder="Search organizations" style="border:none;background:none;font-family:'Public Sans',sans-serif;font-size:13px;flex:1;color:#17173A;">
+    </div>
+  </div>
+  <div style="display:flex;gap:7px;flex-wrap:wrap;">
+    <sc-for list="{{ statusChips }}" as="f" hint-placeholder-count="6">
+      <div onClick="{{ f.pick }}" style="font-size:12px;font-weight:700;padding:7px 13px;border-radius:99px;cursor:pointer;background:{{ f.bg }};color:{{ f.fg }};border:1px solid {{ f.bd }};">{{ f.label }}</div>
+    </sc-for>
+  </div>
+  <div style="background:#fff;border:1px solid #E7E7EF;border-radius:20px;overflow:hidden;">
+    <div style="display:grid;grid-template-columns:2.2fr 1.6fr 1fr 0.8fr 1.1fr 1.1fr;gap:12px;padding:12px 18px;font-size:11px;font-weight:700;color:#8A8AA3;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid #F0F0F6;">
+      <div>Organization</div><div>Admin</div><div>Plan</div><div>Teachers</div><div>Expiry</div><div>Status</div>
+    </div>
+    <sc-for list="{{ orgRows }}" as="o" hint-placeholder-count="7">
+      <div onClick="{{ o.open }}" style="display:grid;grid-template-columns:2.2fr 1.6fr 1fr 0.8fr 1.1fr 1.1fr;gap:12px;padding:13px 18px;align-items:center;border-bottom:1px solid #F6F6FA;cursor:pointer;" style-hover="background:#FAFAFD;">
+        <div>
+          <div style="font-size:13.5px;font-weight:700;">{{ o.name }}</div>
+          <div style="font-size:11.5px;color:#8A8AA3;">{{ o.city }}</div>
+        </div>
+        <div style="font-size:12.5px;font-weight:600;color:#43436B;">{{ o.admin }}</div>
+        <div style="font-size:12.5px;font-weight:600;color:#43436B;">{{ o.plan }}</div>
+        <div style="font-size:12.5px;font-weight:700;">{{ o.teachers }}</div>
+        <div style="font-size:12.5px;font-weight:600;color:#43436B;">{{ o.end }}</div>
+        <div><span style="font-size:11px;font-weight:800;padding:4px 10px;border-radius:8px;background:{{ o.sc }}1A;color:{{ o.sc }};">{{ o.status }}</span></div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isTeachers }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:14px;">
+  <div style="font-family:Sora,sans-serif;font-size:24px;font-weight:700;">Individual teachers</div>
+  <div style="background:#fff;border:1px solid #E7E7EF;border-radius:20px;overflow:hidden;">
+    <div style="display:grid;grid-template-columns:2fr 2fr 1fr 1.1fr 1.1fr 1.8fr;gap:12px;padding:12px 18px;font-size:11px;font-weight:700;color:#8A8AA3;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid #F0F0F6;">
+      <div>Teacher</div><div>Email</div><div>Plan</div><div>Expiry</div><div>Status</div><div style="text-align:right;">Actions</div>
+    </div>
+    <sc-for list="{{ teacherRows }}" as="t" hint-placeholder-count="6">
+      <div style="display:grid;grid-template-columns:2fr 2fr 1fr 1.1fr 1.1fr 1.8fr;gap:12px;padding:12px 18px;align-items:center;border-bottom:1px solid #F6F6FA;">
+        <div style="font-size:13.5px;font-weight:700;">{{ t.name }}</div>
+        <div style="font-size:12.5px;font-weight:600;color:#43436B;overflow:hidden;text-overflow:ellipsis;">{{ t.email }}</div>
+        <div style="font-size:12.5px;font-weight:600;color:#43436B;">{{ t.plan }}</div>
+        <div style="font-size:12.5px;font-weight:600;color:#43436B;">{{ t.end }}</div>
+        <div><span style="font-size:11px;font-weight:800;padding:4px 10px;border-radius:8px;background:{{ t.sc }}1A;color:{{ t.sc }};">{{ t.status }}</span></div>
+        <div style="display:flex;gap:6px;justify-content:flex-end;">
+          <sc-for list="{{ t.actions }}" as="a" hint-placeholder-count="2">
+            <div onClick="{{ a.go }}" style="font-size:11.5px;font-weight:700;border-radius:9px;padding:6px 11px;cursor:pointer;color:{{ a.fg }};background:{{ a.bg }};border:1px solid {{ a.bd }};" style-hover="opacity:0.88;">{{ a.label }}</div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isNotifs }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:14px;max-width:860px;">
+  <div style="font-family:Sora,sans-serif;font-size:24px;font-weight:700;">Expiry notifications</div>
+  <div style="background:#fff;border:1px solid #E7E7EF;border-radius:20px;padding:18px;">
+    <div style="font-family:Sora,sans-serif;font-size:15px;font-weight:700;">Reminder schedule</div>
+    <div style="font-size:12.5px;color:#8A8AA3;margin-top:3px;">Subscribers are reminded before their subscription expires.</div>
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+      <sc-for list="{{ reminderChips }}" as="r" hint-placeholder-count="5">
+        <div onClick="{{ r.toggle }}" style="font-size:12.5px;font-weight:700;padding:9px 16px;border-radius:12px;cursor:pointer;background:{{ r.bg }};color:{{ r.fg }};border:1px solid {{ r.bd }};">{{ r.label }}</div>
+      </sc-for>
+    </div>
+    <div onClick="{{ sendNow }}" style="display:inline-block;margin-top:16px;background:{{ accent }};color:#fff;border-radius:12px;padding:11px 18px;font-size:13px;font-weight:700;cursor:pointer;" style-hover="opacity:0.93;">Send due reminders now</div>
+  </div>
+  <div style="background:#fff;border:1px solid #E7E7EF;border-radius:20px;padding:18px;">
+    <div style="font-family:Sora,sans-serif;font-size:15px;font-weight:700;margin-bottom:12px;">Sent log</div>
+    <div style="display:flex;flex-direction:column;gap:11px;">
+      <sc-for list="{{ sentLog }}" as="l" hint-placeholder-count="4">
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:7px;height:7px;border-radius:99px;background:{{ l.color }};margin-top:5px;flex:none;"></div>
+          <div style="flex:1;font-size:12.5px;color:#43436B;line-height:1.45;">{{ l.text }}</div>
+          <div style="font-size:11px;color:#B0B0C3;flex:none;">{{ l.time }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+</div>
+
+<sc-if value="{{ drawerOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:fixed;inset:0;z-index:40;">
+  <div onClick="{{ closeDrawer }}" style="position:absolute;inset:0;background:rgba(23,23,58,0.35);animation:fadeIn 0.18s ease;"></div>
+  <div style="position:absolute;top:0;right:0;bottom:0;width:430px;background:#fff;box-shadow:-20px 0 50px rgba(23,23,58,0.15);animation:drawerIn 0.22s ease;padding:26px 26px 30px;overflow:auto;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+      <div>
+        <div style="font-family:Sora,sans-serif;font-size:19px;font-weight:700;">{{ dOrg.name }}</div>
+        <div style="font-size:12.5px;color:#8A8AA3;margin-top:2px;">{{ dOrg.city }} · since {{ dOrg.since }}</div>
+      </div>
+      <span style="font-size:11px;font-weight:800;padding:5px 11px;border-radius:9px;background:{{ dOrg.sc }}1A;color:{{ dOrg.sc }};">{{ dOrg.status }}</span>
+    </div>
+    <div style="border:1px solid #F0F0F6;border-radius:16px;padding:14px 16px;margin-top:18px;display:flex;flex-direction:column;gap:8px;">
+      <sc-for list="{{ dOrg.info }}" as="i" hint-placeholder-count="5">
+        <div style="display:flex;justify-content:space-between;font-size:13px;">
+          <span style="color:#8A8AA3;font-weight:600;">{{ i.l }}</span><span style="font-weight:700;color:#43436B;">{{ i.v }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="font-family:Sora,sans-serif;font-size:13.5px;font-weight:700;margin:18px 0 8px;">Subscription history</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <sc-for list="{{ dOrg.history }}" as="h" hint-placeholder-count="2">
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;border:1px solid #F0F0F6;border-radius:12px;padding:10px 13px;">
+          <span style="font-weight:700;">{{ h.plan }}</span><span style="color:#8A8AA3;font-weight:600;">{{ h.range }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="font-family:Sora,sans-serif;font-size:13.5px;font-weight:700;margin:18px 0 8px;">Actions</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      <sc-for list="{{ dOrg.actions }}" as="a" hint-placeholder-count="3">
+        <div onClick="{{ a.go }}" style="font-size:12.5px;font-weight:700;border-radius:11px;padding:10px 15px;cursor:pointer;color:{{ a.fg }};background:{{ a.bg }};border:1px solid {{ a.bd }};" style-hover="opacity:0.88;">{{ a.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+<div style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:50;background:#17173A;color:#fff;font-size:13px;font-weight:600;padding:12px 20px;border-radius:99px;white-space:nowrap;animation:toastIn 0.22s ease;box-shadow:0 12px 28px rgba(23,23,58,0.35);">{{ toast }}</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#4338CA&quot;,&quot;options&quot;:[&quot;#4338CA&quot;,&quot;#0F766E&quot;,&quot;#B45309&quot;,&quot;#1E3A5F&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.orgs = [
+      { id: 'o1', name: 'Punjab College of IT', city: 'Lahore', admin: 'Rashid Mehmood', email: 'admin@pcit.edu.pk', phone: '042 3571 8890', plan: 'Yearly', status: 'Active', teachers: 5, students: 312, start: '2025-08-08', end: '2027-08-08', since: 'Aug 2025', history: [{ plan: 'Yearly', range: 'Aug 2026 — Aug 2027' }, { plan: 'Yearly', range: 'Aug 2025 — Aug 2026' }] },
+      { id: 'o2', name: 'The Educators Academy', city: 'Karachi', admin: 'Shaista Lodhi', email: 'office@educators-khi.pk', phone: '021 3488 2214', plan: 'Monthly', status: 'Expiring Soon', teachers: 12, students: 840, start: '2026-07-15', end: '2026-08-15', since: 'Mar 2026', history: [{ plan: 'Monthly', range: 'Jul — Aug 2026' }, { plan: 'Monthly', range: 'Mar — Jul 2026' }] },
+      { id: 'o3', name: 'Beaconhouse Campus 7', city: 'Islamabad', admin: 'Omar Farooq', email: 'campus7@bh-isb.edu.pk', phone: '051 2270 456', plan: 'Yearly', status: 'Active', teachers: 22, students: 1460, start: '2026-01-10', end: '2027-01-10', since: 'Jan 2026', history: [{ plan: 'Yearly', range: 'Jan 2026 — Jan 2027' }] },
+      { id: 'o4', name: 'Iqra Model School', city: 'Faisalabad', admin: 'Bushra Anwar', email: 'iqra.fsd@gmail.com', phone: '041 8722 903', plan: 'Monthly', status: 'Expired', teachers: 6, students: 380, start: '2026-07-02', end: '2026-08-02', since: 'Nov 2025', history: [{ plan: 'Monthly', range: 'Jul — Aug 2026' }, { plan: 'Monthly', range: 'Nov 2025 — Jul 2026' }] },
+      { id: 'o5', name: 'Superior Science Academy', city: 'Multan', admin: 'Tahir Jamil', email: 'ssa.multan@outlook.com', phone: '061 4552 118', plan: 'Yearly', status: 'Pending', teachers: 9, students: 520, start: null, end: null, since: 'Requested 6 Aug 2026', history: [] },
+      { id: 'o6', name: 'Al-Huda Girls College', city: 'Rawalpindi', admin: 'Farzana Sheikh', email: 'alhuda.rwp@edu.pk', phone: '051 5566 731', plan: 'Permanent', status: 'Active', teachers: 15, students: 940, start: '2025-05-20', end: null, since: 'May 2025', history: [{ plan: 'Permanent', range: 'May 2025 — no expiry' }] },
+      { id: 'o7', name: 'Cornerstone Tuition Centre', city: 'Peshawar', admin: 'Yasir Afridi', email: 'cornerstone.psh@gmail.com', phone: '091 5843 002', plan: 'Monthly', status: 'Suspended', teachers: 3, students: 145, start: '2026-06-12', end: '2026-07-12', since: 'Jun 2026', history: [{ plan: 'Monthly', range: 'Jun — Jul 2026' }] },
+    ];
+    this.teachers = [
+      { id: 'p1', name: 'Ayesha Rehman', email: 'ayesha.rehman@gmail.com', plan: 'Yearly', status: 'Active', end: '2027-02-14' },
+      { id: 'p2', name: 'Junaid Akram', email: 'junaid.akram@gmail.com', plan: 'Monthly', status: 'Active', end: '2026-09-01' },
+      { id: 'p3', name: 'Kashif Mahmood', email: 'kashif.m@yahoo.com', plan: 'Monthly', status: 'Expiring Soon', end: '2026-08-18' },
+      { id: 'p4', name: 'Rubina Kausar', email: 'rubina.kausar@gmail.com', plan: 'Monthly', status: 'Pending', end: null },
+      { id: 'p5', name: 'Samina Yousaf', email: 'samina.y@hotmail.com', plan: 'Monthly', status: 'Expired', end: '2026-07-28' },
+      { id: 'p6', name: 'Waqar Ali', email: 'waqar.ali@gmail.com', plan: 'Permanent', status: 'Active', end: null },
+    ];
+    this.state = { nav: 'dash', orgOv: {}, tOv: {}, orgSearch: '', filter: 'All', drawerId: null, toast: '', reminders: { '30': true, '15': true, '7': true, '3': false, '1': true } };
+  }
+  fmt(iso) { if (!iso) return '—'; const d = new Date(iso + 'T00:00:00'); return d.getDate() + ' ' + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()] + ' ' + d.getFullYear(); }
+  sColor(st) { return { 'Active': '#16A34A', 'Pending': '#D97706', 'Expiring Soon': '#EA580C', 'Expired': '#DC2626', 'Suspended': '#8A8AA3' }[st] || '#8A8AA3'; }
+  ov(base, ovMap) { const o = ovMap[base.id]; return o ? Object.assign({}, base, o) : base; }
+  extendEnd(plan, from) {
+    const d = from ? new Date(from + 'T00:00:00') : new Date('2026-08-08T00:00:00');
+    if (plan === 'Yearly') d.setFullYear(d.getFullYear() + 1); else d.setMonth(d.getMonth() + 1);
+    return d.toISOString().slice(0, 10);
+  }
+  showToast(m) { clearTimeout(this._tt); this.setState({ toast: m }); this._tt = setTimeout(() => this.setState({ toast: '' }), 2800); }
+  setOrg(id, patch) { this.setState(p => ({ orgOv: Object.assign({}, p.orgOv, { [id]: Object.assign({}, p.orgOv[id], patch) }) })); }
+  setT(id, patch) { this.setState(p => ({ tOv: Object.assign({}, p.tOv, { [id]: Object.assign({}, p.tOv[id], patch) }) })); }
+  renderVals() {
+    const s = this.state, accent = this.props.accent ?? '#4338CA';
+    const orgs = this.orgs.map(o => this.ov(o, s.orgOv));
+    const teachers = this.teachers.map(t => this.ov(t, s.tOv));
+    const nav = k => () => this.setState({ nav: k, drawerId: null });
+    const pendingCount = orgs.filter(o => o.status === 'Pending').length + teachers.filter(t => t.status === 'Pending').length;
+    const navItems = [
+      { k: 'dash', label: 'Dashboard', glyph: '◧' }, { k: 'orgs', label: 'Organizations', glyph: '◫' },
+      { k: 'teachers', label: 'Teachers', glyph: '◔' }, { k: 'notifs', label: 'Notifications', glyph: '◭' },
+    ].map(n => ({ label: n.label, glyph: n.glyph, go: nav(n.k), bg: s.nav === n.k ? accent : 'transparent', fg: s.nav === n.k ? '#fff' : 'rgba(255,255,255,0.68)', badge: n.k === 'dash' && pendingCount > 0, badgeN: pendingCount }));
+    const activeOrgs = orgs.filter(o => o.status === 'Active').length;
+    const dashStats = [
+      { v: String(orgs.length), label: 'Organizations', sub: activeOrgs + ' active · ' + orgs.filter(o => o.status === 'Expired').length + ' expired', color: accent },
+      { v: String(teachers.length), label: 'Individual teachers', sub: teachers.filter(t => t.status === 'Active').length + ' active', color: '#17173A' },
+      { v: String(orgs.reduce((n, o) => n + o.teachers, 0)), label: 'Organization teachers', sub: 'across ' + orgs.length + ' organizations', color: '#17173A' },
+      { v: String(orgs.concat(teachers).filter(x => x.status === 'Active' || x.status === 'Expiring Soon').length), label: 'Active subscriptions', sub: orgs.concat(teachers).filter(x => x.status === 'Expiring Soon').length + ' expiring soon', color: '#16A34A' },
+    ];
+    const approveOrg = o => () => { this.setOrg(o.id, { status: 'Active', start: '2026-08-08', end: this.extendEnd(o.plan, '2026-08-08') }); this.showToast(o.name + ' approved · ' + o.plan.toLowerCase() + ' subscription activated'); };
+    const approveT = t => () => { this.setT(t.id, { status: 'Active', end: this.extendEnd(t.plan, '2026-08-08') }); this.showToast(t.name + ' approved · account activated'); };
+    const pendingRows = orgs.filter(o => o.status === 'Pending').map(o => ({
+      name: o.name, initials: o.name.split(' ').map(w => w[0]).slice(0, 2).join(''), meta: 'Organization · ' + o.city + ' · ' + o.plan + ' plan · ' + o.teachers + ' teachers',
+      approve: approveOrg(o), reject: () => { this.setOrg(o.id, { status: 'Suspended' }); this.showToast(o.name + ' rejected'); },
+    })).concat(teachers.filter(t => t.status === 'Pending').map(t => ({
+      name: t.name, initials: t.name.split(' ').map(w => w[0]).slice(0, 2).join(''), meta: 'Individual teacher · ' + t.plan + ' plan · ' + t.email,
+      approve: approveT(t), reject: () => { this.setT(t.id, { status: 'Suspended' }); this.showToast(t.name + ' rejected'); },
+    })));
+    const expiring = orgs.filter(o => o.status === 'Expiring Soon').map(o => ({ name: o.name, meta: 'Organization · ' + o.plan + ' · expires ' + this.fmt(o.end), end: o.end })).concat(
+      teachers.filter(t => t.status === 'Expiring Soon').map(t => ({ name: t.name, meta: 'Individual teacher · ' + t.plan + ' · expires ' + this.fmt(t.end), end: t.end })));
+    const daysTo = iso => Math.round((new Date(iso + 'T00:00:00') - new Date('2026-08-08T00:00:00')) / 86400000);
+    const expiringRows = expiring.map(e => ({ name: e.name, meta: e.meta, days: daysTo(e.end) + ' days', notify: () => this.showToast('Reminder sent to ' + e.name) }));
+    const allSubs = orgs.filter(o => o.status !== 'Pending').concat(teachers.filter(t => t.status !== 'Pending'));
+    const planN = p => allSubs.filter(x => x.plan === p).length;
+    const planBars = [['Monthly', '#4338CA'], ['Yearly', '#0E7490'], ['Permanent', '#16A34A']].map(([p, c]) => ({ label: p, n: planN(p), w: Math.round(planN(p) / allSubs.length * 100) + '%', color: c }));
+    const adminActivity = [
+      { text: 'Approved Beaconhouse Campus 7 · yearly subscription activated', time: 'Jan', color: '#16A34A' },
+      { text: 'Suspended Cornerstone Tuition Centre · payment failed', time: '12 Jul', color: '#DC2626' },
+      { text: 'Extended Al-Huda Girls College to permanent access', time: 'May', color: accent },
+      { text: 'Expiry reminder sent to The Educators Academy (7 days)', time: '8 Aug', color: '#EA580C' },
+    ];
+    // orgs table
+    const q = s.orgSearch.trim().toLowerCase();
+    const statuses = ['All', 'Pending', 'Active', 'Expiring Soon', 'Expired', 'Suspended'];
+    const statusChips = statuses.map(f => { const on = f === s.filter; return { label: f, bg: on ? accent : '#fff', fg: on ? '#fff' : '#43436B', bd: on ? accent : '#E7E7EF', pick: () => this.setState({ filter: f }) }; });
+    const orgRows = orgs.filter(o => (s.filter === 'All' || o.status === s.filter) && (!q || o.name.toLowerCase().includes(q) || o.city.toLowerCase().includes(q))).map(o => ({
+      name: o.name, city: o.city, admin: o.admin, plan: o.plan, teachers: String(o.teachers), end: o.plan === 'Permanent' ? 'No expiry' : this.fmt(o.end), status: o.status, sc: this.sColor(o.status),
+      open: () => this.setState({ drawerId: o.id }),
+    }));
+    // drawer
+    const dRaw = orgs.find(o => o.id === s.drawerId) || orgs[0];
+    const btn = (label, kind, go) => kind === 'green' ? { label, go, fg: '#fff', bg: '#16A34A', bd: '#16A34A' } : kind === 'red' ? { label, go, fg: '#DC2626', bg: '#fff', bd: '#F3C4C4' } : kind === 'accent' ? { label, go, fg: '#fff', bg: accent, bd: accent } : { label, go, fg: '#43436B', bg: '#fff', bd: '#E3E3EC' };
+    const orgActions = o => {
+      const extend = () => { const ne = this.extendEnd(o.plan, o.end); this.setOrg(o.id, { status: 'Active', end: ne }); this.showToast(o.name + ' extended to ' + this.fmt(ne)); };
+      if (o.status === 'Pending') return [btn('Approve & activate', 'green', approveOrg(o)), btn('Reject', 'red', () => { this.setOrg(o.id, { status: 'Suspended' }); this.showToast(o.name + ' rejected'); })];
+      if (o.status === 'Suspended') return [btn('Reactivate', 'green', () => { this.setOrg(o.id, { status: 'Active' }); this.showToast(o.name + ' reactivated'); })];
+      if (o.status === 'Expired') return [btn('Renew ' + o.plan.toLowerCase(), 'accent', extend), btn('Notify expiry', 'plain', () => this.showToast('Expiry notice sent to ' + o.name))];
+      const acts = [btn('Suspend', 'red', () => { this.setOrg(o.id, { status: 'Suspended' }); this.showToast(o.name + ' suspended'); })];
+      if (o.plan !== 'Permanent') { acts.unshift(btn('Extend ' + (o.plan === 'Yearly' ? '+1 year' : '+1 month'), 'accent', extend)); acts.push(btn('Notify expiry', 'plain', () => this.showToast('Expiry reminder sent to ' + o.name))); }
+      return acts;
+    };
+    const dOrg = {
+      name: dRaw.name, city: dRaw.city, since: dRaw.since, status: dRaw.status, sc: this.sColor(dRaw.status),
+      info: [{ l: 'Organization Admin', v: dRaw.admin }, { l: 'Email', v: dRaw.email }, { l: 'Phone', v: dRaw.phone }, { l: 'Plan', v: dRaw.plan }, { l: 'Start', v: this.fmt(dRaw.start) }, { l: 'Expiry', v: dRaw.plan === 'Permanent' ? 'No expiry' : this.fmt(dRaw.end) }, { l: 'Teachers', v: String(dRaw.teachers) }, { l: 'Students', v: String(dRaw.students) }],
+      history: dRaw.history.length ? dRaw.history : [{ plan: 'No subscriptions yet', range: 'awaiting approval' }],
+      actions: orgActions(dRaw),
+    };
+    // teachers table
+    const tActions = t => {
+      const extend = () => { const ne = this.extendEnd(t.plan, t.end); this.setT(t.id, { status: 'Active', end: ne }); this.showToast(t.name + ' extended to ' + this.fmt(ne)); };
+      if (t.status === 'Pending') return [btn('Approve', 'green', approveT(t)), btn('Reject', 'red', () => { this.setT(t.id, { status: 'Suspended' }); this.showToast(t.name + ' rejected'); })];
+      if (t.status === 'Suspended') return [btn('Reactivate', 'green', () => { this.setT(t.id, { status: 'Active' }); this.showToast(t.name + ' reactivated'); })];
+      if (t.status === 'Expired') return [btn('Renew', 'accent', extend)];
+      const a = [btn('Suspend', 'red', () => { this.setT(t.id, { status: 'Suspended' }); this.showToast(t.name + ' suspended'); })];
+      if (t.plan !== 'Permanent') a.unshift(btn('Extend', 'accent', extend));
+      return a;
+    };
+    const teacherRows = teachers.map(t => ({ name: t.name, email: t.email, plan: t.plan, end: t.plan === 'Permanent' ? 'No expiry' : this.fmt(t.end), status: t.status, sc: this.sColor(t.status), actions: tActions(t) }));
+    // notifications
+    const reminderChips = ['30', '15', '7', '3', '1'].map(d => { const on = s.reminders[d]; return { label: d + (d === '1' ? ' day before' : ' days before'), bg: on ? accent : '#fff', fg: on ? '#fff' : '#8A8AA3', bd: on ? accent : '#E3E3EC', toggle: () => this.setState(p => ({ reminders: Object.assign({}, p.reminders, { [d]: !p.reminders[d] }) })) }; });
+    const sentLog = [
+      { text: '"Your EDU Manager subscription will expire in 7 days." → The Educators Academy', time: '8 Aug', color: '#EA580C' },
+      { text: '"Your EDU Manager subscription will expire in 15 days." → Kashif Mahmood', time: '3 Aug', color: '#EA580C' },
+      { text: '"Your EDU Manager subscription has expired." → Iqra Model School', time: '2 Aug', color: '#DC2626' },
+      { text: '"Your EDU Manager subscription has expired." → Samina Yousaf', time: '28 Jul', color: '#DC2626' },
+    ];
+    return {
+      accent, toast: s.toast, hasToast: !!s.toast,
+      isDash: s.nav === 'dash', isOrgs: s.nav === 'orgs', isTeachers: s.nav === 'teachers', isNotifs: s.nav === 'notifs',
+      navItems, dashStats, pendingRows, pendingN: pendingRows.length, noPending: pendingRows.length === 0,
+      expiringRows, notifyAll: () => this.showToast('Reminders sent to ' + expiringRows.length + ' expiring subscribers'),
+      planBars, adminActivity, statusChips, orgRows, orgSearch: s.orgSearch, setOrgSearch: e => this.setState({ orgSearch: e.target.value }),
+      drawerOpen: !!s.drawerId, closeDrawer: () => this.setState({ drawerId: null }), dOrg,
+      teacherRows, reminderChips, sentLog,
+      sendNow: () => this.showToast(expiringRows.length + ' due reminders sent · email + WhatsApp'),
+    };
+  }
+}
+</script>
+</body>
+</html>
