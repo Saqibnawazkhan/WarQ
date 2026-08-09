@@ -1,59 +1,61 @@
-# dependencies
-node_modules/
-.pnp
-.pnp.js
+# Repository-level ignores.
+#
+# The Flutter app under mobile/ has its own .gitignore; these rules are a
+# safety net so build output (multiple GB) can never be committed from the
+# repository root, whatever directory a tool runs in.
 
-# build output
-dist/
-build/
-out/
-.next/
-.turbo/
-*.tsbuildinfo
+# Dart / Flutter
+**/build/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/.pub-cache/
+**/.pub/
+**/generated_plugin_registrant.dart
+*.g.dart.lock
 
-# environment — never commit real secrets
-.env
-.env.*
-!.env.example
+# Android
+**/.gradle/
+**/local.properties
+**/captures/
+**/*.keystore
+**/*.jks
+**/key.properties
+**/.cxx/
 
-# test & coverage
-coverage/
-.vitest/
-playwright-report/
-test-results/
+# iOS / macOS
+**/Pods/
+**/.symlinks/
+**/Flutter/Flutter.framework
+**/Flutter/Flutter.podspec
+**/Flutter/App.framework
+**/Flutter/ephemeral/
+**/ServiceDefinitions.json
+**/xcuserdata/
+**/*.mode1v3
+**/*.mode2v3
+**/*.perspectivev3
 
-# editors
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
+# Editors
 .idea/
-*.swp
+.vscode/
+*.iml
+*.ipr
+*.iws
+.history/
 
-# os
+# OS
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# logs
+# Logs and temp
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
+*.tmp
+coverage/
 
-# deploy tooling
-.vercel/
-.railway/
-
-# expo / react native (from M5)
-.expo/
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-*.orig.*
-
-# supabase local stack
-supabase/.branches/
-supabase/.temp/
+# Secrets — never commit credentials
+.env
+.env.*
+!.env.example
