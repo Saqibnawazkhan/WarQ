@@ -120,8 +120,8 @@ class OrgReportsTab extends StatelessWidget {
                           color: context.semantic.warning,
                         ),
                         ChartSlice(
-                          label: 'Excused',
-                          value: data.attendance.excused.toDouble(),
+                          label: 'Short leave',
+                          value: data.attendance.shortLeave.toDouble(),
                           color: context.semantic.info,
                         ),
                       ],

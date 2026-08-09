@@ -168,11 +168,11 @@ class StudentReportDocument {
                 color: PdfTheme.colorForPercent(percent),
                 height: 8,
               ),
-              if (attendance.excused > 0) ...<pw.Widget>[
+              if (attendance.shortLeave > 0) ...<pw.Widget>[
                 pw.SizedBox(height: 6),
                 PdfTheme.pdfText(
-                  '${attendance.excused} excused '
-                  'session${attendance.excused == 1 ? '' : 's'} '
+                  '${attendance.shortLeave} short leave '
+                  'session${attendance.shortLeave == 1 ? '' : 's'} '
                   'excluded from the percentage.',
                   style: PdfTheme.label,
                 ),

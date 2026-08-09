@@ -261,8 +261,8 @@ class _SummaryStrip extends StatelessWidget {
               color: context.semantic.warning,
             ),
             _Count(
-              label: 'Excused',
-              value: controller.excusedCount,
+              label: 'Short leave',
+              value: controller.shortLeaveCount,
               color: context.semantic.info,
             ),
           ],

@@ -153,14 +153,14 @@ class AttendanceStatusChip extends StatelessWidget {
         AttendanceStatus.present => BadgeTone.success,
         AttendanceStatus.absent => BadgeTone.danger,
         AttendanceStatus.late => BadgeTone.warning,
-        AttendanceStatus.excused => BadgeTone.info,
+        AttendanceStatus.shortLeave => BadgeTone.info,
       };
 
   static IconData iconFor(AttendanceStatus status) => switch (status) {
         AttendanceStatus.present => Icons.check_circle_rounded,
         AttendanceStatus.absent => Icons.cancel_rounded,
         AttendanceStatus.late => Icons.schedule_rounded,
-        AttendanceStatus.excused => Icons.verified_user_rounded,
+        AttendanceStatus.shortLeave => Icons.verified_user_rounded,
       };
 
   static Color colorFor(BuildContext context, AttendanceStatus status) =>
@@ -168,6 +168,6 @@ class AttendanceStatusChip extends StatelessWidget {
         AttendanceStatus.present => context.semantic.success,
         AttendanceStatus.absent => context.semantic.danger,
         AttendanceStatus.late => context.semantic.warning,
-        AttendanceStatus.excused => context.semantic.info,
+        AttendanceStatus.shortLeave => context.semantic.info,
       };
 }

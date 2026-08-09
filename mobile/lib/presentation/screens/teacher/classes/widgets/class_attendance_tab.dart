@@ -157,8 +157,8 @@ class _AttendanceSummaryCard extends StatelessWidget {
                 color: context.semantic.warning,
               ),
               _Metric(
-                label: 'Excused',
-                value: '${summary.excused}',
+                label: 'Short leave',
+                value: '${summary.shortLeave}',
                 color: context.semantic.info,
               ),
             ],

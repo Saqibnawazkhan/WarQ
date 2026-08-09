@@ -490,10 +490,10 @@ class _AttendanceCard extends StatelessWidget {
                   value: summary.late.toDouble(),
                   color: context.semantic.warning,
                 ),
-              if (summary.excused > 0)
+              if (summary.shortLeave > 0)
                 ChartSlice(
-                  label: 'Excused',
-                  value: summary.excused.toDouble(),
+                  label: 'Short leave',
+                  value: summary.shortLeave.toDouble(),
                   color: context.semantic.info,
                 ),
             ],

@@ -495,7 +495,7 @@ class DemoSeeder {
         } else if (roll < bias + 0.06) {
           status = AttendanceStatus.late;
         } else if (roll < bias + 0.09) {
-          status = AttendanceStatus.excused;
+          status = AttendanceStatus.shortLeave;
         } else {
           status = AttendanceStatus.absent;
         }

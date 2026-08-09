@@ -58,7 +58,7 @@ class AttendanceMarkingController extends BaseController {
   int get presentCount => countOf(AttendanceStatus.present);
   int get absentCount => countOf(AttendanceStatus.absent);
   int get lateCount => countOf(AttendanceStatus.late);
-  int get excusedCount => countOf(AttendanceStatus.excused);
+  int get shortLeaveCount => countOf(AttendanceStatus.shortLeave);
 
   /// Absent students that have at least one guardian number on file.
   List<Student> get notifiableAbsentees => _roster
@@ -116,7 +116,7 @@ class AttendanceMarkingController extends BaseController {
     safeNotify();
   }
 
-  /// Cycles Present → Absent → Late → Excused, used by the row tap target.
+  /// Cycles Present → Absent → Late → Short leave, used by the row tap target.
   void cycleStatus(String studentId) {
     final AttendanceStatus current = statusFor(studentId);
     final int next = (AttendanceStatus.values.indexOf(current) + 1) %

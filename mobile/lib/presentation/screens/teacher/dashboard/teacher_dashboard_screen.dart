@@ -503,10 +503,10 @@ class _TodayAttendanceCard extends StatelessWidget {
           value: today.summary.late.toDouble(),
           color: context.semantic.warning,
         ),
-      if (today.summary.excused > 0)
+      if (today.summary.shortLeave > 0)
         ChartSlice(
-          label: 'Excused',
-          value: today.summary.excused.toDouble(),
+          label: 'Short leave',
+          value: today.summary.shortLeave.toDouble(),
           color: context.semantic.info,
         ),
     ];

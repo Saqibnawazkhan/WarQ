@@ -2,28 +2,28 @@ import '../../data/models/enums.dart';
 
 /// Aggregated attendance for one student (optionally scoped to one class).
 ///
-/// Excused sessions are removed from the denominator so a sanctioned absence
+/// Short leave sessions are removed from the denominator so a sanctioned absence
 /// does not damage the percentage, while `late` still counts as attended.
 class AttendanceSummary {
   const AttendanceSummary({
     required this.present,
     required this.absent,
     required this.late,
-    required this.excused,
+    required this.shortLeave,
   });
 
   const AttendanceSummary.empty()
       : present = 0,
         absent = 0,
         late = 0,
-        excused = 0;
+        shortLeave = 0;
 
   /// Builds a summary from raw statuses.
   factory AttendanceSummary.fromStatuses(Iterable<AttendanceStatus> statuses) {
     int present = 0;
     int absent = 0;
     int late = 0;
-    int excused = 0;
+    int shortLeave = 0;
     for (final AttendanceStatus status in statuses) {
       switch (status) {
         case AttendanceStatus.present:
@@ -32,25 +32,25 @@ class AttendanceSummary {
           absent++;
         case AttendanceStatus.late:
           late++;
-        case AttendanceStatus.excused:
-          excused++;
+        case AttendanceStatus.shortLeave:
+          shortLeave++;
       }
     }
     return AttendanceSummary(
       present: present,
       absent: absent,
       late: late,
-      excused: excused,
+      shortLeave: shortLeave,
     );
   }
 
   final int present;
   final int absent;
   final int late;
-  final int excused;
+  final int shortLeave;
 
   /// Every session the student has a record for.
-  int get totalSessions => present + absent + late + excused;
+  int get totalSessions => present + absent + late + shortLeave;
 
   /// Sessions that count towards the percentage.
   int get assessableSessions => present + absent + late;
@@ -73,7 +73,7 @@ class AttendanceSummary {
         present: present + other.present,
         absent: absent + other.absent,
         late: late + other.late,
-        excused: excused + other.excused,
+        shortLeave: shortLeave + other.shortLeave,
       );
 
   static AttendanceSummary combine(Iterable<AttendanceSummary> parts) {
@@ -85,5 +85,5 @@ class AttendanceSummary {
 
   @override
   String toString() =>
-      'AttendanceSummary(P:$present A:$absent L:$late E:$excused)';
+      'AttendanceSummary(P:$present A:$absent L:$late S:$shortLeave)';
 }

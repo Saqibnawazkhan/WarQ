@@ -27,8 +27,8 @@ class AttendanceSheet {
   int get lateCount =>
       records.values.where((AttendanceRecord r) => r.status == AttendanceStatus.late).length;
 
-  int get excusedCount => records.values
-      .where((AttendanceRecord r) => r.status == AttendanceStatus.excused)
+  int get shortLeaveCount => records.values
+      .where((AttendanceRecord r) => r.status == AttendanceStatus.shortLeave)
       .length;
 }
 

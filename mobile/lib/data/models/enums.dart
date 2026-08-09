@@ -47,34 +47,34 @@ enum AccountStatus {
 
 /// Attendance outcome for one student on one day.
 ///
-/// The spec requires Present/Absent; Late and Excused are supported so schools
+/// The spec requires Present/Absent; Late and Short leave are supported so schools
 /// that need them do not have to fall back to notes.
 enum AttendanceStatus {
   present,
   absent,
   late,
-  excused;
+  shortLeave;
 
   String get label => switch (this) {
         AttendanceStatus.present => 'Present',
         AttendanceStatus.absent => 'Absent',
         AttendanceStatus.late => 'Late',
-        AttendanceStatus.excused => 'Excused',
+        AttendanceStatus.shortLeave => 'Short leave',
       };
 
   String get shortLabel => switch (this) {
         AttendanceStatus.present => 'P',
         AttendanceStatus.absent => 'A',
         AttendanceStatus.late => 'L',
-        AttendanceStatus.excused => 'E',
+        AttendanceStatus.shortLeave => 'S',
       };
 
   /// Counts towards the "attended" numerator of the attendance percentage.
   bool get countsAsAttended =>
       this == AttendanceStatus.present || this == AttendanceStatus.late;
 
-  /// Excused sessions are removed from the denominator entirely.
-  bool get countsTowardsTotal => this != AttendanceStatus.excused;
+  /// Short leave sessions are removed from the denominator entirely.
+  bool get countsTowardsTotal => this != AttendanceStatus.shortLeave;
 
   /// Triggers the absence notification pipeline.
   bool get notifiesGuardians => this == AttendanceStatus.absent;

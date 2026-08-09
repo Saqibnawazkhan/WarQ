@@ -11,14 +11,14 @@ void main() {
           AttendanceStatus.present,
           AttendanceStatus.absent,
           AttendanceStatus.late,
-          AttendanceStatus.excused,
+          AttendanceStatus.shortLeave,
         ],
       );
 
       expect(summary.present, 2);
       expect(summary.absent, 1);
       expect(summary.late, 1);
-      expect(summary.excused, 1);
+      expect(summary.shortLeave, 1);
       expect(summary.totalSessions, 5);
     });
 
@@ -36,12 +36,12 @@ void main() {
       expect(summary.percentage, 50);
     });
 
-    test('excludes excused sessions from the denominator', () {
+    test('excludes short leave sessions from the denominator', () {
       final AttendanceSummary summary = AttendanceSummary.fromStatuses(
         <AttendanceStatus>[
           AttendanceStatus.present,
           AttendanceStatus.present,
-          AttendanceStatus.excused,
+          AttendanceStatus.shortLeave,
         ],
       );
 
@@ -59,9 +59,9 @@ void main() {
       expect(summary.percentageOrZero, 0);
     });
 
-    test('returns null when every session was excused', () {
+    test('returns null when every session was short leave', () {
       final AttendanceSummary summary = AttendanceSummary.fromStatuses(
-        <AttendanceStatus>[AttendanceStatus.excused, AttendanceStatus.excused],
+        <AttendanceStatus>[AttendanceStatus.shortLeave, AttendanceStatus.shortLeave],
       );
 
       expect(summary.hasData, isTrue);
@@ -71,15 +71,15 @@ void main() {
     test('combines summaries across classes', () {
       final AttendanceSummary combined = AttendanceSummary.combine(
         <AttendanceSummary>[
-          const AttendanceSummary(present: 3, absent: 1, late: 0, excused: 0),
-          const AttendanceSummary(present: 2, absent: 2, late: 1, excused: 1),
+          const AttendanceSummary(present: 3, absent: 1, late: 0, shortLeave: 0),
+          const AttendanceSummary(present: 2, absent: 2, late: 1, shortLeave: 1),
         ],
       );
 
       expect(combined.present, 5);
       expect(combined.absent, 3);
       expect(combined.late, 1);
-      expect(combined.excused, 1);
+      expect(combined.shortLeave, 1);
       expect(combined.percentage, closeTo(66.67, 0.01));
     });
   });
@@ -89,7 +89,7 @@ void main() {
       expect(AttendanceStatus.absent.notifiesGuardians, isTrue);
       expect(AttendanceStatus.present.notifiesGuardians, isFalse);
       expect(AttendanceStatus.late.notifiesGuardians, isFalse);
-      expect(AttendanceStatus.excused.notifiesGuardians, isFalse);
+      expect(AttendanceStatus.shortLeave.notifiesGuardians, isFalse);
     });
   });
 }
