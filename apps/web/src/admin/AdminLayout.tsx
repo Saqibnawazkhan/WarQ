@@ -108,8 +108,16 @@ export function AdminLayout() {
         </div>
       </nav>
 
+      {/*
+        Capped and centred. Without a maximum the tables stretch the full width
+        of a large monitor, which pushes a row's first and last cell so far apart
+        that scanning across one becomes work. 1440 keeps a six-column table
+        readable while still using a laptop screen fully.
+      */}
       <main className="min-w-0 flex-1 px-5 py-6 sm:px-8 sm:py-7">
-        <Outlet />
+        <div className="mx-auto w-full max-w-[1440px]">
+          <Outlet />
+        </div>
       </main>
     </div>
   );
