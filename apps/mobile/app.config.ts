@@ -33,7 +33,8 @@ const config: ExpoConfig = {
   icon: './assets/images/icon.png',
   scheme: 'warq',
   userInterfaceStyle: 'light',
-  newArchEnabled: true,
+  // The new architecture is the default in SDK 57 and is no longer a config
+  // field, so there is nothing to declare here.
   ios: {
     supportsTablet: true,
     bundleIdentifier: 'pk.warq.app',
