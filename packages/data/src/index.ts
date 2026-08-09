@@ -55,4 +55,31 @@ export type {
   WarqSession,
 } from './types.js';
 
+export {
+  approveSubscription,
+  getPlatformOverview,
+  getReminderSchedule,
+  listActivity,
+  listExpiringSoon,
+  listIndividualTeachers,
+  listOrganizations,
+  listOrgAdmins,
+  listPendingRequests,
+  listRecentActivity,
+  listReminderLog,
+  listSubscriptionHistory,
+  listSubscriptions,
+  reactivateSubscription,
+  rejectSubscription,
+  renewSubscription,
+  setReminderSchedule,
+  suspendSubscription,
+  type ActivityFilter,
+  type AdminIndividualTeacher,
+  type AdminOrganization,
+  type AdminOrgAdmin,
+  type AdminSubscription,
+  type PendingRequest,
+} from './admin.js';
+
 export type { Database } from './database.types.js';
