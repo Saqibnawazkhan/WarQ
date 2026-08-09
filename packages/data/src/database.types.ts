@@ -615,6 +615,13 @@ export type Database = {
             referencedRelation: "v_effective_subscriptions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "reminder_logs_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "v_pending_requests"
+            referencedColumns: ["subscription_id"]
+          },
         ]
       }
       reminder_settings: {
@@ -837,6 +844,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_effective_subscriptions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_events_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "v_pending_requests"
+            referencedColumns: ["subscription_id"]
           },
         ]
       }
@@ -1062,6 +1076,44 @@ export type Database = {
         }
         Relationships: []
       }
+      v_pending_requests: {
+        Row: {
+          city: string | null
+          kind: string | null
+          organization_id: string | null
+          phone: string | null
+          plan: Database["public"]["Enums"]["subscription_plan"] | null
+          profile_id: string | null
+          requested_at: string | null
+          subject_email: string | null
+          subject_name: string | null
+          subscription_id: string | null
+          teacher_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_overview"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "subscriptions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_platform_overview: {
         Row: {
           active_organization_count: number | null
@@ -1139,6 +1191,28 @@ export type Database = {
     }
     Functions: {
       accept_invitation: { Args: { invitation_token: string }; Returns: string }
+      approve_subscription: {
+        Args: { target_subscription: string }
+        Returns: {
+          created_at: string
+          currency: string
+          ends_at: string | null
+          id: string
+          organization_id: string | null
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          price_cents: number | null
+          profile_id: string | null
+          starts_at: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "subscriptions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       auth_org_id: { Args: never; Returns: string }
       auth_role: {
         Args: never
@@ -1166,12 +1240,108 @@ export type Database = {
         Args: { obtained: number; total: number }
         Returns: number
       }
+      fn_period_end: {
+        Args: {
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          starts: string
+        }
+        Returns: string
+      }
       fn_reminder_days_valid: { Args: { days: number[] }; Returns: boolean }
+      fn_require_main_admin: { Args: never; Returns: undefined }
       has_access: { Args: never; Returns: boolean }
       is_main_admin: { Args: never; Returns: boolean }
       is_org_admin_of: { Args: { target_org: string }; Returns: boolean }
       me: { Args: never; Returns: Json }
       owns_class: { Args: { target_class: string }; Returns: boolean }
+      reactivate_subscription: {
+        Args: { target_subscription: string }
+        Returns: {
+          created_at: string
+          currency: string
+          ends_at: string | null
+          id: string
+          organization_id: string | null
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          price_cents: number | null
+          profile_id: string | null
+          starts_at: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "subscriptions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      reject_subscription: {
+        Args: { reason?: string; target_subscription: string }
+        Returns: {
+          created_at: string
+          currency: string
+          ends_at: string | null
+          id: string
+          organization_id: string | null
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          price_cents: number | null
+          profile_id: string | null
+          starts_at: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "subscriptions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      renew_subscription: {
+        Args: { target_subscription: string }
+        Returns: {
+          created_at: string
+          currency: string
+          ends_at: string | null
+          id: string
+          organization_id: string | null
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          price_cents: number | null
+          profile_id: string | null
+          starts_at: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "subscriptions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      suspend_subscription: {
+        Args: { reason?: string; target_subscription: string }
+        Returns: {
+          created_at: string
+          currency: string
+          ends_at: string | null
+          id: string
+          organization_id: string | null
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          price_cents: number | null
+          profile_id: string | null
+          starts_at: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "subscriptions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       account_status: "pending" | "active" | "suspended"
