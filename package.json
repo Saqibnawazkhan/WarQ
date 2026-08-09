@@ -49,5 +49,11 @@
     "typescript": "6.0.3",
     "typescript-eslint": "8.66.0"
   },
+  "overridesReason": "React Native needs exactly one React instance per app. Dozens of Expo packages declare react as a wildcard peer, so npm also hoists a newest-wins copy to the root for them. These overrides keep any transitively-installed React on the version Expo SDK 57 was tested against; each app additionally pins its own, which is what Metro and Vite actually resolve.",
+  "overrides": {
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "@types/react": "19.2.2"
+  },
   "packageManager": "npm@11.6.2"
 }
