@@ -164,6 +164,13 @@ export type Database = {
             referencedRelation: "v_org_classes"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "assessments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "v_teacher_today"
+            referencedColumns: ["class_id"]
+          },
         ]
       }
       attendance_records: {
@@ -189,6 +196,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "attendance_sessions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_records_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "v_teacher_today"
+            referencedColumns: ["session_id"]
           },
           {
             foreignKeyName: "attendance_records_student_id_fkey"
@@ -252,6 +266,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_org_classes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_sessions_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "v_teacher_today"
+            referencedColumns: ["class_id"]
           },
           {
             foreignKeyName: "attendance_sessions_taken_by_fkey"
@@ -1192,6 +1213,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_org_classes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "students_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "v_teacher_today"
+            referencedColumns: ["class_id"]
           },
         ]
       }
@@ -2225,6 +2253,65 @@ export type Database = {
             referencedRelation: "v_org_classes"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "students_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "v_teacher_today"
+            referencedColumns: ["class_id"]
+          },
+        ]
+      }
+      v_teacher_today: {
+        Row: {
+          absent: number | null
+          class_id: string | null
+          color_index: number | null
+          late: number | null
+          name: string | null
+          present: number | null
+          section: string | null
+          session_id: string | null
+          student_count: number | null
+          taken: boolean | null
+          teacher_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classes_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "classes_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "v_admin_individual_teachers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "classes_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "v_admin_org_admins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "classes_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "v_admin_organizations"
+            referencedColumns: ["admin_profile_id"]
+          },
+          {
+            foreignKeyName: "classes_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_teachers"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
@@ -2259,6 +2346,31 @@ export type Database = {
       }
       bootstrap_main_admin: { Args: { admin_email: string }; Returns: string }
       can_read_class: { Args: { target_class: string }; Returns: boolean }
+      create_class: {
+        Args: {
+          class_name: string
+          class_section: string
+          class_session: string
+        }
+        Returns: {
+          archived_at: string | null
+          color_index: number
+          created_at: string
+          id: string
+          name: string
+          organization_id: string | null
+          section: string
+          session: string
+          teacher_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "classes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       fn_effective_subscription_status: {
         Args: {
           as_of?: string
@@ -2388,6 +2500,14 @@ export type Database = {
         }
       }
       revoke_invitation: { Args: { invitation_id: string }; Returns: undefined }
+      save_attendance: {
+        Args: { p_class_id: string; p_date: string; p_entries: Json }
+        Returns: Json
+      }
+      save_marks: {
+        Args: { p_assessment_id: string; p_entries: Json }
+        Returns: Json
+      }
       suspend_subscription: {
         Args: { reason?: string; target_subscription: string }
         Returns: {

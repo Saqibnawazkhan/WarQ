@@ -101,4 +101,24 @@ export {
   type StudentPerformanceRow,
 } from './org.js';
 
+export {
+  addStudent,
+  createAssessment,
+  createClass,
+  getAttendance,
+  listAssessments,
+  listAttendanceHistory,
+  listMarks,
+  listMyClasses,
+  listRoster,
+  listStudentContacts,
+  listToday,
+  saveAttendance,
+  saveMarks,
+  // Row types come from ./types.js; only the teacher-specific shapes are new here.
+  type SaveAttendanceResult,
+  type TeacherClass,
+  type TeacherToday,
+} from './teacher.js';
+
 export type { Database } from './database.types.js';

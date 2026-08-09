@@ -21,9 +21,16 @@ import { OrgReportsPage } from './org/pages/OrgReportsPage.tsx';
 import { OrgSettingsPage } from './org/pages/OrgSettingsPage.tsx';
 import { OrgStudentsPage } from './org/pages/OrgStudentsPage.tsx';
 import { OrgTeachersPage } from './org/pages/OrgTeachersPage.tsx';
+import { TeacherLayout } from './teacher/TeacherLayout.tsx';
+import { AttendancePage } from './teacher/pages/AttendancePage.tsx';
+import { ClassDetailPage } from './teacher/pages/ClassDetailPage.tsx';
+import { MarksPage } from './teacher/pages/MarksPage.tsx';
+import { MyClassesPage } from './teacher/pages/MyClassesPage.tsx';
+import { StudentPage } from './teacher/pages/StudentPage.tsx';
+import { TeacherReportsPage, TeacherSettingsPage } from './teacher/pages/TeacherSimplePages.tsx';
+import { TodayPage } from './teacher/pages/TodayPage.tsx';
 import { RequireRole } from './auth/RequireRole.tsx';
 import { SessionProvider } from './auth/SessionProvider.tsx';
-import { DashboardPage } from './routes/DashboardPage.tsx';
 import { JoinPage } from './routes/JoinPage.tsx';
 import { ToastProvider } from './ui/index.ts';
 import { DesignSystemPage } from './routes/DesignSystemPage.tsx';
@@ -108,13 +115,23 @@ export function App() {
                 <Route path="*" element={<NotFoundPage />} />
               </Route>
               <Route
-                path="/teacher/*"
+                path="/teacher"
                 element={
                   <RequireRole role="teacher">
-                    <DashboardPage milestone="M4" title="Teacher dashboard" />
+                    <TeacherLayout />
                   </RequireRole>
                 }
-              />
+              >
+                <Route index element={<TodayPage />} />
+                <Route path="classes" element={<MyClassesPage />} />
+                <Route path="classes/:classId" element={<ClassDetailPage />} />
+                <Route path="students/:studentId" element={<StudentPage />} />
+                <Route path="attendance" element={<AttendancePage />} />
+                <Route path="marks" element={<MarksPage />} />
+                <Route path="reports" element={<TeacherReportsPage />} />
+                <Route path="settings" element={<TeacherSettingsPage />} />
+                <Route path="*" element={<NotFoundPage />} />
+              </Route>
 
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
