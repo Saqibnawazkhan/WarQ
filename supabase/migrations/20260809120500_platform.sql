@@ -95,7 +95,12 @@ create table public.guardian_messages (
 
   student_id uuid references public.students (id) on delete set null,
   class_id uuid references public.classes (id) on delete set null,
-  attendance_record_id uuid references public.attendance_records (id) on delete set null,
+
+  -- Which roll call produced this notice. attendance_records is keyed by
+  -- (session_id, student_id) and has no id of its own, so the session is the
+  -- referencable half; together with student_id above it identifies the exact
+  -- record without a composite foreign key.
+  attendance_session_id uuid references public.attendance_sessions (id) on delete set null,
 
   -- Snapshotted so the outbox still reads correctly after a student is renamed
   -- or removed.
