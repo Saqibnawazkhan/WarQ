@@ -6,18 +6,30 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { createBrowserClient } from '@warq/data';
 
+interface WarqExtra {
+  readonly supabaseUrl?: string;
+  readonly supabasePublishableKey?: string;
+}
+
 /**
- * Expo exposes only `EXPO_PUBLIC_`-prefixed variables to the bundle, which is
- * why the secret key has no prefix: it cannot reach a phone by accident.
+ * Configuration comes from `app.config.ts`, which loads the repository-root
+ * `.env` at build time. Reading it from `extra` rather than `process.env` is
+ * what lets one `.env` serve the web app, the worker and this app — Expo would
+ * otherwise only look inside `apps/mobile`.
+ *
+ * The secret key is deliberately absent from every path here: it has no
+ * `EXPO_PUBLIC_` prefix and is never placed in `extra`, so it cannot reach a phone.
  */
-const url = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
-const publishableKey = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? '';
+const extra = (Constants.expoConfig?.extra ?? {}) as WarqExtra;
+
+const url = extra.supabaseUrl ?? '';
+const publishableKey = extra.supabasePublishableKey ?? '';
 
 if (!url || !publishableKey) {
   throw new Error(
-    'Missing Supabase configuration. Set EXPO_PUBLIC_SUPABASE_URL and ' +
-      'EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY in the repository .env, then restart Expo — ' +
-      'environment variables are read at bundle time, not at runtime.',
+    'Missing Supabase configuration. Fill EXPO_PUBLIC_SUPABASE_URL and ' +
+      'EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY in the repository-root .env, then restart Expo — ' +
+      'configuration is read when the bundle is built, not at runtime.',
   );
 }
 
@@ -30,5 +42,5 @@ if (!url || !publishableKey) {
  */
 export const supabase = createBrowserClient({ url, publishableKey }, 'mobile', AsyncStorage);
 
-/** Shown on the settings screen so a bug report can name the build it came from. */
+/** Shown on the account screen so a bug report can name the build it came from. */
 export const appVersion = Constants.expoConfig?.version ?? '0.0.0';
