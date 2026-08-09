@@ -2,8 +2,16 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { AdminLayout } from './admin/AdminLayout.tsx';
+import { ActivityPage } from './admin/pages/ActivityPage.tsx';
+import { NotificationsPage } from './admin/pages/NotificationsPage.tsx';
+import { OrgAdminsPage } from './admin/pages/OrgAdminsPage.tsx';
+import { OrganizationsPage } from './admin/pages/OrganizationsPage.tsx';
 import { OverviewPage } from './admin/pages/OverviewPage.tsx';
-import { PlaceholderPage } from './admin/pages/PlaceholderPage.tsx';
+import { PendingPage } from './admin/pages/PendingPage.tsx';
+import { ReportsPage } from './admin/pages/ReportsPage.tsx';
+import { SettingsPage } from './admin/pages/SettingsPage.tsx';
+import { ExpiringPage, SubscriptionsPage } from './admin/pages/SubscriptionsPage.tsx';
+import { TeachersPage } from './admin/pages/TeachersPage.tsx';
 import { RequireRole } from './auth/RequireRole.tsx';
 import { SessionProvider } from './auth/SessionProvider.tsx';
 import { DashboardPage } from './routes/DashboardPage.tsx';
@@ -58,96 +66,17 @@ export function App() {
                 }
               >
                 <Route index element={<OverviewPage />} />
-                <Route
-                  path="organizations"
-                  element={
-                    <PlaceholderPage
-                      title="Organizations"
-                      body="Every institution on the platform, with its subscription, admin and counts. Searchable, filterable by status, with a detail drawer for approving, extending, suspending and renewing."
-                    />
-                  }
-                />
-                <Route
-                  path="teachers"
-                  element={
-                    <PlaceholderPage
-                      title="Individual Teachers"
-                      body="Teachers who hold their own subscription rather than belonging to an organization."
-                    />
-                  }
-                />
-                <Route
-                  path="org-admins"
-                  element={
-                    <PlaceholderPage
-                      title="Organization Admins"
-                      body="The administrators running each organization, and which organization each one owns."
-                    />
-                  }
-                />
-                <Route
-                  path="subscriptions"
-                  element={
-                    <PlaceholderPage
-                      title="Subscriptions"
-                      body="Every subscription on the platform in one list, whoever holds it."
-                    />
-                  }
-                />
-                <Route
-                  path="pending"
-                  element={
-                    <PlaceholderPage
-                      title="Pending Requests"
-                      body="Organizations and individual teachers awaiting approval. The same queue as the dashboard, with the full detail of each request."
-                    />
-                  }
-                />
-                <Route
-                  path="expiring"
-                  element={
-                    <PlaceholderPage
-                      title="Expiring Soon"
-                      body="Subscriptions inside the fourteen-day warning window, soonest first, with the reminders already sent to each."
-                    />
-                  }
-                />
-                <Route
-                  path="notifications"
-                  element={
-                    <PlaceholderPage
-                      title="Notifications"
-                      body="The reminder schedule — 30, 15, 7, 3 and 1 days before expiry — and the log of every notice sent."
-                    />
-                  }
-                />
-                <Route
-                  path="activity"
-                  element={
-                    <PlaceholderPage
-                      title="Activity Logs"
-                      body="Everything that has happened across the platform, filterable by kind."
-                    />
-                  }
-                />
-                <Route
-                  path="reports"
-                  element={
-                    <PlaceholderPage
-                      title="Reports"
-                      body="Platform-wide reports. Generation lands with the worker in M8."
-                    />
-                  }
-                />
-                <Route
-                  path="settings"
-                  element={
-                    <PlaceholderPage
-                      title="Settings"
-                      body="Platform defaults: the grade scale, plan pricing and administrator accounts."
-                    />
-                  }
-                />
+                <Route path="organizations" element={<OrganizationsPage />} />
+                <Route path="teachers" element={<TeachersPage />} />
+                <Route path="org-admins" element={<OrgAdminsPage />} />
+                <Route path="subscriptions" element={<SubscriptionsPage />} />
+                <Route path="pending" element={<PendingPage />} />
+                <Route path="expiring" element={<ExpiringPage />} />
+                <Route path="notifications" element={<NotificationsPage />} />
+                <Route path="activity" element={<ActivityPage />} />
+                <Route path="reports" element={<ReportsPage />} />
+                <Route path="settings" element={<SettingsPage />} />
+                <Route path="*" element={<NotFoundPage />} />
               </Route>
               <Route
                 path="/org/*"
