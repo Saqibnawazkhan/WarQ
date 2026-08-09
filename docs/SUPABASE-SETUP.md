@@ -77,20 +77,31 @@ Fill in the values. `.env` is gitignored, so it cannot reach GitHub.
 
 ---
 
-## 4. Connect the CLI (from M1)
+## 4. Connect the CLI
 
-The CLI applies migrations and loads the seed data. It arrives as a project
-dependency in M1 — no global install needed.
+The CLI is a project dependency — no global install. Two commands, run once:
 
 ```bash
-npx supabase login
-npx supabase link --project-ref <your-project-ref>   # the subdomain in your project URL
-npx supabase db push                                  # apply migrations
-npx supabase db seed                                  # load the mockup fixtures
+npx supabase login          # opens a browser; approve, then close the tab
+npm run db:link             # asks for the database password from step 1
 ```
 
-The **project ref** is the subdomain of the project URL: for
-`https://abcdefgh.supabase.co`, it is `abcdefgh`.
+`db:link` is pinned to this project's ref. The **project ref** is the subdomain
+of the project URL: for `https://abcdefgh.supabase.co`, it is `abcdefgh`.
+
+Afterwards:
+
+| Command               | Does                                                        |
+| --------------------- | ----------------------------------------------------------- |
+| `npm run db:push:dry` | Shows which migrations _would_ apply. Always safe.          |
+| `npm run db:push`     | Applies pending migrations to the linked project.           |
+| `npm run db:seed`     | Applies migrations **and** loads the mockup fixtures.       |
+| `npm run db:diff`     | Shows drift between local migrations and the remote schema. |
+| `npm run db:types`    | Regenerates the TypeScript types from the live schema.      |
+
+> **`db:DANGER:reset` drops every table and rebuilds from scratch.** It is named
+> that way so it cannot be run by muscle memory. Only for a development project
+> you are willing to lose.
 
 ---
 
