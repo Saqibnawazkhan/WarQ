@@ -14,12 +14,12 @@ Roughly five minutes. The region is the only choice that cannot be undone.
 2. Create an organization if prompted — name `Warq`, type **Personal**, plan **Free**.
 3. **New project**, then:
 
-| Field                 | Value                                             | Notes                                                                                                        |
-| --------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Name**              | `warq`                                            |                                                                                                                |
+| Field                 | Value                                             | Notes                                                                                                                 |
+| --------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Name**              | `warq`                                            |                                                                                                                       |
 | **Database password** | Generate one, then store it in a password manager | Shown once. Needed for migrations and direct connections. Recoverable only by resetting it under Settings → Database. |
-| **Region**            | **South Asia (Mumbai) · `ap-south-1`**            | Closest to Pakistan. **Permanent** — changing it later means a new project and a data migration.               |
-| **Plan**              | Free                                              | 500 MB database, 1 GB storage, 50k monthly active users. More than enough through M10.                         |
+| **Region**            | **South Asia (Mumbai) · `ap-south-1`**            | Closest to Pakistan. **Permanent** — changing it later means a new project and a data migration.                      |
+| **Plan**              | Free                                              | 500 MB database, 1 GB storage, 50k monthly active users. More than enough through M10.                                |
 
 Provisioning takes a minute or two.
 
@@ -34,11 +34,11 @@ modern `sb_publishable_…` / `sb_secret_…` keys with the older pair under a
 **Legacy API keys** tab. Either generation works — the roles below are what
 matter, not the naming.
 
-| Value                                    | Goes in                                                    | Sensitivity                                                                    |
-| ---------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| **Project URL**                          | `SUPABASE_URL`, `VITE_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_URL` | Public                                                                         |
-| **anon / publishable key**               | `SUPABASE_ANON_KEY`, `VITE_SUPABASE_ANON_KEY`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Public by design — it ships inside the web bundle and the phone app |
-| **service_role / secret key**            | `SUPABASE_SERVICE_ROLE_KEY` — **worker only**              | **Secret.** Bypasses row-level security entirely                                 |
+| Value                         | Goes in                                                                        | Sensitivity                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| **Project URL**               | `SUPABASE_URL`, `VITE_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_URL`                | Public                                                              |
+| **anon / publishable key**    | `SUPABASE_ANON_KEY`, `VITE_SUPABASE_ANON_KEY`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Public by design — it ships inside the web bundle and the phone app |
+| **service_role / secret key** | `SUPABASE_SERVICE_ROLE_KEY` — **worker only**                                  | **Secret.** Bypasses row-level security entirely                    |
 
 ### On the anon key being public
 
@@ -89,11 +89,11 @@ The **project ref** is the subdomain of the project URL: for
 The same three values go into each host, with the service-role key confined to
 the worker.
 
-| Host        | Variables                                                                 |
-| ----------- | ------------------------------------------------------------------------- |
-| **Vercel**  | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`                              |
-| **Railway** | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`                                |
-| **Expo**    | `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`                |
+| Host        | Variables                                                   |
+| ----------- | ----------------------------------------------------------- |
+| **Vercel**  | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`               |
+| **Railway** | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`                 |
+| **Expo**    | `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` |
 
 ---
 
