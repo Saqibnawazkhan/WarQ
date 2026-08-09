@@ -12,9 +12,19 @@ import { ReportsPage } from './admin/pages/ReportsPage.tsx';
 import { SettingsPage } from './admin/pages/SettingsPage.tsx';
 import { ExpiringPage, SubscriptionsPage } from './admin/pages/SubscriptionsPage.tsx';
 import { TeachersPage } from './admin/pages/TeachersPage.tsx';
+import { OrgLayout } from './org/OrgLayout.tsx';
+import { OrgActivityPage } from './org/pages/OrgActivityPage.tsx';
+import { OrgClassDetailPage } from './org/pages/OrgClassDetailPage.tsx';
+import { OrgClassesPage } from './org/pages/OrgClassesPage.tsx';
+import { OrgOverviewPage } from './org/pages/OrgOverviewPage.tsx';
+import { OrgReportsPage } from './org/pages/OrgReportsPage.tsx';
+import { OrgSettingsPage } from './org/pages/OrgSettingsPage.tsx';
+import { OrgStudentsPage } from './org/pages/OrgStudentsPage.tsx';
+import { OrgTeachersPage } from './org/pages/OrgTeachersPage.tsx';
 import { RequireRole } from './auth/RequireRole.tsx';
 import { SessionProvider } from './auth/SessionProvider.tsx';
 import { DashboardPage } from './routes/DashboardPage.tsx';
+import { JoinPage } from './routes/JoinPage.tsx';
 import { ToastProvider } from './ui/index.ts';
 import { DesignSystemPage } from './routes/DesignSystemPage.tsx';
 import { ForgotPasswordPage } from './routes/ForgotPasswordPage.tsx';
@@ -56,6 +66,7 @@ export function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignUpPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/join/:token" element={<JoinPage />} />
 
               <Route
                 path="/admin"
@@ -79,13 +90,23 @@ export function App() {
                 <Route path="*" element={<NotFoundPage />} />
               </Route>
               <Route
-                path="/org/*"
+                path="/org"
                 element={
                   <RequireRole role="org_admin">
-                    <DashboardPage milestone="M3" title="Organization dashboard" />
+                    <OrgLayout />
                   </RequireRole>
                 }
-              />
+              >
+                <Route index element={<OrgOverviewPage />} />
+                <Route path="teachers" element={<OrgTeachersPage />} />
+                <Route path="classes" element={<OrgClassesPage />} />
+                <Route path="classes/:classId" element={<OrgClassDetailPage />} />
+                <Route path="students" element={<OrgStudentsPage />} />
+                <Route path="activity" element={<OrgActivityPage />} />
+                <Route path="reports" element={<OrgReportsPage />} />
+                <Route path="settings" element={<OrgSettingsPage />} />
+                <Route path="*" element={<NotFoundPage />} />
+              </Route>
               <Route
                 path="/teacher/*"
                 element={

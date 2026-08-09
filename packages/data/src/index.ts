@@ -82,4 +82,23 @@ export {
   type PendingRequest,
 } from './admin.js';
 
+export {
+  getClassDetail,
+  getOrgOverview,
+  inviteTeacher,
+  listDailyAttendance,
+  listInvitations,
+  listOrgActivity,
+  listOrgClasses,
+  listOrgStudents,
+  listOrgTeachers,
+  removeTeacher,
+  revokeInvitation,
+  type InviteResult,
+  type OrgClass,
+  type OrgDailyAttendance,
+  type OrgTeacher,
+  type StudentPerformanceRow,
+} from './org.js';
+
 export type { Database } from './database.types.js';

@@ -75,6 +75,13 @@ export type Database = {
             referencedColumns: ["admin_profile_id"]
           },
           {
+            foreignKeyName: "activity_logs_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_teachers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "activity_logs_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
@@ -149,6 +156,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_class_attendance"
             referencedColumns: ["class_id"]
+          },
+          {
+            foreignKeyName: "assessments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_classes"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -233,6 +247,13 @@ export type Database = {
             referencedColumns: ["class_id"]
           },
           {
+            foreignKeyName: "attendance_sessions_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_classes"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "attendance_sessions_taken_by_fkey"
             columns: ["taken_by"]
             isOneToOne: false
@@ -259,6 +280,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_admin_organizations"
             referencedColumns: ["admin_profile_id"]
+          },
+          {
+            foreignKeyName: "attendance_sessions_taken_by_fkey"
+            columns: ["taken_by"]
+            isOneToOne: false
+            referencedRelation: "v_org_teachers"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -355,6 +383,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_admin_organizations"
             referencedColumns: ["admin_profile_id"]
+          },
+          {
+            foreignKeyName: "classes_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_teachers"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -484,6 +519,13 @@ export type Database = {
             referencedColumns: ["admin_profile_id"]
           },
           {
+            foreignKeyName: "invitations_accepted_by_fkey"
+            columns: ["accepted_by"]
+            isOneToOne: false
+            referencedRelation: "v_org_teachers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "invitations_invited_by_fkey"
             columns: ["invited_by"]
             isOneToOne: false
@@ -510,6 +552,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_admin_organizations"
             referencedColumns: ["admin_profile_id"]
+          },
+          {
+            foreignKeyName: "invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "v_org_teachers"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "invitations_organization_id_fkey"
@@ -613,6 +662,13 @@ export type Database = {
             referencedRelation: "v_admin_organizations"
             referencedColumns: ["admin_profile_id"]
           },
+          {
+            foreignKeyName: "marks_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "v_org_teachers"
+            referencedColumns: ["id"]
+          },
         ]
       }
       notifications: {
@@ -674,6 +730,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_admin_organizations"
             referencedColumns: ["admin_profile_id"]
+          },
+          {
+            foreignKeyName: "notifications_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_teachers"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -745,6 +808,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_admin_organizations"
             referencedColumns: ["admin_profile_id"]
+          },
+          {
+            foreignKeyName: "organizations_owner_fkey"
+            columns: ["owner_profile_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_teachers"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -931,6 +1001,13 @@ export type Database = {
             referencedRelation: "v_admin_organizations"
             referencedColumns: ["admin_profile_id"]
           },
+          {
+            foreignKeyName: "reminder_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "v_org_teachers"
+            referencedColumns: ["id"]
+          },
         ]
       }
       reports: {
@@ -989,6 +1066,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_admin_organizations"
             referencedColumns: ["admin_profile_id"]
+          },
+          {
+            foreignKeyName: "reports_generated_by_fkey"
+            columns: ["generated_by"]
+            isOneToOne: false
+            referencedRelation: "v_org_teachers"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "reports_organization_id_fkey"
@@ -1102,6 +1186,13 @@ export type Database = {
             referencedRelation: "v_class_attendance"
             referencedColumns: ["class_id"]
           },
+          {
+            foreignKeyName: "students_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_classes"
+            referencedColumns: ["id"]
+          },
         ]
       }
       subscription_events: {
@@ -1166,6 +1257,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_admin_organizations"
             referencedColumns: ["admin_profile_id"]
+          },
+          {
+            foreignKeyName: "subscription_events_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_teachers"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "subscription_events_subscription_id_fkey"
@@ -1307,6 +1405,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_admin_organizations"
             referencedColumns: ["admin_profile_id"]
+          },
+          {
+            foreignKeyName: "subscriptions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_teachers"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1467,6 +1572,13 @@ export type Database = {
             referencedRelation: "v_admin_organizations"
             referencedColumns: ["admin_profile_id"]
           },
+          {
+            foreignKeyName: "subscriptions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_teachers"
+            referencedColumns: ["id"]
+          },
         ]
       }
       v_class_attendance: {
@@ -1543,6 +1655,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_admin_organizations"
             referencedColumns: ["admin_profile_id"]
+          },
+          {
+            foreignKeyName: "classes_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_teachers"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1657,6 +1776,136 @@ export type Database = {
             referencedRelation: "v_admin_organizations"
             referencedColumns: ["admin_profile_id"]
           },
+          {
+            foreignKeyName: "subscriptions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_org_classes: {
+        Row: {
+          assessment_count: number | null
+          attendance_percent: number | null
+          color_index: number | null
+          id: string | null
+          last_session_date: string | null
+          name: string | null
+          organization_id: string | null
+          section: string | null
+          session: string | null
+          session_count: number | null
+          student_count: number | null
+          teacher_id: string | null
+          teacher_name: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "classes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_admin_org_admins"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "classes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_admin_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "classes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_overview"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "classes_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "classes_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "v_admin_individual_teachers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "classes_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "v_admin_org_admins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "classes_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "v_admin_organizations"
+            referencedColumns: ["admin_profile_id"]
+          },
+          {
+            foreignKeyName: "classes_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_org_daily_attendance: {
+        Row: {
+          absent: number | null
+          attendance_percent: number | null
+          classes_marked: number | null
+          date: string | null
+          late: number | null
+          organization_id: string | null
+          present: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "classes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_admin_org_admins"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "classes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_admin_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "classes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_overview"
+            referencedColumns: ["organization_id"]
+          },
         ]
       }
       v_org_overview: {
@@ -1694,6 +1943,86 @@ export type Database = {
           teacher_count?: never
         }
         Relationships: []
+      }
+      v_org_teachers: {
+        Row: {
+          account_status: Database["public"]["Enums"]["account_status"] | null
+          activity_state: string | null
+          assessment_count: number | null
+          class_count: number | null
+          email: string | null
+          full_name: string | null
+          id: string | null
+          joined_at: string | null
+          last_assessment_date: string | null
+          last_attendance_date: string | null
+          organization_id: string | null
+          phone: string | null
+          session_count: number | null
+          student_count: number | null
+        }
+        Insert: {
+          account_status?: Database["public"]["Enums"]["account_status"] | null
+          activity_state?: never
+          assessment_count?: never
+          class_count?: never
+          email?: string | null
+          full_name?: string | null
+          id?: string | null
+          joined_at?: string | null
+          last_assessment_date?: never
+          last_attendance_date?: never
+          organization_id?: string | null
+          phone?: string | null
+          session_count?: never
+          student_count?: never
+        }
+        Update: {
+          account_status?: Database["public"]["Enums"]["account_status"] | null
+          activity_state?: never
+          assessment_count?: never
+          class_count?: never
+          email?: string | null
+          full_name?: string | null
+          id?: string | null
+          joined_at?: string | null
+          last_assessment_date?: never
+          last_attendance_date?: never
+          organization_id?: string | null
+          phone?: string | null
+          session_count?: never
+          student_count?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_admin_org_admins"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_admin_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_overview"
+            referencedColumns: ["organization_id"]
+          },
+        ]
       }
       v_pending_requests: {
         Row: {
@@ -1765,6 +2094,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_admin_organizations"
             referencedColumns: ["admin_profile_id"]
+          },
+          {
+            foreignKeyName: "subscriptions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_teachers"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1862,6 +2198,13 @@ export type Database = {
             referencedColumns: ["admin_profile_id"]
           },
           {
+            foreignKeyName: "classes_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_teachers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "students_class_id_fkey"
             columns: ["class_id"]
             isOneToOne: false
@@ -1874,6 +2217,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_class_attendance"
             referencedColumns: ["class_id"]
+          },
+          {
+            foreignKeyName: "students_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "v_org_classes"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1939,6 +2289,33 @@ export type Database = {
       fn_reminder_days_valid: { Args: { days: number[] }; Returns: boolean }
       fn_require_main_admin: { Args: never; Returns: undefined }
       has_access: { Args: never; Returns: boolean }
+      invite_teacher: {
+        Args: {
+          send_via?: Database["public"]["Enums"]["notification_channel"]
+          teacher_email: string
+          teacher_name: string
+        }
+        Returns: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          full_name: string
+          id: string
+          invited_by: string | null
+          organization_id: string
+          sent_via: Database["public"]["Enums"]["notification_channel"]
+          status: Database["public"]["Enums"]["invitation_status"]
+          token: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "invitations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       is_main_admin: { Args: never; Returns: boolean }
       is_org_admin_of: { Args: { target_org: string }; Returns: boolean }
       me: { Args: never; Returns: Json }
@@ -1987,6 +2364,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      remove_teacher: { Args: { teacher_id: string }; Returns: undefined }
       renew_subscription: {
         Args: { target_subscription: string }
         Returns: {
@@ -2009,6 +2387,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      revoke_invitation: { Args: { invitation_id: string }; Returns: undefined }
       suspend_subscription: {
         Args: { reason?: string; target_subscription: string }
         Returns: {

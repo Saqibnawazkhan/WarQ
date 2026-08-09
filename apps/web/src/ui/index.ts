@@ -5,6 +5,7 @@ export { DataTable, type Column } from './DataTable.tsx';
 export { Drawer } from './Drawer.tsx';
 export { EmptyState } from './EmptyState.tsx';
 export { Field } from './Field.tsx';
+export { Modal } from './Modal.tsx';
 export { SearchField } from './SearchField.tsx';
 export { StatCard } from './StatCard.tsx';
 export { StatusPill } from './StatusPill.tsx';
