@@ -10,9 +10,13 @@ export interface WorkerConfig {
   readonly port: number;
   readonly host: string;
   readonly environment: 'development' | 'production' | 'test';
-  /** Set from M7, when the worker starts writing to Supabase with the service role. */
+  /** Set from M7, when the worker starts writing to Supabase. */
   readonly supabaseUrl: string | null;
-  readonly supabaseServiceKey: string | null;
+  /**
+   * The `sb_secret_…` key. Bypasses row-level security, so it lives here and
+   * nowhere else — never in the web app, never in the mobile app.
+   */
+  readonly supabaseSecretKey: string | null;
 }
 
 function readPort(raw: string | undefined, fallback: number): number {
@@ -34,6 +38,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): WorkerConfig {
     host: env.HOST ?? '0.0.0.0',
     environment,
     supabaseUrl: env.SUPABASE_URL ?? null,
-    supabaseServiceKey: env.SUPABASE_SERVICE_ROLE_KEY ?? null,
+    supabaseSecretKey: env.SUPABASE_SECRET_KEY ?? null,
   };
 }

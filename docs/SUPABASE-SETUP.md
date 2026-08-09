@@ -27,33 +27,43 @@ Provisioning takes a minute or two.
 
 ## 2. Collect the credentials
 
-**Project Settings** (gear, bottom left) → **API**.
+**Project Settings** (gear, bottom left) → **API Keys**.
 
-Newer dashboards split this across **API** and **API Keys**, and may present
-modern `sb_publishable_…` / `sb_secret_…` keys with the older pair under a
-**Legacy API keys** tab. Either generation works — the roles below are what
-matter, not the naming.
+Supabase currently shows two generations of key. **Warq uses the newer pair.**
 
-| Value                         | Goes in                                                                        | Sensitivity                                                         |
-| ----------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
-| **Project URL**               | `SUPABASE_URL`, `VITE_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_URL`                | Public                                                              |
-| **anon / publishable key**    | `SUPABASE_ANON_KEY`, `VITE_SUPABASE_ANON_KEY`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Public by design — it ships inside the web bundle and the phone app |
-| **service_role / secret key** | `SUPABASE_SERVICE_ROLE_KEY` — **worker only**                                  | **Secret.** Bypasses row-level security entirely                    |
+| Generation                         | Keys                                      | Status                                                        |
+| ---------------------------------- | ----------------------------------------- | ------------------------------------------------------------- |
+| **Current — use these**            | `sb_publishable_…` and `sb_secret_…`      | Rotatable individually, revocable, no session disruption      |
+| Legacy — under **Legacy API keys** | `anon` / `public` and `service_role` JWTs | Deprecated. Rotating them means rotating the whole JWT secret |
 
-### On the anon key being public
+| Value               | Goes in                                                                                             | Sensitivity                                                         |
+| ------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| **Project URL**     | `SUPABASE_URL`, `VITE_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_URL`                                     | Public                                                              |
+| **Publishable key** | `SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Public by design — it ships inside the web bundle and the phone app |
+| **Secret key**      | `SUPABASE_SECRET_KEY` — **worker only**                                                             | **Secret.** Bypasses row-level security entirely                    |
 
-It is not a password. Every request it makes is still filtered by row-level
-security, so it can only reach rows the signed-in user is allowed to reach.
-Shipping it in a client is the intended design.
+### On the publishable key being public
 
-### On the service-role key
+It is not a password, and Supabase's own dashboard says it can be shared
+publicly. Every request it makes is still filtered by row-level security, so it
+can only reach rows the signed-in user is allowed to reach. Shipping it in a
+client is the intended design — which is exactly why the policies in
+[`RBAC.md`](RBAC.md) have to be right.
+
+### On the secret key
 
 It bypasses row-level security completely. Anyone holding it can read every
 student record in every organization on the platform.
 
 It belongs in exactly two places: your local `.env`, and the Railway worker's
 environment variables. Never in the web app, never in the mobile app, never in a
-commit, never pasted into a chat or an issue. See [`RBAC.md`](RBAC.md).
+commit, never pasted into a chat or an issue.
+
+### Disabling the legacy keys
+
+There is a **Disable JWT-based API keys** button on that page. It is the right
+end state, but leave it until M1 is running against the new keys — turning it off
+first only makes a failure harder to diagnose. Once the app works, disable them.
 
 ---
 
@@ -86,14 +96,14 @@ The **project ref** is the subdomain of the project URL: for
 
 ## 5. Deployment environments
 
-The same three values go into each host, with the service-role key confined to
-the worker.
+The same three values go into each host, with the secret key confined to the
+worker.
 
-| Host        | Variables                                                   |
-| ----------- | ----------------------------------------------------------- |
-| **Vercel**  | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`               |
-| **Railway** | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`                 |
-| **Expo**    | `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` |
+| Host        | Variables                                                          |
+| ----------- | ------------------------------------------------------------------ |
+| **Vercel**  | `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`               |
+| **Railway** | `SUPABASE_URL`, `SUPABASE_SECRET_KEY`                              |
+| **Expo**    | `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` |
 
 ---
 

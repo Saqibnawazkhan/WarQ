@@ -111,12 +111,15 @@ a request. They are read by:
 
 ---
 
-## The service-role key
+## The secret key
 
-`SUPABASE_SERVICE_ROLE_KEY` bypasses row-level security completely. It exists in
-exactly one place — the Railway worker — and is used only for work that has no
-user behind it: nightly subscription transitions, reminder dispatch, report
-rendering.
+`SUPABASE_SECRET_KEY` — the `sb_secret_…` key — bypasses row-level security
+completely. It exists in exactly one place, the Railway worker, and is used only
+for work that has no user behind it: nightly subscription transitions, reminder
+dispatch, report rendering.
+
+Everything else uses `SUPABASE_PUBLISHABLE_KEY`, which is safe in a browser and
+on a phone precisely because the policies above still apply to it.
 
 It is never in the web app, never in the mobile app, never in a CI log. The
 worker's Fastify logger redacts `authorization` and `x-supabase-key` headers so
