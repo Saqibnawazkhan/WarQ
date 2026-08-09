@@ -9,18 +9,19 @@ functions/    edge functions — accept invitation, approve organization, sessio
 seed.sql      the mockup fixtures, so a fresh database renders the designs
 ```
 
-## Getting set up (M1)
+## Getting set up
+
+Creating the project and collecting its credentials is a one-time job, written
+up step by step in [`../docs/SUPABASE-SETUP.md`](../docs/SUPABASE-SETUP.md).
+
+Once the project exists and `.env` is filled in:
 
 ```bash
-npm install -g supabase          # or: npx supabase
-supabase login
-supabase link --project-ref <your-project-ref>
-supabase db push                 # apply migrations
-supabase db seed                 # load the fixtures
+npx supabase login
+npx supabase link --project-ref <your-project-ref>
+npx supabase db push                 # apply migrations
+npx supabase db seed                 # load the fixtures
 ```
-
-Copy the project URL and anon key into `.env` — see `.env.example`. The
-service-role key belongs only in the Railway worker's environment.
 
 ## Principles
 

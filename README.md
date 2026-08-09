@@ -33,7 +33,8 @@ npm run dev -w @warq/worker        # just the worker, on :8080
 ```
 
 Copy `.env.example` to `.env` before running anything that talks to Supabase. Real
-values live in Vercel, Railway and Expo — never in the repository.
+values live in Vercel, Railway and Expo — never in the repository. Provisioning the
+Supabase project is a one-time job: see [`docs/SUPABASE-SETUP.md`](docs/SUPABASE-SETUP.md).
 
 ---
 
