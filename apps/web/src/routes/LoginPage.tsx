@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import { landingRoute } from '@warq/core';
-import { PlatformNotPermittedError, signIn } from '@warq/data';
+import { EmailNotConfirmedError, resendConfirmation, signIn } from '@warq/data';
 
 import { useSession } from '../auth/session-context.ts';
 import { FullPageWait } from '../auth/RequireRole.tsx';
@@ -18,6 +18,9 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  /** Set when the password was right but the address is unconfirmed — offers a resend. */
+  const [unconfirmed, setUnconfirmed] = useState<string | null>(null);
+  const [resent, setResent] = useState(false);
 
   if (loading) return <FullPageWait />;
 
@@ -30,6 +33,8 @@ export function LoginPage() {
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setError(null);
+    setUnconfirmed(null);
+    setResent(false);
     setSubmitting(true);
 
     try {
@@ -39,12 +44,25 @@ export function LoginPage() {
       const intended = (location.state as { from?: string } | null)?.from;
       void navigate(intended ?? landingRoute(result.profile.role), { replace: true });
     } catch (cause) {
+      if (cause instanceof EmailNotConfirmedError) {
+        setUnconfirmed(cause.email);
+      }
+
       setError(
-        cause instanceof PlatformNotPermittedError || cause instanceof Error
-          ? cause.message
-          : 'Something went wrong signing you in. Try again.',
+        cause instanceof Error ? cause.message : 'Something went wrong signing you in. Try again.',
       );
       setSubmitting(false);
+    }
+  }
+
+  async function handleResend() {
+    if (!unconfirmed) return;
+
+    try {
+      await resendConfirmation(supabase, unconfirmed);
+      setResent(true);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not resend the email.');
     }
   }
 
@@ -92,12 +110,31 @@ export function LoginPage() {
           />
 
           {error && (
-            <p
+            <div
               role="alert"
-              className="rounded-control bg-[#DC26260F] px-3.5 py-2.5 text-[13px] font-semibold text-expired"
+              className={
+                unconfirmed
+                  ? 'rounded-control bg-[#D977060F] px-3.5 py-2.5 text-[13px] text-ink-base'
+                  : 'rounded-control bg-[#DC26260F] px-3.5 py-2.5 text-[13px] font-semibold text-expired'
+              }
             >
-              {error}
-            </p>
+              <p className={unconfirmed ? 'font-semibold text-pending' : undefined}>{error}</p>
+
+              {unconfirmed &&
+                (resent ? (
+                  <p className="mt-1.5 text-ink-muted">
+                    Sent again to {unconfirmed}. Check the spam folder too.
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => void handleResend()}
+                    className="mt-1.5 cursor-pointer font-bold text-accent underline underline-offset-2"
+                  >
+                    Send the confirmation email again
+                  </button>
+                ))}
+            </div>
           )}
 
           <Button type="submit" disabled={submitting} className="mt-1 h-12 w-full">

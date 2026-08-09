@@ -13,9 +13,11 @@ export {
 } from './client.js';
 
 export {
+  EmailNotConfirmedError,
   getSession,
   PlatformNotPermittedError,
   requestPasswordReset,
+  resendConfirmation,
   signIn,
   signOut,
 } from './session.js';

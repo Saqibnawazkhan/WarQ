@@ -21,6 +21,24 @@ export class PlatformNotPermittedError extends Error {
   }
 }
 
+/**
+ * Raised when the password was right but the address has never been confirmed.
+ *
+ * Distinguished from a wrong password deliberately. Collapsing the two would
+ * tell someone their password is wrong when it is not, and they would reset it
+ * repeatedly without ever getting in. Naming it is not a disclosure risk either:
+ * the password was already correct, so the person asking is the account holder.
+ */
+export class EmailNotConfirmedError extends Error {
+  override readonly name = 'EmailNotConfirmedError';
+  readonly email: string;
+
+  constructor(email: string) {
+    super('Confirm your email address first. Open the link Warq sent you, then sign in again.');
+    this.email = email;
+  }
+}
+
 interface RawSession {
   profile: Profile;
   organization: Organization | null;
@@ -64,14 +82,24 @@ export async function signIn(
   credentials: { email: string; password: string },
   platform: Platform,
 ): Promise<WarqSession> {
+  const email = credentials.email.trim().toLowerCase();
+
   const { error } = await client.auth.signInWithPassword({
-    email: credentials.email.trim().toLowerCase(),
+    email,
     password: credentials.password,
   });
 
   if (error) {
-    // Never distinguish "no such account" from "wrong password": that difference
-    // tells an attacker which addresses are registered.
+    // The password was right; only the address is unverified. Say so, because
+    // otherwise the only remedy anyone will try is resetting a password that
+    // was never wrong.
+    if (error.code === 'email_not_confirmed') {
+      throw new EmailNotConfirmedError(email);
+    }
+
+    // Everything else is deliberately indistinguishable. "No such account" and
+    // "wrong password" must read identically, or the form becomes a way to
+    // discover which addresses are registered.
     throw new Error('That email address and password do not match an account.');
   }
 
@@ -103,6 +131,18 @@ export async function signOut(client: WarqClient): Promise<void> {
   const { error } = await client.auth.signOut();
   if (error) {
     throw new Error(`Could not sign you out: ${error.message}`);
+  }
+}
+
+/** Sends the confirmation email again. For someone who lost or never got the first one. */
+export async function resendConfirmation(client: WarqClient, email: string): Promise<void> {
+  const { error } = await client.auth.resend({
+    type: 'signup',
+    email: email.trim().toLowerCase(),
+  });
+
+  if (error) {
+    throw new Error(`Could not send the confirmation email: ${error.message}`);
   }
 }
 
