@@ -206,11 +206,24 @@ Aggregation belongs in the database, not in three clients that would each drift.
 
 ---
 
-## Seed data
+## No seed data
 
-`supabase/seed.sql` reproduces the mockup fixtures so a fresh database renders
-the designs: seven organizations from Punjab College of IT to Cornerstone Tuition
-Centre, six individual teachers, five organization teachers, three classes,
-twenty-seven students with their guardian contacts, four assessments with marks,
-and an attendance history. The seed is dated against **8 August 2026**, the date
-the mockups are drawn on, so every "Expiring Soon" badge matches.
+The database ships empty apart from one row: the default grade scale.
+
+The mockup fixtures — Punjab College of IT, the twenty-seven students, their
+marks and attendance — are a **specification of what the screens must handle**,
+not data to load. Real records are entered through the product.
+
+That is a deliberate choice with two effects:
+
+- **Empty states are real screens.** A Main Admin dashboard with no organizations
+  yet is what someone sees on day one. The mockups only draw the populated case,
+  so each empty state is designed rather than left as a blank panel.
+- **The onboarding path gets exercised.** An organization signs up, a Main Admin
+  approves it, a teacher is invited and accepts, a class is created. Seeding
+  around that flow would leave it untested until the first real customer hit it.
+
+The fixtures still earn their keep as test data: `@warq/core` asserts its
+grading, attendance and subscription logic against the exact numbers in the
+mockups, so the calculations are verified without any of it reaching the
+database.

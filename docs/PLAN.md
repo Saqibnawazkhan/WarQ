@@ -50,9 +50,21 @@ reads it from there. Detail in [`RBAC.md`](RBAC.md).
 
 ## 4. Data model
 
-Every value in the mockups traces back to a table, and the fixtures inside them
-become the seed data — so a fresh database renders exactly what was designed.
-Detail in [`DATA-MODEL.md`](DATA-MODEL.md).
+Every value in the mockups traces back to a table. Detail in
+[`DATA-MODEL.md`](DATA-MODEL.md).
+
+**The mockup fixtures are not seeded.** The seven organizations, the students and
+their marks exist in `design/` as a specification of what the screens must
+handle, not as data to load. Real records are entered through the product.
+
+Two consequences, both worth having:
+
+- **Every screen needs a real empty state.** The mockups only draw the populated
+  case; a dashboard with no organizations yet is a screen someone will actually
+  see on day one, so it gets designed rather than left blank.
+- **The first run exercises the real path.** An organization signs up, a Main
+  Admin approves it, a teacher is invited and accepts. That flow gets tested by
+  being used, instead of being bypassed by a seed script.
 
 Rules carried over from the mockups:
 
@@ -78,10 +90,10 @@ Vercel and Railway configuration in place.
 
 ### M1 — Schema, security and authentication · Supabase
 
-Every table, enum, view and RLS policy as versioned SQL. Seed data drawn from the
-mockup fixtures. Sign-up for an organization request and an individual teacher
-request, sign-in with role and tenant claims in the JWT, password reset, and the
-role-based routing contract both apps follow.
+Every table, enum, view and RLS policy as versioned SQL. Sign-up for an
+organization request and an individual teacher request, sign-in, password reset,
+and the role-based routing contract both apps follow. No seed data: records are
+entered through the product.
 
 ### M2 — Main Admin web dashboard · Vercel
 

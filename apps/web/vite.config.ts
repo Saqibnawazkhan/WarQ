@@ -6,6 +6,9 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // One .env at the repository root rather than one per app, so the Supabase
+  // credentials are configured in a single place.
+  envDir: fileURLToPath(new URL('../..', import.meta.url)),
   resolve: {
     alias: {
       '~': fileURLToPath(new URL('./src', import.meta.url)),

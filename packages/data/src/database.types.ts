@@ -1144,6 +1144,7 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      bootstrap_main_admin: { Args: { admin_email: string }; Returns: string }
       can_read_class: { Args: { target_class: string }; Returns: boolean }
       fn_effective_subscription_status: {
         Args: {
@@ -1171,22 +1172,6 @@ export type Database = {
       is_org_admin_of: { Args: { target_org: string }; Returns: boolean }
       me: { Args: never; Returns: Json }
       owns_class: { Args: { target_class: string }; Returns: boolean }
-      request_individual_subscription: {
-        Args: {
-          requested_plan: Database["public"]["Enums"]["subscription_plan"]
-        }
-        Returns: string
-      }
-      request_organization: {
-        Args: {
-          organization_city: string
-          organization_email: string
-          organization_name: string
-          organization_phone: string
-          requested_plan: Database["public"]["Enums"]["subscription_plan"]
-        }
-        Returns: string
-      }
     }
     Enums: {
       account_status: "pending" | "active" | "suspended"
