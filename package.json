@@ -27,7 +27,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "clean": "turbo run clean && rimraf node_modules",
-    "db:link": "supabase link --project-ref ndjtwrchnxmmjaqvwyjo",
+    "db:link": "supabase link --project-ref umkyvmnadjturrsdubfm",
     "db:push": "supabase db push --linked",
     "db:push:dry": "supabase db push --linked --dry-run",
     "db:seed": "supabase db push --linked --include-seed",
