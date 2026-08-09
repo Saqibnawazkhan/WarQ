@@ -102,6 +102,26 @@ create index subscription_events_subscription_idx
 -- reminder_settings
 -- ─────────────────────────────────────────────────────────────
 
+-- Offsets must be positive, sane and free of duplicates: two notices on one day
+-- reads as a malfunction, not as diligence.
+--
+-- Written as a function because Postgres forbids subqueries inside a CHECK
+-- constraint, but permits a call to an immutable function that contains them.
+create or replace function public.fn_reminder_days_valid(days integer[])
+returns boolean
+language sql
+immutable
+as $$
+  select
+    days is not null
+    and array_length(days, 1) between 1 and 8
+    and (select bool_and(d between 1 and 365) from unnest(days) as d)
+    and array_length(days, 1) = (select count(distinct d) from unnest(days) as d);
+$$;
+
+comment on function public.fn_reminder_days_valid is
+  'Reminder offsets: between one and eight of them, each 1-365 days, no duplicates.';
+
 -- The 30 / 15 / 7 / 3 / 1 schedule from the Main Admin's Notifications page.
 -- A single row, enforced by the check on id.
 create table public.reminder_settings (
@@ -110,13 +130,7 @@ create table public.reminder_settings (
   updated_by uuid references public.profiles (id) on delete set null,
   updated_at timestamptz not null default now(),
 
-  -- Offsets must be positive, sane and free of duplicates: two notices on one
-  -- day reads as a malfunction, not as diligence.
-  constraint days_are_valid check (
-    array_length(days, 1) between 1 and 8
-    and days <@ (select array_agg(n) from generate_series(1, 365) as n)
-    and array_length(days, 1) = (select count(distinct d) from unnest(days) as d)
-  )
+  constraint days_are_valid check (public.fn_reminder_days_valid(days))
 );
 
 insert into public.reminder_settings (id) values (true);

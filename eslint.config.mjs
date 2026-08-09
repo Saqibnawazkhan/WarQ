@@ -16,6 +16,8 @@ export default tseslint.config(
       '**/coverage/**',
       '**/.turbo/**',
       '**/node_modules/**',
+      // Regenerated from the live database by `npm run db:types`.
+      'packages/data/src/database.types.ts',
     ],
   },
 
