@@ -154,6 +154,7 @@ class AssessmentTile extends StatelessWidget {
         AssessmentType.finalExam => Icons.school_outlined,
         AssessmentType.presentation => Icons.co_present_outlined,
         AssessmentType.project => Icons.science_outlined,
+        AssessmentType.lab => Icons.biotech_outlined,
         AssessmentType.custom => Icons.star_outline_rounded,
       };
 }

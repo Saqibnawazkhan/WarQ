@@ -31,7 +31,7 @@ class LocalOrganizationRepository implements OrganizationRepository {
     final String code = joinCode.trim().toUpperCase();
     if (code.isEmpty) return null;
     return _db.organizations.firstWhereOrNull(
-      (Organization o) => o.joinCode.toUpperCase() == code,
+      (Organization o) => o.joinCode?.toUpperCase() == code,
     );
   }
 

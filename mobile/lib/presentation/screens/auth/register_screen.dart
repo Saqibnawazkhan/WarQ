@@ -26,6 +26,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _email = TextEditingController();
   final TextEditingController _phone = TextEditingController();
   final TextEditingController _organization = TextEditingController();
+  final TextEditingController _city = TextEditingController();
   final TextEditingController _password = TextEditingController();
   final TextEditingController _confirmPassword = TextEditingController();
 
@@ -38,6 +39,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _email.dispose();
     _phone.dispose();
     _organization.dispose();
+    _city.dispose();
     _password.dispose();
     _confirmPassword.dispose();
     super.dispose();
@@ -60,6 +62,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             email: _email.text,
             password: _password.text,
             organizationName: _organization.text,
+            city: _city.text,
             phone: _phone.text,
           );
 
@@ -116,6 +119,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   validator: (String? v) =>
                       Validators.name(v, field: 'Organization name'),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                TextFormField(
+                  controller: _city,
+                  textCapitalization: TextCapitalization.words,
+                  textInputAction: TextInputAction.next,
+                  decoration: const InputDecoration(
+                    labelText: 'City *',
+                    prefixIcon: Icon(Icons.location_city_rounded),
+                  ),
+                  validator: (String? v) => Validators.name(v, field: 'City'),
                 ),
               ],
               const SizedBox(height: AppSpacing.lg),

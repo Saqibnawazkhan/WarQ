@@ -298,11 +298,14 @@ class _ProfileHeaderCard extends StatelessWidget {
             value: AppDate.format(user.createdAt),
             icon: Icons.calendar_today_outlined,
           ),
-          if (organization != null)
+          // City rather than a join code: teachers arrive through a tokenised
+          // invitation, so showing a "code" would imply a way in that does not
+          // exist.
+          if (organization?.city != null)
             DetailRow(
-              label: 'Organization code',
-              value: organization!.joinCode,
-              icon: Icons.qr_code_rounded,
+              label: 'City',
+              value: organization!.city!,
+              icon: Icons.location_city_rounded,
             ),
         ],
       ),

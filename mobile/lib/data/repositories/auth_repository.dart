@@ -43,6 +43,9 @@ abstract class AuthRepository {
   });
 
   /// Creates an organization plus its first admin account.
+  ///
+  /// [city] is required by the shared database, which uses it for the platform
+  /// admin's search across institutions.
   Future<AppUser> registerOrganization({
     required String fullName,
     required String email,
@@ -50,6 +53,7 @@ abstract class AuthRepository {
     required String organizationName,
     String? username,
     String? phone,
+    String? city,
   });
 
   Future<void> signOut(AppUser user);

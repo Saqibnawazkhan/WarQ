@@ -88,6 +88,7 @@ enum AssessmentType {
   finalExam,
   presentation,
   project,
+  lab,
   custom;
 
   String get label => switch (this) {
@@ -97,6 +98,7 @@ enum AssessmentType {
         AssessmentType.finalExam => 'Final Exam',
         AssessmentType.presentation => 'Presentation',
         AssessmentType.project => 'Project',
+        AssessmentType.lab => 'Lab',
         AssessmentType.custom => 'Custom',
       };
 
@@ -108,6 +110,7 @@ enum AssessmentType {
         AssessmentType.finalExam => 100,
         AssessmentType.presentation => 20,
         AssessmentType.project => 50,
+        AssessmentType.lab => 25,
         AssessmentType.custom => 100,
       };
 }

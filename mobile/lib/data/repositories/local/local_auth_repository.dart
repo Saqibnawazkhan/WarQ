@@ -188,6 +188,7 @@ class LocalAuthRepository implements AuthRepository {
     required String organizationName,
     String? username,
     String? phone,
+    String? city,
   }) async {
     final String normalisedEmail = _normaliseEmail(email);
     final String? normalisedUsername = _normaliseUsername(username);
@@ -202,6 +203,7 @@ class LocalAuthRepository implements AuthRepository {
     final Organization organization = Organization(
       id: IdGenerator.generate('org'),
       name: cleanedOrgName,
+      city: Format.cleanOrNull(city),
       joinCode: IdGenerator.code(),
       ownerUserId: userId,
       createdAt: DateTime.now(),

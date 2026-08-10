@@ -8,9 +8,10 @@ class Organization {
   const Organization({
     required this.id,
     required this.name,
-    required this.joinCode,
     required this.ownerUserId,
     required this.createdAt,
+    this.city,
+    this.joinCode,
     this.email,
     this.phone,
     this.address,
@@ -23,7 +24,8 @@ class Organization {
     return Organization(
       id: Json.string(json, 'id'),
       name: Json.string(json, 'name'),
-      joinCode: Json.string(json, 'joinCode'),
+      city: Json.stringOrNull(json, 'city'),
+      joinCode: Json.stringOrNull(json, 'joinCode'),
       ownerUserId: Json.string(json, 'ownerUserId'),
       createdAt: Json.dateTime(json, 'createdAt', fallback: DateTime.now()),
       email: Json.stringOrNull(json, 'email'),
@@ -38,8 +40,13 @@ class Organization {
   final String id;
   final String name;
 
-  /// Short human-readable code teachers can quote when joining.
-  final String joinCode;
+  /// Required when an organization registers itself; drives the platform
+  /// admin's search.
+  final String? city;
+
+  /// Short human-readable code, kept for display only. Teachers join through a
+  /// tokenised invitation, never by quoting this.
+  final String? joinCode;
   final String ownerUserId;
   final DateTime createdAt;
   final String? email;
@@ -53,6 +60,7 @@ class Organization {
 
   Organization copyWith({
     String? name,
+    String? city,
     String? email,
     bool clearEmail = false,
     String? phone,
@@ -67,6 +75,7 @@ class Organization {
     return Organization(
       id: id,
       name: name ?? this.name,
+      city: city ?? this.city,
       joinCode: joinCode,
       ownerUserId: ownerUserId,
       createdAt: createdAt,
@@ -82,6 +91,7 @@ class Organization {
   Map<String, dynamic> toJson() => Json.compact(<String, dynamic>{
         'id': id,
         'name': name,
+        'city': city,
         'joinCode': joinCode,
         'ownerUserId': ownerUserId,
         'createdAt': createdAt.toIso8601String(),

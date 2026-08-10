@@ -105,6 +105,7 @@ class SessionController extends BaseController {
     required String organizationName,
     String? username,
     String? phone,
+    String? city,
   }) async {
     final bool? ok = await guardAction<bool>(() async {
       final AppUser user = await _deps.auth.registerOrganization(
@@ -114,6 +115,7 @@ class SessionController extends BaseController {
         organizationName: organizationName,
         username: username,
         phone: phone,
+        city: city,
       );
       await _applyUser(user);
       return true;
