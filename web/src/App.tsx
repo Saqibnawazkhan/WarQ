@@ -19,6 +19,12 @@ import { Register } from './pages/teacher/Register'
 import { MarkEntry } from './pages/teacher/MarkEntry'
 import { Students } from './pages/teacher/Students'
 
+import { OrgShell } from './components/OrgShell'
+import { OrgOverviewPage } from './pages/org/OrgOverviewPage'
+import { OrgTeachers } from './pages/org/OrgTeachers'
+import { OrgInvitations } from './pages/org/OrgInvitations'
+import { OrgClasses } from './pages/org/OrgClasses'
+
 export function App() {
   return (
     <SessionProvider>
@@ -60,6 +66,21 @@ function Routed() {
           <Route path="organizations" element={<Organizations />} />
           <Route path="teachers" element={<Teachers />} />
           <Route path="subscriptions" element={<Subscriptions />} />
+          <Route path="activity" element={<Activity />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    )
+  }
+
+  if (user.role === 'org_admin') {
+    return (
+      <Routes>
+        <Route element={<OrgShell />}>
+          <Route index element={<OrgOverviewPage />} />
+          <Route path="teachers" element={<OrgTeachers />} />
+          <Route path="invitations" element={<OrgInvitations />} />
+          <Route path="classes" element={<OrgClasses />} />
           <Route path="activity" element={<Activity />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
