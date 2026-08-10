@@ -177,18 +177,23 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const Gap.xl(),
-            SectionCard(
-              title: 'Developer',
-              subtitle: 'Phase 1 runs entirely on this device',
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-              child: _SettingsTile(
-                icon: Icons.restart_alt_rounded,
-                title: 'Reset demo data',
-                subtitle: 'Restore the sample classes and students',
-                onTap: () => _resetDemoData(context),
+            // Offline builds only. Against the shared database there is no demo
+            // data to restore, and offering to "reset" would read as an offer
+            // to wipe the teacher's real classes.
+            if (context.read<AppDependencies>().backend == AppBackend.local) ...<Widget>[
+              const Gap.xl(),
+              SectionCard(
+                title: 'Developer',
+                subtitle: 'This build runs entirely on this device',
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                child: _SettingsTile(
+                  icon: Icons.restart_alt_rounded,
+                  title: 'Reset demo data',
+                  subtitle: 'Restore the sample classes and students',
+                  onTap: () => _resetDemoData(context),
+                ),
               ),
-            ),
+            ],
             const Gap.xl(),
             OutlinedButton.icon(
               onPressed: () => _signOut(context),

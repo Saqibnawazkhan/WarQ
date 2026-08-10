@@ -70,7 +70,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (ok) {
       // The root gate swaps to the signed-in shell; drop the auth stack.
       Navigator.of(context).popUntil((Route<dynamic> route) => route.isFirst);
-      context.showSuccess('Account created. Welcome to EDU Manager.');
+      // A new account may be waiting for approval, in which case the gate shows
+      // the screen that explains it. Welcoming them to an app they cannot use
+      // yet would contradict it.
+      context.showSuccess(
+        session.user?.hasAccess ?? false
+            ? 'Account created. Welcome to EDU Manager.'
+            : 'Account created. We will let you in as soon as it is approved.',
+      );
     }
   }
 

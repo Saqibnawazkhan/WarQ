@@ -43,7 +43,10 @@ class _LoginScreenState extends State<LoginScreen> {
       password: _password.text,
     );
     if (!mounted) return;
-    if (ok) {
+    // Only greet someone who is actually getting in. An account still waiting
+    // for approval lands on a screen explaining the wait, and "Welcome back"
+    // over the top of it reads as though something went right.
+    if (ok && (session.user?.hasAccess ?? false)) {
       context.showSuccess('Welcome back, ${session.user?.displayName ?? ''}.');
     }
   }
