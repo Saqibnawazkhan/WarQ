@@ -16,7 +16,7 @@ export function TeacherShell() {
         <div className="brand">
           <span className="brand-mark">W</span>
           <span>
-            <div className="brand-name">Warq</div>
+            <div className="brand-name">WarQ</div>
             <div className="brand-sub">{organization?.name ?? 'Teacher'}</div>
           </span>
         </div>

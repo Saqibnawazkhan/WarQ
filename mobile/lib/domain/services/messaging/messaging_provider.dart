@@ -51,7 +51,7 @@ class MessageDispatchResult {
   final String? failureReason;
 }
 
-/// The seam between EDU Manager and an outbound messaging gateway.
+/// The seam between WarQ and an outbound messaging gateway.
 ///
 /// Phase 1 ships [QueuedMessagingProvider], which records messages without
 /// sending them. Connecting WhatsApp, an SMS gateway or a push service later

@@ -128,7 +128,7 @@ export function OrgTeachers() {
       {removing !== null && (
         <Modal
           title={`Remove ${removing.full_name}?`}
-          description="Their classes, registers and marks stay with your organization and you keep seeing them. They lose access to Warq, because with no organization they have no subscription."
+          description="Their classes, registers and marks stay with your organization and you keep seeing them. They lose access to WarQ, because with no organization they have no subscription."
           onClose={() => setRemoving(null)}
         >
           <div className="modal-actions">

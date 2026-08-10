@@ -42,7 +42,7 @@ class StudentReportDocument {
     final pw.Document document = pw.Document(
       title: 'Student report - ${student.fullName}',
       author: context.teacher.displayName,
-      creator: 'EDU Manager',
+      creator: 'WarQ',
       subject: 'Academic performance report',
     );
 

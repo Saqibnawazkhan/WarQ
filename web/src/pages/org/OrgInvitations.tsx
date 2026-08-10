@@ -42,7 +42,7 @@ export function OrgInvitations() {
       {error !== null && <ErrorNotice message={error} />}
 
       <div className="notice" style={{ background: 'var(--primary-tint)', color: 'var(--primary-dark)' }}>
-        Warq does not send the email yet. Tell the teacher to download the app and register with
+        WarQ does not send the email yet. Tell the teacher to download the app and register with
         exactly the address you invite here, and they will land inside your organization.
       </div>
 

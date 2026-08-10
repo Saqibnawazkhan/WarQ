@@ -75,7 +75,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       // yet would contradict it.
       context.showSuccess(
         session.user?.hasAccess ?? false
-            ? 'Account created. Welcome to EDU Manager.'
+            ? 'Account created. Welcome to WarQ.'
             : 'Account created. We will let you in as soon as it is approved.',
       );
     }

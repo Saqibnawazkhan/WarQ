@@ -179,7 +179,7 @@ class PdfTheme {
                       ),
                       pw.SizedBox(width: 8),
                       pw.Text(
-                        'EDU Manager',
+                        'WarQ',
                         style: pw.TextStyle(
                           fontSize: 11,
                           fontWeight: pw.FontWeight.bold,

@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 
-/// Connection details for the shared Warq database.
+/// Connection details for the shared WarQ database.
 ///
 /// The publishable (anon) key is designed to be public: it identifies the
 /// project, not the caller. Every table is behind row-level security that

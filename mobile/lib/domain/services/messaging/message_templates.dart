@@ -58,7 +58,7 @@ class MessageTemplates {
   }) {
     final String greeting = inviteeName == null ? 'Hello' : 'Hello $inviteeName';
     return '$greeting,\n\n$inviterName has invited you to join '
-        '$organizationName on EDU Manager.\n\n'
+        '$organizationName on WarQ.\n\n'
         'Create your account with this email address and you will join the '
         'organization automatically.\n\nInvitation code: $token';
   }

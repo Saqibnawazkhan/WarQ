@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Brand palette for EDU Manager.
+/// Brand palette for WarQ.
 ///
 /// Colours are defined once here and consumed through [ThemeData] so screens
 /// never hardcode hex values. Semantic colours (success / warning / danger)

@@ -18,7 +18,7 @@ export function SignIn() {
         <div className="brand" style={{ padding: 0, marginBottom: 18 }}>
           <span className="brand-mark">W</span>
           <span>
-            <div className="brand-name">Warq</div>
+            <div className="brand-name">WarQ</div>
             <div className="brand-sub">Platform administration</div>
           </span>
         </div>

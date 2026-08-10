@@ -61,7 +61,7 @@ export function Activity() {
           state={activity}
           what="activity"
           emptyTitle="Nothing recorded yet"
-          emptyHint="Entries appear as teachers and administrators use Warq."
+          emptyHint="Entries appear as teachers and administrators use WarQ."
           isEmpty={(rows) => rows.length === 0}
         >
           {(rows) => (

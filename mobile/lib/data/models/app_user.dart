@@ -1,7 +1,7 @@
 import '../../core/utils/json_utils.dart';
 import 'enums.dart';
 
-/// A person who can sign in to EDU Manager.
+/// A person who can sign in to WarQ.
 ///
 /// One table for every role keeps the future backend simple: role and
 /// `organizationId` decide what the account can see.

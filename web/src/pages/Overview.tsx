@@ -41,7 +41,7 @@ export function Overview() {
       <div className="page-head">
         <div>
           <h1>Overview</h1>
-          <p className="page-sub">Everything running on Warq right now.</p>
+          <p className="page-sub">Everything running on WarQ right now.</p>
         </div>
       </div>
 

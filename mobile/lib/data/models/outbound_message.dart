@@ -4,7 +4,7 @@ import 'enums.dart';
 /// A guardian-facing message queued by the app (currently only absence
 /// notices).
 ///
-/// This is the seam between EDU Manager and whichever SMS/WhatsApp gateway is
+/// This is the seam between WarQ and whichever SMS/WhatsApp gateway is
 /// plugged in later: the app always writes an outbox row, and a
 /// `MessagingProvider` decides what actually happens to it. Nothing in the app
 /// references a specific vendor.

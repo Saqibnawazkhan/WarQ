@@ -120,7 +120,7 @@ export function Requests() {
       {rejecting !== null && (
         <Modal
           title={`Reject ${rejecting.subject_name ?? 'this account'}?`}
-          description="They keep their account but cannot use Warq. A reason is optional and is stored on the record."
+          description="They keep their account but cannot use WarQ. A reason is optional and is stored on the record."
           onClose={() => setRejecting(null)}
         >
           <div className="field">

@@ -56,7 +56,7 @@ export function Organizations() {
           <h1>Organizations</h1>
           <p className="page-sub">
             {organizations.data === null
-              ? 'Schools, colleges and academies on Warq.'
+              ? 'Schools, colleges and academies on WarQ.'
               : `${organizations.data.length} on the platform.`}
           </p>
         </div>

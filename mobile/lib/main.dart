@@ -82,7 +82,7 @@ class _StartupErrorApp extends StatelessWidget {
                 const Icon(Icons.error_outline_rounded, size: 44),
                 const SizedBox(height: 16),
                 const Text(
-                  'EDU Manager could not start',
+                  'WarQ could not start',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                 ),

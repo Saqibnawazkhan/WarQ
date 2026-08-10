@@ -15,7 +15,7 @@ export function OrgShell() {
         <div className="brand">
           <span className="brand-mark">W</span>
           <span>
-            <div className="brand-name">{organization?.name ?? 'Warq'}</div>
+            <div className="brand-name">{organization?.name ?? 'WarQ'}</div>
             <div className="brand-sub">Organization admin</div>
           </span>
         </div>

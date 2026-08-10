@@ -1,6 +1,6 @@
-# Warq · platform admin
+# WarQ · platform admin
 
-The dashboard for running Warq itself: every organization and independent
+The dashboard for running WarQ itself: every organization and independent
 teacher on the platform, their subscriptions, and the audit trail.
 
 Not for teachers. They and their organization admins use the mobile app; this

@@ -75,7 +75,7 @@ function explain(status: string, inOrganization: boolean) {
       return {
         waiting: true,
         title: 'Waiting for approval',
-        body: 'Your account has been created and is with the Warq team for review. You will be able to start creating classes as soon as it is approved.',
+        body: 'Your account has been created and is with the WarQ team for review. You will be able to start creating classes as soon as it is approved.',
       }
     case 'suspended':
       return {
