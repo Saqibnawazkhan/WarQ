@@ -18,6 +18,9 @@ Future<AppDependencies> createTestDependencies({
     store: InMemoryKeyValueStore(),
     messagingProvider: messaging ?? const QueuedMessagingProvider(),
     seedDemoData: seedDemoData,
+    // Never the shared database: a test suite must not depend on a network, and
+    // must certainly not write to a project real teachers are using.
+    backend: AppBackend.local,
   );
 }
 

@@ -1,4 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Classes, registers and marks live in a shared database, so a release
+         build needs this as much as a debug one does. Flutter only declares it
+         in the debug and profile manifests, which was harmless while the app
+         stored everything on the device and is not any more. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:label="edu_manager"
         android:name="${applicationName}"

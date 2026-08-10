@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../app/app_dependencies.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/routing/route_names.dart';
@@ -58,10 +59,16 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final SessionController session = context.watch<SessionController>();
 
+    // Only an offline build has the seeded accounts. Offering them against the
+    // shared database would hand every new teacher a password that cannot work.
+    final bool offersDemoAccounts =
+        context.read<AppDependencies>().backend == AppBackend.local;
+
     return AuthScaffold(
       title: 'Sign in',
       subtitle: 'Manage your classes, attendance and results.',
-      footer: _DemoAccountsCard(onSelect: _useDemoAccount),
+      footer:
+          offersDemoAccounts ? _DemoAccountsCard(onSelect: _useDemoAccount) : null,
       children: <Widget>[
         if (session.errorMessage != null)
           AuthErrorBanner(message: session.errorMessage!),

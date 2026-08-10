@@ -1,3 +1,7 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../core/config/supabase_config.dart';
+import '../core/error/failure.dart';
 import '../data/local/key_value_store.dart';
 import '../data/local/local_database.dart';
 import '../data/repositories/activity_repository.dart';
@@ -18,6 +22,15 @@ import '../data/repositories/local/local_student_repository.dart';
 import '../data/repositories/notification_repository.dart';
 import '../data/repositories/organization_repository.dart';
 import '../data/repositories/student_repository.dart';
+import '../data/repositories/supabase/supabase_activity_repository.dart';
+import '../data/repositories/supabase/supabase_assessment_repository.dart';
+import '../data/repositories/supabase/supabase_attendance_repository.dart';
+import '../data/repositories/supabase/supabase_auth_repository.dart';
+import '../data/repositories/supabase/supabase_class_repository.dart';
+import '../data/repositories/supabase/supabase_grade_scale_repository.dart';
+import '../data/repositories/supabase/supabase_notification_repository.dart';
+import '../data/repositories/supabase/supabase_organization_repository.dart';
+import '../data/repositories/supabase/supabase_student_repository.dart';
 import '../data/seed/demo_seeder.dart';
 import '../domain/services/absence_notification_service.dart';
 import '../domain/services/analytics_service.dart';
@@ -26,13 +39,25 @@ import '../domain/services/messaging/messaging_provider.dart';
 import '../domain/services/messaging/whatsapp_messaging_provider.dart';
 import '../domain/services/report_service.dart';
 
+/// Where the app's data actually lives.
+enum AppBackend {
+  /// The shared Supabase project. What a real install runs on, and the reason
+  /// the phone and the web app see the same classes.
+  supabase,
+
+  /// On-device storage only. Used by the test suite, which must not depend on a
+  /// network or on the state of a live database.
+  local,
+}
+
 /// Composition root.
 ///
 /// Builds the whole object graph once at startup and hands it to the widget
-/// tree via `Provider`. Swapping the local repositories for HTTP-backed ones in
-/// Phase 2 is a change to this file only — no screen imports an implementation.
+/// tree via `Provider`. No screen imports an implementation, so which backend
+/// is in use is decided here and nowhere else.
 class AppDependencies {
   AppDependencies._({
+    required this.backend,
     required this.database,
     required this.auth,
     required this.classes,
@@ -50,46 +75,110 @@ class AppDependencies {
     required this.seeder,
   });
 
-  /// Wires everything together against a key-value store.
+  /// Wires everything together.
   ///
   /// [store] is injectable so widget tests can pass an in-memory store.
+  /// [backend] decides where the data lives; see [AppBackend].
   static Future<AppDependencies> bootstrap({
     KeyValueStore? store,
     MessagingProvider messagingProvider = const WhatsAppMessagingProvider(),
-    bool seedDemoData = true,
+    bool seedDemoData = false,
+    AppBackend backend = AppBackend.supabase,
   }) async {
     final KeyValueStore resolvedStore =
         store ?? await SharedPreferencesStore.create();
+
+    // Kept whichever backend is in use: it owns the event bus the controllers
+    // listen to, and the settings that belong to the device rather than the
+    // account. Only its collections go unused when the data is remote.
     final LocalDatabase database = LocalDatabase(resolvedStore);
     await database.init();
 
     final DemoSeeder seeder = DemoSeeder(database);
-    if (seedDemoData) {
+    // Demo data would be indistinguishable from a teacher's real classes once
+    // the app is reading a shared database, so it is only ever installed into
+    // on-device storage.
+    if (seedDemoData && backend == AppBackend.local) {
       await seeder.seedIfEmpty();
     }
 
-    final ActivityRepository activity = LocalActivityRepository(database);
-    final NotificationRepository notifications =
-        LocalNotificationRepository(database);
-    final AuthRepository auth = LocalAuthRepository(
-      database,
-      activity: activity,
-      notifications: notifications,
-    );
-    final ClassRepository classes =
-        LocalClassRepository(database, activity: activity);
-    final StudentRepository students =
-        LocalStudentRepository(database, activity: activity);
-    final AttendanceRepository attendance =
-        LocalAttendanceRepository(database, activity: activity);
-    final AssessmentRepository assessments =
-        LocalAssessmentRepository(database, activity: activity);
-    final GradeScaleRepository gradeScales = LocalGradeScaleRepository(database);
-    final OrganizationRepository organizations = LocalOrganizationRepository(
-      database,
-      activity: activity,
-      notifications: notifications,
-    );
+    final ActivityRepository activity;
+    final NotificationRepository notifications;
+    final AuthRepository auth;
+    final ClassRepository classes;
+    final StudentRepository students;
+    final AttendanceRepository attendance;
+    final AssessmentRepository assessments;
+    final GradeScaleRepository gradeScales;
+    final OrganizationRepository organizations;
+
+    switch (backend) {
+      case AppBackend.supabase:
+        if (!SupabaseConfig.isConfigured) {
+          throw const AppFailure.storage(
+            'This build has no database configured. Rebuild with '
+            '--dart-define=SUPABASE_URL and --dart-define=SUPABASE_ANON_KEY.',
+          );
+        }
+
+        // Initialised here rather than in main() so the test harness never
+        // touches it, and so a second bootstrap (the retry button on the
+        // startup error screen) reuses the existing client instead of failing.
+        // publishableKey is the current name for the same header; the SDK takes
+        // whichever is given and sends it unchanged, so the project's existing
+        // anon key still goes in here.
+        final Supabase supabase = await Supabase.initialize(
+          url: SupabaseConfig.url,
+          publishableKey: SupabaseConfig.anonKey,
+        );
+        final SupabaseClient client = supabase.client;
+
+        activity = SupabaseActivityRepository(client, database.bus);
+        notifications = SupabaseNotificationRepository(client, database.bus);
+        auth = SupabaseAuthRepository(client);
+        classes = SupabaseClassRepository(
+          client,
+          database.bus,
+          activity: activity,
+        );
+        students = SupabaseStudentRepository(
+          client,
+          database.bus,
+          activity: activity,
+        );
+        attendance = SupabaseAttendanceRepository(
+          client,
+          database.bus,
+          activity: activity,
+        );
+        assessments = SupabaseAssessmentRepository(
+          client,
+          database.bus,
+          activity: activity,
+        );
+        gradeScales = SupabaseGradeScaleRepository(client, database.bus);
+        organizations =
+            SupabaseOrganizationRepository(client, database.bus);
+
+      case AppBackend.local:
+        activity = LocalActivityRepository(database);
+        notifications = LocalNotificationRepository(database);
+        auth = LocalAuthRepository(
+          database,
+          activity: activity,
+          notifications: notifications,
+        );
+        classes = LocalClassRepository(database, activity: activity);
+        students = LocalStudentRepository(database, activity: activity);
+        attendance = LocalAttendanceRepository(database, activity: activity);
+        assessments = LocalAssessmentRepository(database, activity: activity);
+        gradeScales = LocalGradeScaleRepository(database);
+        organizations = LocalOrganizationRepository(
+          database,
+          activity: activity,
+          notifications: notifications,
+        );
+    }
 
     const GradingService grading = GradingService();
     final AnalyticsService analytics = AnalyticsService(
@@ -119,6 +208,7 @@ class AppDependencies {
     );
 
     return AppDependencies._(
+      backend: backend,
       database: database,
       auth: auth,
       classes: classes,
@@ -137,6 +227,7 @@ class AppDependencies {
     );
   }
 
+  final AppBackend backend;
   final LocalDatabase database;
   final AuthRepository auth;
   final ClassRepository classes;
@@ -167,7 +258,15 @@ class AppDependencies {
   }
 
   /// Clears every collection and reinstalls the demo dataset.
+  ///
+  /// On-device only. Against the shared database this would either do nothing
+  /// or, worse, read as an offer to wipe a teacher's real classes.
   Future<void> resetDemoData() async {
+    if (backend != AppBackend.local) {
+      throw const AppFailure.validation(
+        'Demo data is only available in an offline build.',
+      );
+    }
     await database.wipe();
     await seeder.seed();
   }
