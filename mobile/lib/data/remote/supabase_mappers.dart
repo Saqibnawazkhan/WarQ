@@ -370,6 +370,7 @@ class Rows {
         createdAt: time(row, 'created_at'),
         customTypeLabel: strOrNull(row, 'custom_type_label'),
         description: strOrNull(row, 'description'),
+        weight: numOrNull(row, 'weight'),
         updatedAt: timeOrNull(row, 'updated_at'),
       );
 
