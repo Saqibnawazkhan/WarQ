@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabase'
 /// The queue count sits next to Pending requests because it is the only number
 /// that means somebody is waiting on a decision.
 export function Shell() {
-  const { admin, signOut } = useSession()
+  const { user, signOut } = useSession()
 
   const pending = useQuery(async () => {
     const { count, error } = await supabase
@@ -54,8 +54,8 @@ export function Shell() {
         <span className="nav-spacer" />
 
         <div className="sidebar-footer">
-          <div style={{ fontWeight: 600, color: 'var(--text)' }}>{admin?.full_name}</div>
-          <div style={{ marginBottom: 10 }}>{admin?.email}</div>
+          <div style={{ fontWeight: 600, color: 'var(--text)' }}>{user?.full_name}</div>
+          <div style={{ marginBottom: 10 }}>{user?.email}</div>
           <button className="btn-quiet" onClick={() => void signOut()}>
             Sign out
           </button>

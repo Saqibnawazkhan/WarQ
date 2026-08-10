@@ -350,6 +350,70 @@ input:focus, select:focus, textarea:focus {
 .modal h2 { margin-bottom: 6px; }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
 
+/* ── Attendance marks ────────────────────────────────────── */
+
+.mark-off,
+.mark-on {
+  padding: 5px 11px;
+  font-size: 13px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.mark-off:hover { background: var(--grey-tint); }
+
+.mark-on { color: #fff; border-color: transparent; }
+.mark-green { background: var(--green); }
+.mark-red { background: var(--red); }
+.mark-amber { background: var(--amber); }
+.mark-blue { background: var(--primary); }
+
+/* Sticky, because a long register scrolls well past the button and a teacher
+ * should never have to hunt for the way to save what they just marked. */
+.save-bar {
+  position: sticky;
+  bottom: 0;
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 -2px 12px rgb(16 24 40 / 6%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* ── Tabs ────────────────────────────────────────────────── */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 18px;
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 9px 14px;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-weight: 550;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  white-space: nowrap;
+}
+
+.tab:hover { color: var(--text); }
+
+.tab.active {
+  color: var(--primary-dark);
+  border-bottom-color: var(--primary);
+}
+
 /* ── Plan bars ───────────────────────────────────────────── */
 
 .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }

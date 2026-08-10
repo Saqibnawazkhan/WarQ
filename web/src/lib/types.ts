@@ -126,16 +126,221 @@ export interface ActivityRow {
   created_at: string
 }
 
+export type UserRole = 'teacher' | 'org_admin' | 'main_admin'
+
+export interface Profile {
+  id: string
+  full_name: string
+  email: string
+  phone: string | null
+  role: UserRole
+  status: AccountStatus
+  organization_id: string | null
+  title: string | null
+  bio: string | null
+  created_at: string
+}
+
+export interface Organization {
+  id: string
+  name: string
+  city: string | null
+  email: string | null
+  phone: string | null
+  address: string | null
+  website: string | null
+  status: AccountStatus
+  owner_profile_id: string | null
+}
+
 export interface Me {
-  profile: {
-    id: string
-    full_name: string
-    email: string
-    role: 'teacher' | 'org_admin' | 'main_admin'
-    status: AccountStatus
-    organization_id: string | null
-  } | null
-  organization: unknown
+  profile: Profile | null
+  organization: Organization | null
   subscription: unknown
   has_access: boolean
+}
+
+// ── Teaching ────────────────────────────────────────────────
+
+export type AttendanceMark = 'present' | 'absent' | 'late' | 'short_leave'
+
+export type AssessmentType =
+  | 'quiz'
+  | 'assignment'
+  | 'midterm'
+  | 'final'
+  | 'presentation'
+  | 'project'
+  | 'lab'
+  | 'custom'
+
+export interface SchoolClass {
+  id: string
+  organization_id: string | null
+  teacher_id: string
+  name: string
+  section: string | null
+  session: string | null
+  subject: string | null
+  description: string | null
+  color_index: number
+  archived_at: string | null
+  created_at: string
+  updated_at: string | null
+}
+
+export interface StudentContact {
+  id: string
+  student_id: string
+  label: 'father' | 'mother' | 'student' | 'guardian'
+  phone: string
+  receives_alerts: boolean
+}
+
+export interface Student {
+  id: string
+  teacher_id: string
+  organization_id: string | null
+  full_name: string
+  roll_no: string | null
+  email: string | null
+  address: string | null
+  guardian_name: string | null
+  notes: string | null
+  created_at: string
+  student_contacts?: StudentContact[]
+}
+
+export interface TeacherToday {
+  class_id: string
+  teacher_id: string
+  name: string
+  section: string | null
+  color_index: number
+  student_count: number
+  session_id: string | null
+  taken: boolean
+  present: number
+  absent: number
+  late: number
+  short_leave: number
+}
+
+export interface ClassAttendance {
+  class_id: string
+  organization_id: string | null
+  teacher_id: string
+  name: string
+  subject: string | null
+  section: string | null
+  session: string | null
+  color_index: number
+  student_count: number
+  session_count: number
+  assessment_count: number
+  present_total: number
+  absent_total: number
+  late_total: number
+  short_leave_total: number
+  attendance_percent: number | null
+  last_session_date: string | null
+}
+
+export interface StudentPerformance {
+  student_id: string
+  class_id: string
+  full_name: string
+  roll_no: string | null
+  present: number
+  absent: number
+  late: number
+  short_leave: number
+  assessable_sessions: number
+  attendance_percent: number | null
+  obtained: number
+  total: number
+  assessments_marked: number
+  assessments_pending: number
+  marks_percent: number | null
+  grade: string | null
+}
+
+export interface AttendanceSession {
+  id: string
+  class_id: string
+  date: string
+  taken_by: string | null
+  note: string | null
+  created_at: string
+}
+
+export interface AttendanceRecord {
+  session_id: string
+  student_id: string
+  mark: AttendanceMark
+  notified: boolean
+}
+
+export interface Assessment {
+  id: string
+  class_id: string
+  name: string
+  type: AssessmentType
+  date: string
+  total_marks: number
+  custom_type_label: string | null
+  description: string | null
+  weight: number | null
+  created_at: string
+}
+
+export interface Mark {
+  assessment_id: string
+  student_id: string
+  score: number | null
+  absent: boolean
+  remarks: string | null
+  updated_at: string
+}
+
+// ── Organization admin ──────────────────────────────────────
+
+export interface OrgTeacher {
+  id: string
+  organization_id: string
+  full_name: string
+  email: string
+  phone: string | null
+  account_status: AccountStatus
+  joined_at: string
+  class_count: number
+  student_count: number
+  session_count: number
+  assessment_count: number
+  last_attendance_date: string | null
+  last_assessment_date: string | null
+  activity_state: 'active' | 'idle'
+}
+
+export interface Invitation {
+  id: string
+  organization_id: string
+  email: string
+  full_name: string
+  status: 'pending' | 'accepted' | 'expired' | 'revoked'
+  expires_at: string
+  accepted_at: string | null
+  created_at: string
+}
+
+export interface OrgOverview {
+  id: string
+  name: string
+  city: string | null
+  status: AccountStatus
+  teacher_count: number
+  class_count: number
+  student_count: number
+  classes_marked_today: number
+  attendance_percent: number
 }
