@@ -109,7 +109,7 @@ class SupabaseStudentRepository extends SupabaseRepositoryBase
     );
 
     await _activity.record(
-      actorUserId: teacherId,
+      actorUserId: requireUserId,
       organizationId: organizationId,
       type: ActivityType.studentAdded,
       summary: 'Added student ${created.fullName}',
@@ -150,7 +150,7 @@ class SupabaseStudentRepository extends SupabaseRepositoryBase
     );
 
     await _activity.record(
-      actorUserId: updated.ownerTeacherId,
+      actorUserId: requireUserId,
       organizationId: updated.organizationId,
       type: ActivityType.studentUpdated,
       summary: 'Updated student ${updated.fullName}',
@@ -179,7 +179,7 @@ class SupabaseStudentRepository extends SupabaseRepositoryBase
     );
 
     await _activity.record(
-      actorUserId: existing.ownerTeacherId,
+      actorUserId: requireUserId,
       organizationId: existing.organizationId,
       type: ActivityType.studentRemoved,
       summary: 'Deleted student ${existing.fullName}',
@@ -246,7 +246,7 @@ class SupabaseStudentRepository extends SupabaseRepositoryBase
     );
 
     await _activity.record(
-      actorUserId: student.ownerTeacherId,
+      actorUserId: requireUserId,
       organizationId: student.organizationId,
       type: ActivityType.studentEnrolled,
       summary: 'Enrolled ${student.fullName} in '
@@ -288,7 +288,7 @@ class SupabaseStudentRepository extends SupabaseRepositoryBase
     );
 
     await _activity.record(
-      actorUserId: student.ownerTeacherId,
+      actorUserId: requireUserId,
       organizationId: student.organizationId,
       type: ActivityType.studentUnenrolled,
       summary: 'Removed ${student.fullName} from '

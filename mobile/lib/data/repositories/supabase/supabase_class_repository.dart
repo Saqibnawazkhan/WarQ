@@ -228,8 +228,11 @@ class SupabaseClassRepository extends SupabaseRepositoryBase
     ActivityType type,
     String summary,
   ) async {
+    // Attributed to whoever is signed in, not to the class's owner: the audit
+    // trail's insert policy requires actor_id to be the caller, and an entry
+    // someone can file under another person's name is not an audit trail.
     await _activity.record(
-      actorUserId: subject.teacherId,
+      actorUserId: requireUserId,
       organizationId: subject.organizationId,
       type: type,
       summary: summary,
