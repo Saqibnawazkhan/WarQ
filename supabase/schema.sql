@@ -1,8 +1,7 @@
 -- Warq - complete database schema
 --
 -- Generated from supabase/migrations/. Paste into the Supabase SQL editor and
--- run once on an empty project. Wrapped in a transaction, so a failure leaves
--- the database untouched.
+-- run once on an empty project. Wrapped in a transaction.
 
 begin;
 
@@ -3606,7 +3605,11 @@ set search_path = ''
 as $$
 declare
   caller public.profiles;
-  session_id uuid;
+  -- v_ prefix on purpose. A variable called session_id is ambiguous against
+  -- attendance_records.session_id in the INSERT ... SELECT below, and Postgres
+  -- rejects the whole function call with 42702 at run time rather than at
+  -- creation.
+  v_session_id uuid;
   absent_count integer;
   alertable_count integer;
   class_row public.classes;
@@ -3631,13 +3634,13 @@ begin
   values (p_class_id, p_date, auth.uid())
   on conflict (class_id, date)
     do update set taken_by = auth.uid(), updated_at = now()
-  returning id into session_id;
+  returning id into v_session_id;
 
   -- Every student in the entry list, and nobody else. A student who has left the
   -- class mid-term keeps their historical marks but gains no new ones.
   insert into public.attendance_records (session_id, student_id, mark)
   select
-    session_id,
+    v_session_id,
     (entry->>'student_id')::uuid,
     (entry->>'mark')::public.attendance_mark
   from jsonb_array_elements(p_entries) as entry
@@ -3651,13 +3654,13 @@ begin
 
   select count(*) into absent_count
   from public.attendance_records
-  where attendance_records.session_id = save_attendance.session_id
+  where attendance_records.session_id = v_session_id
     and mark = 'absent';
 
   select count(distinct r.student_id) into alertable_count
   from public.attendance_records r
   join public.student_contacts c on c.student_id = r.student_id and c.receives_alerts
-  where r.session_id = save_attendance.session_id and r.mark = 'absent';
+  where r.session_id = v_session_id and r.mark = 'absent';
 
   insert into public.activity_logs (organization_id, actor_id, actor_name, type, message, meta)
   values (
@@ -3673,7 +3676,7 @@ begin
   );
 
   return jsonb_build_object(
-    'session_id', session_id,
+    'session_id', v_session_id,
     'absent', absent_count,
     'alertable', alertable_count
   );
