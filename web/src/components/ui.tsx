@@ -19,9 +19,7 @@ export function SubscriptionPill({ status }: { status: SubscriptionStatus | null
         ? 'amber'
         : status === 'pending'
           ? 'blue'
-          : status === 'expired' || status === 'suspended' || status === 'rejected'
-            ? 'red'
-            : 'grey'
+          : 'red'
 
   const label = status === 'expiring_soon' ? 'Expiring soon' : capitalise(status)
   return <Pill tone={tone}>{label}</Pill>
@@ -33,9 +31,7 @@ export function AccountPill({ status }: { status: AccountStatus }) {
       ? 'green'
       : status === 'pending'
         ? 'blue'
-        : status === 'suspended' || status === 'rejected'
-          ? 'red'
-          : 'grey'
+        : 'red'
   return <Pill tone={tone}>{capitalise(status)}</Pill>
 }
 

@@ -4,16 +4,20 @@
 /// supabase/migrations/ and change only when those do, and a generated file
 /// would need a service-role key to produce.
 
-export type AccountStatus = 'pending' | 'active' | 'suspended' | 'rejected'
+/// public.account_status. Being turned down is stored as suspended rather than
+/// a state of its own, so there is no 'rejected' here.
+export type AccountStatus = 'pending' | 'active' | 'suspended'
 
+/// public.effective_subscription_status: what a client is shown, which is the
+/// stored status widened by the calendar. 'expiring_soon' and 'expired' are
+/// derived on every read rather than stored, so a missed job can never leave
+/// the platform granting access it should have withdrawn.
 export type SubscriptionStatus =
   | 'pending'
   | 'active'
   | 'expiring_soon'
   | 'expired'
   | 'suspended'
-  | 'rejected'
-  | 'cancelled'
 
 export type SubscriptionPlan = 'monthly' | 'yearly' | 'permanent' | 'trial'
 

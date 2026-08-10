@@ -19,7 +19,6 @@ const STATUSES: (SubscriptionStatus | 'all')[] = [
   'expired',
   'pending',
   'suspended',
-  'rejected',
 ]
 
 const KINDS: (SubjectKind | 'all')[] = ['all', 'organization', 'individual_teacher']

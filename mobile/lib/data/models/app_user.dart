@@ -16,6 +16,7 @@ class AppUser {
     this.phone,
     this.organizationId,
     this.status = AccountStatus.active,
+    this.hasAccess = true,
     this.title,
     this.bio,
     this.avatarSeed,
@@ -61,6 +62,18 @@ class AppUser {
   final String? organizationId;
   final AccountStatus status;
 
+  /// Whether the account may actually use the app right now.
+  ///
+  /// Distinct from [status], and not derivable from it: an active teacher whose
+  /// organization's subscription has lapsed, or been suspended from the admin
+  /// console, is in good standing themselves and still cannot teach. The server
+  /// decides this — the same answer that gates every read and write — so the
+  /// app never has to reimplement the rule and get it subtly different.
+  ///
+  /// Defaults to true so on-device builds, which have no subscriptions at all,
+  /// behave exactly as before.
+  final bool hasAccess;
+
   /// e.g. "Senior Lecturer" — shown on reports next to the teacher name.
   final String? title;
   final String? bio;
@@ -90,6 +103,7 @@ class AppUser {
     String? organizationId,
     bool clearOrganization = false,
     AccountStatus? status,
+    bool? hasAccess,
     String? title,
     bool clearTitle = false,
     String? bio,
@@ -109,6 +123,7 @@ class AppUser {
       organizationId:
           clearOrganization ? null : (organizationId ?? this.organizationId),
       status: status ?? this.status,
+      hasAccess: hasAccess ?? this.hasAccess,
       title: clearTitle ? null : (title ?? this.title),
       bio: clearBio ? null : (bio ?? this.bio),
       avatarSeed: avatarSeed ?? this.avatarSeed,

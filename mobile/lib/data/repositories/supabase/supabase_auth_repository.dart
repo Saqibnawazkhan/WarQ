@@ -287,6 +287,23 @@ class SupabaseAuthRepository implements AuthRepository {
 
   Future<AppUser> _requireProfile(String id) async {
     try {
+      // me() rather than a select on profiles: it answers has_access in the
+      // same round trip, and it is the *same* function that gates every read
+      // and write, so the app cannot disagree with the database about whether
+      // this account may work today.
+      final Object? payload = await _client.rpc<Object?>('me');
+      final Map<String, dynamic>? me =
+          payload is Map<String, dynamic> ? payload : null;
+      final Object? profile = me?['profile'];
+
+      if (profile is Map<String, dynamic>) {
+        return Rows.user(profile).copyWith(
+          hasAccess: Rows.boolean(me!, 'has_access', fallback: true),
+        );
+      }
+
+      // A signed-in token with no profile behind it. Falling back to the table
+      // keeps a stale session from being mistaken for a missing account.
       final Map<String, dynamic>? row =
           await _client.from('profiles').select().eq('id', id).maybeSingle();
       if (row == null) {

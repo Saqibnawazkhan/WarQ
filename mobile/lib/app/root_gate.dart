@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../data/models/models.dart';
 import '../presentation/screens/auth/login_screen.dart';
+import '../presentation/screens/auth/pending_approval_screen.dart';
 import '../presentation/screens/org_admin/org_admin_shell.dart';
 import '../presentation/screens/splash/splash_screen.dart';
 import '../presentation/screens/teacher/teacher_shell.dart';
@@ -27,6 +28,13 @@ class RootGate extends StatelessWidget {
     final AppUser? user = session.user;
     if (user == null) {
       return const LoginScreen();
+    }
+
+    // Signed in, but not allowed to work yet: awaiting approval, switched off,
+    // or covered by a subscription that has lapsed. The shells below would load
+    // perfectly and then fail every single query, so they never get the chance.
+    if (!user.hasAccess) {
+      return PendingApprovalScreen(user: user);
     }
 
     return switch (user.role) {

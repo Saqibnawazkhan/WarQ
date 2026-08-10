@@ -101,6 +101,9 @@ class Rows {
 
   static AccountStatus accountStatus(String? value) => switch (value) {
         'active' => AccountStatus.active,
+        // account_status is exactly (pending, active, suspended). Being turned
+        // down is stored as suspended rather than a state of its own, so a
+        // rejected account arrives here and is told its account is paused.
         'suspended' => AccountStatus.suspended,
         _ => AccountStatus.pending,
       };
