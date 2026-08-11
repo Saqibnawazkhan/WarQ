@@ -25,6 +25,27 @@ publishable key, which is public by design — it identifies the project, not th
 caller. The service-role key bypasses row-level security entirely and must never
 appear in this directory.
 
+## Deploying
+
+`vercel.json` sets three things, and the reasoning is here rather than in the
+file because JSON has no comments and Vercel rejects any key it does not
+recognise — including the `"// note"` trick.
+
+- **Root directory `web`.** Set it in the Vercel project settings; the repo root
+  holds the Flutter app and the database, not this.
+- **A catch-all rewrite to `index.html`.** Routing happens in the browser, so
+  without it a hard load of `/organizations`, or a refresh anywhere but `/`,
+  asks Vercel for a file that does not exist and gets a 404. Files that really
+  are in `dist` match before the rewrite runs, so the hashed bundles are
+  unaffected.
+- **A year of caching on `/assets/*`.** Those filenames carry a content hash, so
+  a given file can never change. `index.html` is deliberately left uncached, or a
+  deploy would never reach anyone already holding a copy.
+
+No environment variables are needed: the project URL and publishable key are
+compiled in, which is correct for a key that identifies the project rather than
+the caller.
+
 ## The first administrator
 
 There is no sign-up here on purpose: an administration console that lets people
