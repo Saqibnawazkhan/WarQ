@@ -12,7 +12,6 @@ import '../../../../domain/services/absence_notification_service.dart';
 import '../../../state/attendance_marking_controller.dart';
 import '../../../state/session_controller.dart';
 import 'widgets/absence_dispatch_sheet.dart';
-import '../../../widgets/common/app_avatar.dart';
 import '../../../widgets/common/app_badge.dart';
 import '../../../widgets/common/app_card.dart';
 import '../../../widgets/feedback/dialogs.dart';
@@ -399,38 +398,36 @@ class _AttendanceRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool showMeta = student.rollNumber != null || !student.hasAnyContact;
 
+    // One line per student, with the marks on the same line as the name.
+    // Stacking them put three students on a screen; a class of thirty is the
+    // normal case, and a teacher should be able to see who is left to mark
+    // without scrolling away from the ones they just did.
     return AppCard(
-      padding: AppSpacing.tilePadding,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       borderColor: AttendanceStatusChip.colorFor(context, status)
           .withValues(alpha: 0.35),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              AppAvatar(name: student.fullName, seed: student.id, size: 44),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      student.fullName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.text.titleMedium,
-                    ),
-                    if (showMeta) ...<Widget>[
-                      const Gap.xs(),
-                      _StudentMeta(student: student),
-                    ],
-                  ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  student.fullName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.text.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w600),
                 ),
-              ),
-            ],
+                if (showMeta) _StudentMeta(student: student),
+              ],
+            ),
           ),
-          const Gap.md(),
+          const SizedBox(width: AppSpacing.sm),
           _StatusSelector(status: status, onChanged: onChanged),
         ],
       ),
@@ -483,18 +480,19 @@ class _StatusSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const List<AttendanceStatus> options = AttendanceStatus.values;
+
+    // Fixed width rather than shares of the row, so the four marks sit in the
+    // same place on every student. A register is marked by working down the
+    // column without looking away from the names.
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         for (int i = 0; i < options.length; i++) ...<Widget>[
-          if (i > 0) const SizedBox(width: AppSpacing.sm),
-          // Equal shares of the card width: the four buttons land in the same
-          // place on every row, so a register can be marked without aiming.
-          Expanded(
-            child: _StatusButton(
-              option: options[i],
-              selected: options[i] == status,
-              onTap: () => onChanged(options[i]),
-            ),
+          if (i > 0) const SizedBox(width: AppSpacing.xs),
+          _StatusButton(
+            option: options[i],
+            selected: options[i] == status,
+            onTap: () => onChanged(options[i]),
           ),
         ],
       ],
@@ -528,6 +526,10 @@ class _StatusButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadii.sm),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 140),
+            // Square and comfortably past the 48dp minimum target. The letter
+            // alone now: at this size an icon beside it made both small, and
+            // the letter is the thing a teacher is actually aiming at.
+            width: 46,
             height: 48,
             alignment: Alignment.center,
             decoration: BoxDecoration(
@@ -538,26 +540,12 @@ class _StatusButton extends StatelessWidget {
                 width: selected ? 1.5 : 1,
               ),
             ),
-            // The icon carries the same meaning as the letter, so the state is
-            // still readable across a room and to anyone who cannot separate
-            // the green button from the red one.
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Icon(
-                  AttendanceStatusChip.iconFor(option),
-                  size: 18,
-                  color: foreground,
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Text(
-                  option.shortLabel,
-                  style: context.text.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: foreground,
-                  ),
-                ),
-              ],
+            child: Text(
+              option.shortLabel,
+              style: context.text.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: foreground,
+              ),
             ),
           ),
         ),
