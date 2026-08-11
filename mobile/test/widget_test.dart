@@ -87,11 +87,18 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'Sign in'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Ahmed Raza'), findsWidgets);
-    expect(find.text('Total classes'), findsOneWidget);
+    // The greeting is first-name only now, and it is one Text with the
+    // salutation, so the name is matched inside it rather than on its own.
+    expect(find.textContaining('Ahmed'), findsWidgets);
+    // Stat captions follow the prototype: Classes, Students, Present today.
+    // "Classes" is also a navigation label, hence findsWidgets.
+    expect(find.text('Classes'), findsWidgets);
     expect(find.text('Quick actions'), findsOneWidget);
-    // The five-destination bottom navigation from the spec.
-    expect(find.byType(NavigationBar), findsOneWidget);
+    // Four destinations either side of the docked compose button. The bar is a
+    // custom one rather than a NavigationBar: Material's own has no notch for a
+    // docked button, which the prototype's centre + needs.
+    expect(find.byType(FloatingActionButton), findsWidgets);
+    expect(find.text('Home'), findsWidgets);
     expect(find.text('Attendance'), findsWidgets);
     // Labelled "Marks": "Assessments" wraps onto two lines in a fifth of a
     // phone screen at the current text size and breaks the bar's alignment.
@@ -122,7 +129,8 @@ void main() {
 
     expect(find.text('Bright Future Academy'), findsWidgets);
     expect(find.text('Teachers'), findsWidgets);
-    expect(find.text('Invite teacher'), findsWidgets);
+    // The prototype's wording: a full-width card reading Invite a teacher.
+    expect(find.text('Invite a teacher'), findsWidgets);
   });
 
   testWidgets('restores an existing session without showing sign-in',
@@ -132,7 +140,9 @@ void main() {
     await pumpApp(tester);
 
     expect(find.text('Email or username'), findsNothing);
-    expect(find.text('Total classes'), findsOneWidget);
+    // Landed on the dashboard: its first statistic card, captioned as the
+    // prototype captions it.
+    expect(find.text('Classes'), findsWidgets);
   });
 
   testWidgets('an empty account is guided towards creating a class',

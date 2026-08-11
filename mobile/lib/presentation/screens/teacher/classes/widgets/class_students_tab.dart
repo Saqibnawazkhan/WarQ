@@ -357,24 +357,9 @@ class _TrailingActions extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(
-              Format.percentOrDash(performance.percentage, decimals: 0),
-              style:
-                  context.text.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 3),
-            Text(
-              performance.grade?.label ?? '—',
-              style: context.text.labelSmall?.copyWith(
-                color: context.semantic.mutedText,
-              ),
-            ),
-          ],
-        ),
+        // The same figures the tile shows on its own, so the roster and every
+        // other list of students read alike.
+        StudentTileStats(performance: performance),
         IconButton(
           tooltip: 'Student options',
           icon: const Icon(Icons.more_vert_rounded, size: 20),

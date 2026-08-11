@@ -18,8 +18,6 @@ import '../../../widgets/common/app_avatar.dart';
 import '../../../widgets/common/app_badge.dart';
 import '../../../widgets/common/app_card.dart';
 import '../../../widgets/common/stat_tile.dart';
-import '../../../widgets/domain/activity_tile.dart';
-import '../../../widgets/domain/class_card.dart';
 import '../../../widgets/feedback/dialogs.dart';
 import '../../../widgets/feedback/state_views.dart';
 import '../../../widgets/layout/app_page.dart';
@@ -87,33 +85,7 @@ class _TeacherDetailView extends StatelessWidget {
     final AppUser? teacher = controller.teacher;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(teacher?.displayName ?? 'Teacher'),
-        actions: <Widget>[
-          if (teacher != null)
-            PopupMenuButton<String>(
-              onSelected: (String value) {
-                if (value == 'remove') _removeTeacher(context, controller);
-              },
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                PopupMenuItem<String>(
-                  value: 'remove',
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Icon(
-                      Icons.group_remove_outlined,
-                      color: context.semantic.danger,
-                    ),
-                    title: Text(
-                      'Remove from organization',
-                      style: TextStyle(color: context.semantic.danger),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-        ],
-      ),
+      appBar: AppBar(title: Text(teacher?.displayName ?? 'Teacher')),
       body: ControllerStateView(
         controller: controller,
         loading: const SkeletonList(itemCount: 4),
@@ -126,111 +98,81 @@ class _TeacherDetailView extends StatelessWidget {
           return AppPageBody(
             onRefresh: controller.refresh,
             children: <Widget>[
-              _TeacherHeader(snapshot: snapshot),
-              const Gap.xl(),
-              SectionCard(
-                title: 'Teacher information',
-                child: Column(
-                  children: <Widget>[
-                    DetailRow(
-                      label: 'Email',
-                      value: teacher.email,
-                      icon: Icons.alternate_email_rounded,
-                    ),
-                    DetailRow(
-                      label: 'Account status',
-                      value: teacher.status.label,
-                      icon: Icons.verified_user_outlined,
-                      valueColor: teacher.status.canSignIn
-                          ? context.semantic.success
-                          : context.semantic.danger,
-                    ),
-                    DetailRow(
-                      label: 'Joined',
-                      value: AppDate.format(teacher.createdAt),
-                      icon: Icons.calendar_today_outlined,
-                    ),
-                    DetailRow(
-                      label: 'Last seen',
-                      value: teacher.lastLoginAt == null
-                          ? 'Never signed in'
-                          : AppDate.relativeTime(teacher.lastLoginAt!),
-                      icon: Icons.login_rounded,
-                    ),
-                    if (teacher.phone != null)
-                      DetailRow(
-                        label: 'Phone',
-                        value: teacher.phone!,
-                        icon: Icons.phone_outlined,
-                      ),
-                    if (teacher.title != null)
-                      DetailRow(
-                        label: 'Title',
-                        value: teacher.title!,
-                        icon: Icons.badge_outlined,
-                      ),
-                  ],
-                ),
-              ),
+              _TeacherProfileCard(snapshot: snapshot),
               const Gap.xl(),
               StatGrid(
+                // Two up, so each figure keeps the weight it has on the
+                // organization dashboard.
+                columns: 2,
                 tiles: <Widget>[
                   StatTile(
                     label: 'Classes',
                     value: '${snapshot.classCount}',
-                    icon: Icons.class_rounded,
                   ),
                   StatTile(
                     label: 'Students',
                     value: '${snapshot.studentCount}',
-                    icon: Icons.people_alt_rounded,
-                    accent: context.semantic.info,
+                  ),
+                  StatTile(
+                    label: 'Attendance sessions',
+                    value: '${snapshot.sessionCount}',
                   ),
                   StatTile(
                     label: 'Assessments',
                     value: '${snapshot.assessmentCount}',
-                    icon: Icons.assignment_rounded,
-                    accent: context.semantic.warning,
-                  ),
-                  StatTile(
-                    label: 'Marks entered',
-                    value: '${snapshot.marksRecorded}',
-                    icon: Icons.edit_note_rounded,
-                    accent: context.colors.secondary,
                   ),
                 ],
               ),
               const Gap.xl(),
               SectionCard(
-                title: 'Attendance activity',
+                title: 'Classes',
+                subtitle: Format.plural(snapshot.classCount, 'class', 'classes'),
+                child: controller.classes.isEmpty
+                    ? Text(
+                        'This teacher has not created any classes.',
+                        style: context.text.bodyMedium
+                            ?.copyWith(color: context.semantic.mutedText),
+                      )
+                    : Column(
+                        children: <Widget>[
+                          for (final ClassSummary summary in controller.classes)
+                            _ClassRow(summary: summary),
+                        ],
+                      ),
+              ),
+              const Gap.xl(),
+              SectionCard(
+                title: 'Recent activity',
                 child: Column(
                   children: <Widget>[
-                    DetailRow(
-                      label: 'Attendance sessions',
-                      value: '${snapshot.sessionCount}',
-                      icon: Icons.how_to_reg_rounded,
-                    ),
                     DetailRow(
                       label: 'Last attendance taken',
                       value: snapshot.lastAttendanceAt == null
                           ? 'Never'
                           : AppDate.relativeDay(snapshot.lastAttendanceAt!),
-                      icon: Icons.event_available_rounded,
                     ),
                     DetailRow(
                       label: 'Attendance rate',
                       value: Format.percentOrDash(
                         snapshot.attendance.percentage,
                       ),
-                      icon: Icons.percent_rounded,
                       valueColor: snapshot.attendance.percentageOrZero >= 75
                           ? context.semantic.success
                           : context.semantic.warning,
                     ),
                     DetailRow(
+                      label: 'Marks entered',
+                      value: '${snapshot.marksRecorded}',
+                    ),
+                    DetailRow(
                       label: 'Class average',
                       value: Format.percentOrDash(snapshot.averagePercentage),
-                      icon: Icons.trending_up_rounded,
+                    ),
+                    DetailRow(
+                      label: 'Last seen',
+                      value: teacher.lastLoginAt == null
+                          ? 'Never signed in'
+                          : AppDate.relativeTime(teacher.lastLoginAt!),
                     ),
                   ],
                 ),
@@ -254,46 +196,6 @@ class _TeacherDetailView extends StatelessWidget {
                   ),
                 ),
               ],
-              const Gap.xl(),
-              SectionHeader(
-                title: 'Classes',
-                subtitle: Format.plural(snapshot.classCount, 'class', 'classes'),
-              ),
-              if (controller.classes.isEmpty)
-                const EmptyView(
-                  compact: true,
-                  icon: Icons.class_outlined,
-                  title: 'No classes yet',
-                  message: 'This teacher has not created any classes.',
-                )
-              else
-                for (final ClassSummary summary in controller.classes)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                    child: ClassCard(
-                      summary: summary,
-                      onTap: () => Navigator.of(context).pushNamed(
-                        Routes.orgClassDetail,
-                        arguments: ClassDetailArgs(classId: summary.id),
-                      ),
-                    ),
-                  ),
-              const Gap.lg(),
-              if (controller.activity.isNotEmpty)
-                SectionCard(
-                  title: 'Recent activity',
-                  child: Column(
-                    children: <Widget>[
-                      for (int i = 0;
-                          i < controller.activity.take(12).length;
-                          i++)
-                        ActivityTile(
-                          log: controller.activity[i],
-                          isLast: i == controller.activity.take(12).length - 1,
-                        ),
-                    ],
-                  ),
-                ),
               const Gap.xxl(),
               OutlinedButton.icon(
                 onPressed: () => _removeTeacher(context, controller),
@@ -320,17 +222,20 @@ class _TeacherDetailView extends StatelessWidget {
   }
 }
 
-class _TeacherHeader extends StatelessWidget {
-  const _TeacherHeader({required this.snapshot});
+class _TeacherProfileCard extends StatelessWidget {
+  const _TeacherProfileCard({required this.snapshot});
 
   final TeacherSnapshot snapshot;
 
   @override
   Widget build(BuildContext context) {
     final AppUser teacher = snapshot.teacher;
+    final TextStyle? mutedLine =
+        context.text.bodySmall?.copyWith(color: context.semantic.mutedText);
 
     return AppCard(
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           AppAvatar(name: teacher.displayName, seed: teacher.id, size: 60),
           const SizedBox(width: AppSpacing.lg),
@@ -340,31 +245,57 @@ class _TeacherHeader extends StatelessWidget {
               children: <Widget>[
                 Text(
                   teacher.displayName,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: context.text.titleLarge
                       ?.copyWith(fontWeight: FontWeight.w700),
                 ),
-                const SizedBox(height: 2),
+                if (teacher.title != null) ...<Widget>[
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    teacher.title!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: mutedLine,
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.xxs),
                 Text(
-                  teacher.title ?? teacher.role.label,
-                  style: context.text.bodySmall
-                      ?.copyWith(color: context.semantic.mutedText),
+                  teacher.email,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: mutedLine,
                 ),
+                if (teacher.phone != null) ...<Widget>[
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    teacher.phone!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: mutedLine,
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.xxs),
+                Text('Joined ${AppDate.format(teacher.createdAt)}',
+                    style: mutedLine),
                 const SizedBox(height: AppSpacing.sm),
                 Wrap(
                   spacing: AppSpacing.sm,
                   runSpacing: AppSpacing.sm,
                   children: <Widget>[
                     AppBadge(
-                      snapshot.isActive ? 'Active this week' : 'No recent activity',
+                      snapshot.isActive ? 'Active' : 'Idle',
                       tone: snapshot.isActive
                           ? BadgeTone.success
                           : BadgeTone.neutral,
                       dense: true,
                     ),
-                    if (snapshot.lastActivityAt != null)
+                    // Only worth a pill when it is a problem — an account that
+                    // can sign in says nothing the "Active" badge does not.
+                    if (!teacher.status.canSignIn)
                       AppBadge(
-                        AppDate.relativeTime(snapshot.lastActivityAt!),
-                        icon: Icons.schedule_rounded,
+                        teacher.status.label,
+                        tone: BadgeTone.danger,
                         dense: true,
                       ),
                   ],
@@ -373,6 +304,68 @@ class _TeacherHeader extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ClassRow extends StatelessWidget {
+  const _ClassRow({required this.summary});
+
+  final ClassSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final String subtitle = summary.schoolClass.subtitle;
+
+    return InkWell(
+      onTap: () => Navigator.of(context).pushNamed(
+        Routes.orgClassDetail,
+        arguments: ClassDetailArgs(classId: summary.id),
+      ),
+      borderRadius: BorderRadius.circular(AppRadii.xs),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+        child: Row(
+          children: <Widget>[
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    summary.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.text.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  if (subtitle.isNotEmpty) ...<Widget>[
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.text.bodySmall
+                          ?.copyWith(color: context.semantic.mutedText),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Text(
+              Format.plural(summary.studentCount, 'student'),
+              style: context.text.labelLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: context.semantic.mutedText,
+              ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: context.semantic.mutedText,
+            ),
+          ],
+        ),
       ),
     );
   }

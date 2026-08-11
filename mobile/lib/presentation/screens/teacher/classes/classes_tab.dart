@@ -13,7 +13,7 @@ import '../../../state/class_list_controller.dart';
 import '../../../state/session_controller.dart';
 import '../../../widgets/common/app_card.dart';
 import '../../../widgets/common/search_field.dart';
-import '../../../widgets/domain/class_grid_tile.dart';
+import '../../../widgets/domain/class_card.dart';
 import '../../../widgets/feedback/dialogs.dart';
 import '../../../widgets/feedback/state_views.dart';
 import '../../../widgets/layout/app_page.dart';
@@ -200,17 +200,30 @@ class ClassesView extends StatelessWidget {
                     ),
                   ],
                 ),
+                // The round + sits beside the title, where the design puts it.
+                Padding(
+                  padding: const EdgeInsets.only(right: AppSpacing.sm),
+                  child: IconButton.filled(
+                    tooltip: 'New class',
+                    onPressed: () =>
+                        Navigator.of(context).pushNamed(Routes.classForm),
+                    icon: const Icon(Icons.add_rounded),
+                  ),
+                ),
               ],
             )
           : null,
-      floatingActionButton: FloatingActionButton.extended(
-        // Shell tabs stay alive in an IndexedStack, so every FAB needs its own
-        // hero tag or the shared default collides during route transitions.
-        heroTag: 'fab-classes',
-        onPressed: () => Navigator.of(context).pushNamed(Routes.classForm),
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('New class'),
-      ),
+      // Only for the app-bar-less variant, which has nowhere else to put it.
+      // Shell tabs stay alive in an IndexedStack, so every FAB needs its own
+      // hero tag or the shared default collides during route transitions.
+      floatingActionButton: showAppBar
+          ? null
+          : FloatingActionButton.extended(
+              heroTag: 'fab-classes',
+              onPressed: () => Navigator.of(context).pushNamed(Routes.classForm),
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('New class'),
+            ),
       body: SafeArea(
         top: !showAppBar,
         bottom: false,
@@ -234,7 +247,7 @@ class ClassesView extends StatelessWidget {
             Expanded(
               child: ControllerStateView(
                 controller: controller,
-                loading: const SkeletonList(itemCount: 4, itemHeight: 130),
+                loading: const SkeletonList(itemCount: 4, itemHeight: 140),
                 empty: EmptyView(
                   icon: Icons.class_outlined,
                   title: 'No classes yet',
@@ -260,39 +273,38 @@ class ClassesView extends StatelessWidget {
                   return RefreshIndicator(
                     onRefresh: controller.refresh,
                     child: ContentWidth(
-                      // A grid rather than a list: a class is picked by
-                      // recognising it, and two coloured tiles to a row show
-                      // twice as many at a glance as full-width cards did.
+                      // A list rather than a grid: a full-width row carries the
+                      // name, the section line and the term's figures at a size
+                      // that reads across a classroom, which a square tile
+                      // could only do for the name.
                       child: CustomScrollView(
                         slivers: <Widget>[
                           SliverPadding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: AppSpacing.lg,
                             ),
-                            // Sized by tile rather than by column count: two to
-                            // a row on a phone, and more on a tablet without a
-                            // breakpoint to maintain, with tiles staying
-                            // square instead of stretching.
-                            sliver: SliverGrid(
-                              gridDelegate:
-                                  const SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: 220,
-                                mainAxisSpacing: AppSpacing.md,
-                                crossAxisSpacing: AppSpacing.md,
-                                childAspectRatio: 1,
-                              ),
+                            sliver: SliverList(
                               delegate: SliverChildBuilderDelegate(
                                 (BuildContext context, int index) {
                                   final ClassSummary summary = visible[index];
-                                  return ClassGridTile(
-                                    summary: summary,
-                                    onTap: () => Navigator.of(context).pushNamed(
-                                      Routes.classDetail,
-                                      arguments:
-                                          ClassDetailArgs(classId: summary.id),
+                                  return Padding(
+                                    padding: const EdgeInsets.only(
+                                      bottom: AppSpacing.md,
                                     ),
-                                    onOptions: () =>
-                                        _showActions(context, controller, summary),
+                                    child: ClassCard(
+                                      summary: summary,
+                                      onTap: () =>
+                                          Navigator.of(context).pushNamed(
+                                        Routes.classDetail,
+                                        arguments:
+                                            ClassDetailArgs(classId: summary.id),
+                                      ),
+                                      onOptions: () => _showActions(
+                                        context,
+                                        controller,
+                                        summary,
+                                      ),
+                                    ),
                                   );
                                 },
                                 childCount: visible.length,
@@ -300,11 +312,13 @@ class ClassesView extends StatelessWidget {
                             ),
                           ),
                           SliverPadding(
-                            padding: const EdgeInsets.fromLTRB(
+                            padding: EdgeInsets.fromLTRB(
                               AppSpacing.lg,
+                              AppSpacing.xs,
                               AppSpacing.lg,
-                              AppSpacing.lg,
-                              AppSpacing.fabClearance,
+                              showAppBar
+                                  ? AppSpacing.xxxl
+                                  : AppSpacing.fabClearance,
                             ),
                             sliver: SliverToBoxAdapter(
                               child: _ListFooter(controller: controller),

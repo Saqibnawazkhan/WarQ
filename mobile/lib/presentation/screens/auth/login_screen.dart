@@ -25,6 +25,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final FocusNode _passwordFocus = FocusNode();
   bool _obscure = true;
 
+  /// The default text-button padding insets the label by 12 on each side, which
+  /// both pushes the two links past the width of a 360dp phone and leaves them
+  /// visibly out of line with the fields above.
+  static final ButtonStyle _linkStyle = TextButton.styleFrom(
+    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+  );
+
   @override
   void dispose() {
     _identifier.dispose();
@@ -68,8 +75,9 @@ class _LoginScreenState extends State<LoginScreen> {
         context.read<AppDependencies>().backend == AppBackend.local;
 
     return AuthScaffold(
-      title: 'Sign in',
-      subtitle: 'Manage your classes, attendance and results.',
+      title: 'Your classroom,\nmanaged in minutes.',
+      subtitle:
+          'Attendance, marks, grades and reports for teachers and institutions.',
       footer:
           offersDemoAccounts ? _DemoAccountsCard(onSelect: _useDemoAccount) : null,
       children: <Widget>[
@@ -117,42 +125,38 @@ class _LoginScreenState extends State<LoginScreen> {
                     (value == null || value.isEmpty) ? 'Password is required.' : null,
                 onFieldSubmitted: (_) => _submit(),
               ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => Navigator.of(context)
-                      .pushNamed(Routes.forgotPassword),
-                  child: const Text('Forgot password?'),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.xl),
               FilledButton(
                 onPressed: session.isBusy ? null : _submit,
                 child: session.isBusy
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.2,
-                          color: Colors.white,
+                          color: context.colors.onPrimary,
                         ),
                       )
                     : const Text('Sign in'),
               ),
-              const SizedBox(height: AppSpacing.lg),
-              // Wrap rather than Row: on a narrow screen or at a large text
-              // scale the call to action moves to its own line instead of
-              // overflowing.
+              const SizedBox(height: AppSpacing.md),
+              // Wrap rather than Row: the two links sit on one line at the
+              // usual text size, and drop onto separate lines instead of
+              // overflowing on a narrow screen or at a large text scale.
               Wrap(
-                alignment: WrapAlignment.center,
+                alignment: WrapAlignment.spaceBetween,
                 crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
                 children: <Widget>[
-                  Text(
-                    'New to ${AppConstants.appName}?',
-                    style: context.text.bodyMedium
-                        ?.copyWith(color: context.semantic.mutedText),
+                  TextButton(
+                    style: _linkStyle,
+                    onPressed: () =>
+                        Navigator.of(context).pushNamed(Routes.forgotPassword),
+                    child: const Text('Forgot password?'),
                   ),
                   TextButton(
+                    style: _linkStyle,
                     onPressed: () =>
                         Navigator.of(context).pushNamed(Routes.register),
                     child: const Text('Create an account'),
@@ -177,11 +181,19 @@ class _DemoAccountsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: AppSpacing.cardPadding,
       decoration: BoxDecoration(
-        color: context.colors.surfaceContainerHigh,
+        color: context.colors.surface,
         borderRadius: AppRadii.cardRadius,
-        border: Border.all(color: context.semantic.subtleBorder),
+        // The card lifts off the tinted page on its own surface, so it needs a
+        // shadow rather than an outline to read as a card.
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: context.colors.shadow.withValues(alpha: 0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,10 +206,14 @@ class _DemoAccountsCard extends StatelessWidget {
                 color: context.semantic.mutedText,
               ),
               const SizedBox(width: AppSpacing.sm),
-              Text(
-                'Demo accounts',
-                style: context.text.labelLarge
-                    ?.copyWith(color: context.semantic.mutedText),
+              Expanded(
+                child: Text(
+                  'Demo accounts',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.text.labelLarge
+                      ?.copyWith(color: context.semantic.mutedText),
+                ),
               ),
             ],
           ),

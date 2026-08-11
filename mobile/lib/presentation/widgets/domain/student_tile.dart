@@ -9,8 +9,18 @@ import '../common/app_avatar.dart';
 import '../common/app_badge.dart';
 import '../common/app_card.dart';
 
-/// Roster row showing the fields the spec asks for: name, student number,
-/// attendance percentage, overall percentage and grade.
+/// Width of the status bar down the left edge of a roster row.
+const double _accentBarWidth = 4;
+
+/// Ceiling for the figures at the end of a roster row.
+///
+/// The name is what a teacher scans for, so it has to win the row. A grade
+/// scale is configurable and could carry a long band label; bounding the
+/// column makes that label ellipsize inside it instead of pushing the name
+/// out of the card.
+const double _statsMaxWidth = 96;
+
+/// Roster row: initials, name and roll number, then attendance and grade.
 class StudentTile extends StatelessWidget {
   const StudentTile({
     super.key,
@@ -32,86 +42,105 @@ class StudentTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool atRisk = showRisk && performance.isAtRisk;
-    final TextStyle? detailStyle = context.text.bodySmall?.copyWith(
-      color: context.semantic.mutedText,
-    );
 
     return AppCard(
       onTap: onTap,
       onLongPress: onLongPress,
-      padding: AppSpacing.tilePadding,
-      borderColor: atRisk
-          ? context.semantic.warning.withValues(alpha: 0.5)
-          : null,
-      child: Row(
-        children: <Widget>[
-          AppAvatar(name: student.fullName, seed: student.id, size: 44),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(
-                  student.fullName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.text.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                // One run of text rather than a row of flexible parts: two
-                // flexible children split the width evenly, so a short roll
-                // number would clip the attendance figure while leaving dead
-                // space beside it. As one span the line uses every pixel it
-                // has and can never overflow.
-                Text.rich(
-                  TextSpan(
-                    children: <InlineSpan>[
-                      if (student.rollNumber != null)
-                        TextSpan(text: '${student.rollNumber!} · '),
-                      TextSpan(
-                        text: performance.attendance.hasData
-                            ? '${Format.percentOrDash(performance.attendance.percentage, decimals: 0)} attendance'
-                            : 'No attendance yet',
-                        style: performance.hasLowAttendance
-                            ? TextStyle(
-                                color: context.semantic.warning,
-                                fontWeight: FontWeight.w600,
-                              )
-                            : null,
-                      ),
-                    ],
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: detailStyle,
-                ),
-              ],
+      // The bar has to reach the card's own edge, so the row carries the
+      // padding instead of the card.
+      padding: EdgeInsets.zero,
+      child: ClipRRect(
+        borderRadius: AppRadii.cardRadius,
+        child: Container(
+          padding: AppSpacing.tilePadding,
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                // Colour carries the standing: amber for a student who needs
+                // attention, the brand indigo for everyone else.
+                color: atRisk
+                    ? context.semantic.warning
+                    : context.colors.primary,
+                width: _accentBarWidth,
+              ),
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
-          if (trailing != null)
-            trailing!
-          else
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(
-                  Format.percentOrDash(performance.percentage, decimals: 0),
-                  style: context.text.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+          child: Row(
+            children: <Widget>[
+              AppAvatar(name: student.fullName, seed: student.id, size: 44),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      student.fullName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.text.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      student.rollNumber ?? 'No roll number',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.text.bodySmall?.copyWith(
+                        color: context.semantic.mutedText,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                GradeBadge(
-                  grade: performance.grade?.label,
-                  percent: performance.percentage,
-                ),
-              ],
+              ),
+              const SizedBox(width: AppSpacing.md),
+              trailing ?? StudentTileStats(performance: performance),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The figures at the end of a roster row: attendance over the grade.
+///
+/// Lives here rather than in the roster screen so a student reads the same
+/// wherever the tile is used, including where the screen supplies its own
+/// [StudentTile.trailing].
+class StudentTileStats extends StatelessWidget {
+  const StudentTileStats({super.key, required this.performance});
+
+  final StudentPerformance performance;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: _statsMaxWidth),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(
+            Format.percentOrDash(
+              performance.attendance.percentage,
+              decimals: 0,
             ),
+            maxLines: 1,
+            style: context.text.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: performance.hasLowAttendance
+                  ? context.semantic.warning
+                  : null,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          GradeBadge(
+            grade: performance.grade?.label,
+            percent: performance.percentage,
+            dense: true,
+          ),
         ],
       ),
     );

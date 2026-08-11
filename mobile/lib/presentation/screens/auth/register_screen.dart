@@ -198,12 +198,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
               FilledButton(
                 onPressed: session.isBusy ? null : _submit,
                 child: session.isBusy
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.2,
-                          color: Colors.white,
+                          color: context.colors.onPrimary,
                         ),
                       )
                     : Text(
@@ -282,18 +282,23 @@ class _RoleOption extends StatelessWidget {
           ? context.colors.primary.withValues(alpha: 0.07)
           : context.colors.surface,
       borderRadius: AppRadii.cardRadius,
+      // An unselected option is a plain card lifted off the page by its own
+      // shadow; the indigo outline is then free to mean "chosen" on its own.
+      elevation: selected ? 0 : 1,
+      shadowColor: context.colors.shadow.withValues(alpha: 0.10),
+      surfaceTintColor: Colors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: AppRadii.cardRadius,
         child: Container(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: AppSpacing.cardPadding,
           decoration: BoxDecoration(
             borderRadius: AppRadii.cardRadius,
+            // Both states carry the same border width so selecting one does
+            // not nudge the text; only the colour changes.
             border: Border.all(
-              color: selected
-                  ? context.colors.primary
-                  : context.semantic.subtleBorder,
-              width: selected ? 1.6 : 1,
+              color: selected ? context.colors.primary : context.colors.surface,
+              width: 1.6,
             ),
           ),
           child: Row(
@@ -327,9 +332,11 @@ class _RoleOption extends StatelessWidget {
                 selected
                     ? Icons.radio_button_checked_rounded
                     : Icons.radio_button_unchecked_rounded,
+                // Now that the card carries no outline, the empty radio is the
+                // only thing saying it can be picked - it has to be visible.
                 color: selected
                     ? context.colors.primary
-                    : context.semantic.subtleBorder,
+                    : context.semantic.mutedText,
               ),
             ],
           ),
