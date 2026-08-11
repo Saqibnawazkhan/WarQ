@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Building2, SearchX, User } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useQuery } from '../lib/useQuery'
 import type { AdminSubscription, SubscriptionStatus, SubjectKind } from '../lib/types'
@@ -99,6 +100,7 @@ export function Subscriptions() {
         <QueryBoundary
           state={{ ...subscriptions, data: subscriptions.data === null ? null : visible }}
           what="subscriptions"
+          icon={SearchX}
           emptyTitle="Nothing matches"
           emptyHint="Try a different search or filter."
           isEmpty={(rows) => rows.length === 0}
@@ -122,7 +124,7 @@ export function Subscriptions() {
                   {rows.map((row) => (
                     <tr key={row.id}>
                       <td className="wrap">
-                        <div style={{ fontWeight: 600 }}>{row.subject_name ?? 'Unnamed'}</div>
+                        <HolderName kind={row.kind} name={row.subject_name ?? 'Unnamed'} />
                         <div className="subtle">
                           {[row.subject_email, row.city].filter(Boolean).join(' · ') || '—'}
                         </div>
@@ -161,5 +163,19 @@ export function Subscriptions() {
         </QueryBoundary>
       </Card>
     </>
+  )
+}
+
+/// A building or a person beside the name. The Kind column says the same thing
+/// in words; the icon is what lets the eye group the two sorts of holder while
+/// scrolling a mixed list, so it is hidden from screen readers.
+function HolderName({ kind, name }: { kind: SubjectKind; name: string }) {
+  const Icon = kind === 'organization' ? Building2 : User
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontWeight: 600 }}>
+      <Icon size={16} className="subtle" style={{ flex: 'none' }} aria-hidden="true" />
+      <span>{name}</span>
+    </div>
   )
 }

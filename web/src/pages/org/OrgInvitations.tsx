@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Info, Mail } from 'lucide-react'
 import { useQuery } from '../../lib/useQuery'
 import { org } from '../../lib/org'
 import { errorMessage } from '../../lib/supabase'
@@ -35,21 +36,26 @@ export function OrgInvitations() {
           </p>
         </div>
         <button className="btn-primary" onClick={() => setInviting(true)}>
+          <Mail size={18} />
           Invite a teacher
         </button>
       </div>
 
       {error !== null && <ErrorNotice message={error} />}
 
-      <div className="notice" style={{ background: 'var(--primary-tint)', color: 'var(--primary-dark)' }}>
-        WarQ does not send the email yet. Tell the teacher to download the app and register with
-        exactly the address you invite here, and they will land inside your organization.
+      <div className="notice notice-info">
+        <Info size={18} />
+        <div>
+          WarQ does not send the email yet. Tell the teacher to download the app and register with
+          exactly the address you invite here, and they will land inside your organization.
+        </div>
       </div>
 
       <Card>
         <QueryBoundary
           state={invitations}
           what="invitations"
+          emptyIcon={<Mail size={20} />}
           emptyTitle="No invitations yet"
           emptyHint="Invite a teacher by email address."
           isEmpty={(rows) => rows.length === 0}

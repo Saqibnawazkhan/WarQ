@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Building2, Search, SearchX } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useQuery } from '../lib/useQuery'
 import type { AdminOrganization, SubscriptionStatus } from '../lib/types'
@@ -63,6 +64,7 @@ export function Organizations() {
       </div>
 
       <div className="toolbar">
+        <Search size={16} className="subtle" aria-hidden="true" />
         <input
           type="search"
           placeholder="Search by name, city, admin or email"
@@ -85,6 +87,9 @@ export function Organizations() {
         <QueryBoundary
           state={{ ...organizations, data: organizations.data === null ? null : visible }}
           what="organizations"
+          icon={
+            search === '' && status === 'all' ? <Building2 size={20} /> : <SearchX size={20} />
+          }
           emptyTitle={search === '' && status === 'all' ? 'No organizations yet' : 'Nothing matches'}
           emptyHint={
             search === '' && status === 'all'

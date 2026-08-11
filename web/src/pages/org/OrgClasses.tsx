@@ -1,3 +1,4 @@
+import { BookOpen } from 'lucide-react'
 import { useQuery } from '../../lib/useQuery'
 import { org } from '../../lib/org'
 import { Card, QueryBoundary, formatDate } from '../../components/ui'
@@ -26,6 +27,7 @@ export function OrgClasses() {
         <QueryBoundary
           state={classes}
           what="classes"
+          emptyIcon={<BookOpen size={20} />}
           emptyTitle="No classes yet"
           emptyHint="Classes appear here as your teachers create them."
           isEmpty={(rows) => rows.length === 0}

@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom'
+import { Building2, CalendarClock, ChartBar, CreditCard, Inbox, Users } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useQuery } from '../lib/useQuery'
 import type { PlatformOverview, PendingRequest, AdminSubscription } from '../lib/types'
-import { Card, Stat, QueryBoundary, Empty, formatDate, formatRemaining, capitalise } from '../components/ui'
+import { Card, Stat, QueryBoundary, Empty, ErrorNotice, formatDate, formatRemaining, capitalise } from '../components/ui'
 
 /// What an administrator wants on opening the dashboard: is anybody waiting on
 /// me, and is anything about to lapse. Everything else is a table elsewhere.
@@ -45,15 +46,17 @@ export function Overview() {
         </div>
       </div>
 
-      {overview.error !== null && <div className="notice notice-error">{overview.error}</div>}
+      {overview.error !== null && <ErrorNotice message={overview.error} />}
 
       <div className="stat-grid">
         <Stat
+          icon={Building2}
           label="Organizations"
           value={stats?.organization_count ?? '—'}
           note={stats ? `${stats.active_organization_count} active` : undefined}
         />
         <Stat
+          icon={Users}
           label="Teachers"
           value={
             stats ? stats.organization_teacher_count + stats.individual_teacher_count : '—'
@@ -61,11 +64,13 @@ export function Overview() {
           note={stats ? `${stats.individual_teacher_count} independent` : undefined}
         />
         <Stat
+          icon={CreditCard}
           label="Active subscriptions"
           value={stats?.active_subscription_count ?? '—'}
           note={stats ? `${stats.expiring_soon_count} expiring soon` : undefined}
         />
         <Stat
+          icon={Inbox}
           label="Awaiting approval"
           value={stats?.pending_count ?? '—'}
           note={stats && stats.expired_count > 0 ? `${stats.expired_count} expired` : undefined}
@@ -80,6 +85,7 @@ export function Overview() {
           <QueryBoundary
             state={requests}
             what="requests"
+            icon={Inbox}
             emptyTitle="Nobody is waiting"
             emptyHint="New sign-ups are active immediately in Phase 1."
             isEmpty={(rows) => rows.length === 0}
@@ -116,6 +122,7 @@ export function Overview() {
           <QueryBoundary
             state={expiring}
             what="subscriptions"
+            icon={CalendarClock}
             emptyTitle="Nothing expiring"
             emptyHint="No subscription is inside its reminder window."
             isEmpty={(rows) => rows.length === 0}
@@ -153,7 +160,7 @@ export function Overview() {
         <Card title="Subscriptions by plan">
           <div className="card-body">
             {stats === null ? (
-              <Empty title="No figures yet" />
+              <Empty icon={ChartBar} title="No figures yet" />
             ) : (
               <PlanBars
                 bars={[

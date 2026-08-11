@@ -1,4 +1,12 @@
 import { Link } from 'react-router-dom'
+import {
+  BookOpen,
+  CalendarCheck,
+  CheckCircle2,
+  GraduationCap,
+  Mail,
+  Users,
+} from 'lucide-react'
 import { useQuery } from '../../lib/useQuery'
 import { org } from '../../lib/org'
 import { useSession } from '../../lib/session'
@@ -26,15 +34,23 @@ export function OrgOverviewPage() {
           </p>
         </div>
         <Link to="/invitations">
-          <button className="btn-primary">Invite a teacher</button>
+          <button className="btn-primary">
+            <Mail size={18} />
+            Invite a teacher
+          </button>
         </Link>
       </div>
 
       <div className="stat-grid">
-        <Stat label="Teachers" value={stats?.teacher_count ?? '—'} />
-        <Stat label="Students" value={stats?.student_count ?? '—'} />
-        <Stat label="Classes" value={stats?.class_count ?? '—'} />
+        <Stat icon={<Users size={20} />} label="Teachers" value={stats?.teacher_count ?? '—'} />
         <Stat
+          icon={<GraduationCap size={20} />}
+          label="Students"
+          value={stats?.student_count ?? '—'}
+        />
+        <Stat icon={<BookOpen size={20} />} label="Classes" value={stats?.class_count ?? '—'} />
+        <Stat
+          icon={<CalendarCheck size={20} />}
           label="Marked today"
           value={stats?.classes_marked_today ?? '—'}
           note={
@@ -49,6 +65,13 @@ export function OrgOverviewPage() {
         <QueryBoundary
           state={{ ...teachers, data: teachers.data === null ? null : idle }}
           what="teachers"
+          emptyIcon={
+            (teachers.data ?? []).length === 0 ? (
+              <Users size={20} />
+            ) : (
+              <CheckCircle2 size={20} />
+            )
+          }
           emptyTitle={
             (teachers.data ?? []).length === 0
               ? 'No teachers yet'

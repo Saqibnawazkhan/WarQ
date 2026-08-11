@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Check, Inbox, X } from 'lucide-react'
 import { supabase, errorMessage } from '../lib/supabase'
 import { useQuery } from '../lib/useQuery'
 import { subscriptionActions } from '../lib/actions'
@@ -53,6 +54,7 @@ export function Requests() {
         <QueryBoundary
           state={requests}
           what="requests"
+          icon={Inbox}
           emptyTitle="Nobody is waiting"
           emptyHint="Sign-ups are approved automatically until the approval step is switched on."
           isEmpty={(rows) => rows.length === 0}
@@ -94,7 +96,16 @@ export function Requests() {
                               )
                             }
                           >
-                            {busy === row.subscription_id ? 'Working…' : 'Approve'}
+                            {/* No tick while the call is in flight: a tick beside
+                                "Working…" reads as already approved. */}
+                            {busy === row.subscription_id ? (
+                              'Working…'
+                            ) : (
+                              <>
+                                <Check size={18} />
+                                Approve
+                              </>
+                            )}
                           </button>
                           <button
                             className="btn-danger"
@@ -104,6 +115,7 @@ export function Requests() {
                               setRejecting(row)
                             }}
                           >
+                            <X size={18} />
                             Reject
                           </button>
                         </div>

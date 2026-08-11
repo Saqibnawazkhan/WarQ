@@ -1,4 +1,13 @@
 import { Link } from 'react-router-dom'
+import {
+  BookOpen,
+  CalendarCheck,
+  CircleCheck,
+  GraduationCap,
+  SquarePen,
+  UserCheck,
+  UserX,
+} from 'lucide-react'
 import { useQuery } from '../../lib/useQuery'
 import { teaching } from '../../lib/teaching'
 import { useUser } from '../../lib/session'
@@ -32,15 +41,23 @@ export function Today() {
           </p>
         </div>
         <Link to="/classes">
-          <button className="btn-primary">Go to classes</button>
+          <button className="btn-primary">
+            <BookOpen size={18} />
+            Go to classes
+          </button>
         </Link>
       </div>
 
       <div className="stat-grid">
-        <Stat label="Classes" value={rows.length} />
-        <Stat label="Students" value={studentTotal} />
-        <Stat label="Present today" value={presentToday} note="Includes late arrivals" />
-        <Stat label="Absent today" value={absentToday} />
+        <Stat label="Classes" value={rows.length} icon={<BookOpen size={20} />} />
+        <Stat label="Students" value={studentTotal} icon={<GraduationCap size={20} />} />
+        <Stat
+          label="Present today"
+          value={presentToday}
+          note="Includes late arrivals"
+          icon={<UserCheck size={20} />}
+        />
+        <Stat label="Absent today" value={absentToday} icon={<UserX size={20} />} />
       </div>
 
       <Card title="Still to mark today">
@@ -52,6 +69,9 @@ export function Today() {
             rows.length === 0
               ? 'Create your first class and add students to it.'
               : 'Nothing left to do today.'
+          }
+          emptyIcon={
+            rows.length === 0 ? <BookOpen size={20} /> : <CircleCheck size={20} />
           }
           isEmpty={(list) => list.length === 0}
         >
@@ -84,6 +104,7 @@ export function Today() {
                                 : undefined
                             }
                           >
+                            <CalendarCheck size={18} />
                             Take register
                           </button>
                         </Link>
@@ -127,7 +148,10 @@ export function Today() {
                       <td className="num">{row.short_leave}</td>
                       <td>
                         <Link to={`/classes/${row.class_id}/attendance`}>
-                          <button className="btn-quiet">Edit</button>
+                          <button className="btn-quiet">
+                            <SquarePen size={18} />
+                            Edit
+                          </button>
                         </Link>
                       </td>
                     </tr>

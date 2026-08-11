@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { GraduationCap, Search, SearchX } from 'lucide-react'
 import { useQuery } from '../../lib/useQuery'
 import { teaching } from '../../lib/teaching'
 import { useUser } from '../../lib/session'
@@ -39,6 +40,9 @@ export function Students() {
       </div>
 
       <div className="toolbar">
+        {/* The magnifier is decoration for the field beside it; the placeholder
+         * is what a screen reader should read out. */}
+        <Search size={16} className="subtle" aria-hidden="true" />
         <input
           type="search"
           placeholder="Search by name, roll number or guardian"
@@ -57,6 +61,7 @@ export function Students() {
               ? 'Open a class and add your first student.'
               : 'Try a different search.'
           }
+          emptyIcon={search === '' ? <GraduationCap size={20} /> : <SearchX size={20} />}
           isEmpty={(rows) => rows.length === 0}
         >
           {(rows) => (

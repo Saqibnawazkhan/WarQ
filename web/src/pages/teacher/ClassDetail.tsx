@@ -1,5 +1,14 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import {
+  CalendarCheck,
+  ClipboardList,
+  Pencil,
+  Plus,
+  Trash2,
+  TrendingUp,
+  Users,
+} from 'lucide-react'
 import { useQuery } from '../../lib/useQuery'
 import { teaching } from '../../lib/teaching'
 import type { StudentFields } from '../../lib/teaching'
@@ -57,12 +66,17 @@ export function ClassDetail() {
         </div>
         <div className="btn-row">
           <Link to={`/classes/${classId}/attendance`}>
-            <button className="btn-primary">Take register</button>
+            <button className="btn-primary">
+              <CalendarCheck size={18} />
+              Take register
+            </button>
           </Link>
           <button className="btn-quiet" onClick={() => setEditing(true)}>
+            <Pencil size={18} />
             Edit
           </button>
           <button className="btn-danger" onClick={() => setConfirmDelete(true)}>
+            <Trash2 size={18} />
             Delete
           </button>
         </div>
@@ -171,6 +185,7 @@ function StudentsTab({ classId }: { classId: string }) {
     <>
       <div className="toolbar">
         <button className="btn-primary" onClick={() => setAdding(true)}>
+          <Plus size={18} />
           Add student
         </button>
         <span className="subtle">
@@ -186,6 +201,7 @@ function StudentsTab({ classId }: { classId: string }) {
           what="students"
           emptyTitle="Nobody in this class yet"
           emptyHint="Add a student — only their name is required."
+          emptyIcon={Users}
           isEmpty={(rows) => rows.length === 0}
         >
           {(rows) => (
@@ -220,9 +236,11 @@ function StudentsTab({ classId }: { classId: string }) {
                       <td>
                         <div className="btn-row">
                           <button className="btn-quiet" onClick={() => setEditing(student)}>
+                            <Pencil size={16} />
                             Edit
                           </button>
                           <button className="btn-danger" onClick={() => void unenrol(student)}>
+                            <Trash2 size={16} />
                             Remove
                           </button>
                         </div>
@@ -406,6 +424,7 @@ function AttendanceTab({ classId }: { classId: string }) {
         what="registers"
         emptyTitle="No registers yet"
         emptyHint="Take one and it will appear here."
+        emptyIcon={CalendarCheck}
         isEmpty={(rows) => rows.length === 0}
       >
         {(rows) => (
@@ -449,6 +468,7 @@ function AssessmentsTab({ classId }: { classId: string }) {
     <>
       <div className="toolbar">
         <button className="btn-primary" onClick={() => setCreating(true)}>
+          <Plus size={18} />
           New assessment
         </button>
       </div>
@@ -459,6 +479,7 @@ function AssessmentsTab({ classId }: { classId: string }) {
           what="assessments"
           emptyTitle="No assessments yet"
           emptyHint="Create a quiz, assignment or exam to start recording marks."
+          emptyIcon={ClipboardList}
           isEmpty={(rows) => rows.length === 0}
         >
           {(rows) => (
@@ -643,6 +664,7 @@ function ResultsTab({ classId }: { classId: string }) {
         what="results"
         emptyTitle="Nothing to report yet"
         emptyHint="Results appear once there are students with attendance or marks."
+        emptyIcon={TrendingUp}
         isEmpty={(rows) => rows.length === 0}
       >
         {(rows) => (

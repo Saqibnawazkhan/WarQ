@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { Activity, BookOpen, LayoutDashboard, LogOut, Mail, Users } from 'lucide-react'
 import { useSession } from '../lib/session'
 
 /// The frame an organization administrator works inside.
@@ -21,19 +22,24 @@ export function OrgShell() {
         </div>
 
         <NavLink to="/" end className={navClass}>
-          Overview
+          <LayoutDashboard size={18} />
+          <span>Overview</span>
         </NavLink>
         <NavLink to="/teachers" className={navClass}>
-          Teachers
+          <Users size={18} />
+          <span>Teachers</span>
         </NavLink>
         <NavLink to="/invitations" className={navClass}>
-          Invitations
+          <Mail size={18} />
+          <span>Invitations</span>
         </NavLink>
         <NavLink to="/classes" className={navClass}>
-          Classes
+          <BookOpen size={18} />
+          <span>Classes</span>
         </NavLink>
         <NavLink to="/activity" className={navClass}>
-          Activity
+          <Activity size={18} />
+          <span>Activity</span>
         </NavLink>
 
         <span className="nav-spacer" />
@@ -42,6 +48,7 @@ export function OrgShell() {
           <div style={{ fontWeight: 600, color: 'var(--text)' }}>{user?.full_name}</div>
           <div style={{ marginBottom: 10 }}>{user?.email}</div>
           <button className="btn-quiet" onClick={() => void signOut()}>
+            <LogOut size={18} />
             Sign out
           </button>
         </div>

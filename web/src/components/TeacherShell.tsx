@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { BookOpen, GraduationCap, LayoutDashboard, LogOut } from 'lucide-react'
 import { useSession } from '../lib/session'
 
 /// The frame a teacher works inside.
@@ -22,13 +23,16 @@ export function TeacherShell() {
         </div>
 
         <NavLink to="/" end className={navClass}>
-          Today
+          <LayoutDashboard size={18} />
+          <span>Today</span>
         </NavLink>
         <NavLink to="/classes" className={navClass}>
-          Classes
+          <BookOpen size={18} />
+          <span>Classes</span>
         </NavLink>
         <NavLink to="/students" className={navClass}>
-          Students
+          <GraduationCap size={18} />
+          <span>Students</span>
         </NavLink>
 
         <span className="nav-spacer" />
@@ -37,6 +41,7 @@ export function TeacherShell() {
           <div style={{ fontWeight: 600, color: 'var(--text)' }}>{user?.full_name}</div>
           <div style={{ marginBottom: 10 }}>{user?.email}</div>
           <button className="btn-quiet" onClick={() => void signOut()}>
+            <LogOut size={18} />
             Sign out
           </button>
         </div>

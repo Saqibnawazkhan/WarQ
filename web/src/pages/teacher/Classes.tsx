@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ArrowRight, BookOpen, CalendarCheck, Plus } from 'lucide-react'
 import { useQuery } from '../../lib/useQuery'
 import { teaching } from '../../lib/teaching'
 import { useUser } from '../../lib/session'
@@ -26,6 +27,7 @@ export function Classes() {
           </p>
         </div>
         <button className="btn-primary" onClick={() => setCreating(true)}>
+          <Plus size={18} />
           New class
         </button>
       </div>
@@ -36,6 +38,7 @@ export function Classes() {
           what="classes"
           emptyTitle="No classes yet"
           emptyHint="Create your first class to start adding students and taking attendance."
+          emptyIcon={<BookOpen size={20} />}
           isEmpty={(rows) => rows.length === 0}
         >
           {(rows) => (
@@ -75,10 +78,16 @@ export function Classes() {
                         <td>
                           <div className="btn-row">
                             <Link to={`/classes/${row.id}`}>
-                              <button className="btn-quiet">Open</button>
+                              <button className="btn-quiet">
+                                <ArrowRight size={18} />
+                                Open
+                              </button>
                             </Link>
                             <Link to={`/classes/${row.id}/attendance`}>
-                              <button className="btn-primary">Register</button>
+                              <button className="btn-primary">
+                                <CalendarCheck size={18} />
+                                Register
+                              </button>
                             </Link>
                           </div>
                         </td>

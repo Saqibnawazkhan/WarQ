@@ -1,3 +1,4 @@
+import { Hourglass, PauseCircle, RefreshCw } from 'lucide-react'
 import { useSession } from '../lib/session'
 
 /// Shown to a signed-in account that is not allowed to work yet.
@@ -24,10 +25,9 @@ export function NoAccess() {
             margin: '0 auto 18px',
             background: explanation.waiting ? 'var(--primary-tint)' : 'var(--red-tint)',
             color: explanation.waiting ? 'var(--primary)' : 'var(--red)',
-            fontSize: 26,
           }}
         >
-          {explanation.waiting ? '⏳' : '⏸'}
+          {explanation.waiting ? <Hourglass size={26} /> : <PauseCircle size={26} />}
         </div>
 
         <h1 style={{ fontSize: 19 }}>{explanation.title}</h1>
@@ -55,6 +55,7 @@ export function NoAccess() {
           disabled={loading}
           onClick={() => void refresh()}
         >
+          <RefreshCw size={18} />
           {loading ? 'Checking…' : 'Check again'}
         </button>
         <button

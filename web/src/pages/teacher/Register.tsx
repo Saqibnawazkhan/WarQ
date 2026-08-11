@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { CheckCheck, CircleCheck, Save, UserX, Users } from 'lucide-react'
 import { useQuery } from '../../lib/useQuery'
 import { teaching } from '../../lib/teaching'
 import { errorMessage } from '../../lib/supabase'
@@ -126,9 +127,11 @@ export function Register() {
           style={{ width: 'auto' }}
         />
         <button className="btn-quiet" onClick={() => setAll('present')}>
+          <CheckCheck size={18} />
           Mark all present
         </button>
         <button className="btn-quiet" onClick={() => setAll('absent')}>
+          <UserX size={18} />
           Mark all absent
         </button>
         <span className="subtle" style={{ marginLeft: 'auto' }}>
@@ -138,7 +141,12 @@ export function Register() {
       </div>
 
       {error !== null && <ErrorNotice message={error} />}
-      {result !== null && <div className="notice notice-ok">{result}</div>}
+      {result !== null && (
+        <div className="notice notice-ok">
+          <CircleCheck size={18} />
+          <span>{result}</span>
+        </div>
+      )}
       {isFuture && (
         <ErrorNotice message="A register cannot be taken for a future date." />
       )}
@@ -149,6 +157,7 @@ export function Register() {
           what="students"
           emptyTitle="Nobody in this class yet"
           emptyHint="Add students to the class before taking a register."
+          emptyIcon={Users}
           isEmpty={(rows) => rows.length === 0}
         >
           {(rows) =>
@@ -211,6 +220,7 @@ export function Register() {
             disabled={busy || isFuture || !dirty}
             onClick={() => void save()}
           >
+            <Save size={18} />
             {busy ? 'Saving…' : 'Save register'}
           </button>
         </div>

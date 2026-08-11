@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { GraduationCap, Search, SearchX } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useQuery } from '../lib/useQuery'
 import type { AdminIndividualTeacher } from '../lib/types'
@@ -54,6 +55,7 @@ export function Teachers() {
       </div>
 
       <div className="toolbar">
+        <Search size={16} className="subtle" aria-hidden="true" />
         <input
           type="search"
           placeholder="Search by name, email or phone"
@@ -66,6 +68,7 @@ export function Teachers() {
         <QueryBoundary
           state={{ ...teachers, data: teachers.data === null ? null : visible }}
           what="teachers"
+          icon={search === '' ? <GraduationCap size={20} /> : <SearchX size={20} />}
           emptyTitle={search === '' ? 'No independent teachers yet' : 'Nothing matches'}
           emptyHint={
             search === ''

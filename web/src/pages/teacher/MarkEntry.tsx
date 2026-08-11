@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { CircleCheck, Save, Users } from 'lucide-react'
 import { useQuery } from '../../lib/useQuery'
 import { teaching } from '../../lib/teaching'
 import { errorMessage } from '../../lib/supabase'
@@ -111,7 +112,12 @@ export function MarkEntry() {
       </div>
 
       {error !== null && <ErrorNotice message={error} />}
-      {result !== null && <div className="notice notice-ok">{result}</div>}
+      {result !== null && (
+        <div className="notice notice-ok">
+          <CircleCheck size={18} />
+          <span>{result}</span>
+        </div>
+      )}
       {invalid && (
         <ErrorNotice message={`A score must be between 0 and ${total}.`} />
       )}
@@ -122,6 +128,7 @@ export function MarkEntry() {
           what="students"
           emptyTitle="Nobody in this class yet"
           emptyHint="Add students before recording marks."
+          emptyIcon={Users}
           isEmpty={(rows) => rows.length === 0}
         >
           {(rows) => (
@@ -208,6 +215,7 @@ export function MarkEntry() {
             disabled={busy || invalid || !dirty}
             onClick={() => void save()}
           >
+            <Save size={18} />
             {busy ? 'Saving…' : 'Save marks'}
           </button>
         </div>

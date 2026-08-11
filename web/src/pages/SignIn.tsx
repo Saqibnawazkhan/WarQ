@@ -1,6 +1,23 @@
 import { useState } from 'react'
+import type { CSSProperties } from 'react'
+import { LogIn, Lock, Mail } from 'lucide-react'
 import { useSession } from '../lib/session'
 import { ErrorNotice } from '../components/ui'
+
+/// An icon sitting inside an input needs two things the stylesheet does not
+/// offer: somewhere to sit, and room made for it on the input. Both are local
+/// to this one screen, so they stay here rather than becoming a shared class.
+const fieldIcon: CSSProperties = {
+  position: 'absolute',
+  left: 12,
+  top: '50%',
+  translate: '0 -50%',
+  color: 'var(--muted)',
+  // Otherwise the icon swallows the click that should land in the field.
+  pointerEvents: 'none',
+}
+
+const withIcon: CSSProperties = { paddingLeft: 36 }
 
 export function SignIn() {
   const { signIn, loading, error } = useSession()
@@ -34,29 +51,38 @@ export function SignIn() {
 
         <div className="field">
           <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="username"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-          />
+          <div style={{ position: 'relative' }}>
+            <Mail size={16} style={fieldIcon} />
+            <input
+              id="email"
+              type="email"
+              autoComplete="username"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+              style={withIcon}
+            />
+          </div>
         </div>
 
         <div className="field">
           <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-          />
+          <div style={{ position: 'relative' }}>
+            <Lock size={16} style={fieldIcon} />
+            <input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+              style={withIcon}
+            />
+          </div>
         </div>
 
         <button className="btn-primary" style={{ width: '100%' }} disabled={loading}>
+          <LogIn size={18} />
           {loading ? 'Signing in…' : 'Sign in'}
         </button>
       </form>

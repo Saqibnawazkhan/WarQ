@@ -1,4 +1,13 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import {
+  Activity,
+  Building2,
+  CreditCard,
+  Inbox,
+  LayoutDashboard,
+  LogOut,
+  Users,
+} from 'lucide-react'
 import { useSession } from '../lib/session'
 import { useQuery } from '../lib/useQuery'
 import { supabase } from '../lib/supabase'
@@ -32,23 +41,29 @@ export function Shell() {
         </div>
 
         <NavLink to="/" end className={navClass}>
-          Overview
+          <LayoutDashboard size={18} />
+          <span>Overview</span>
         </NavLink>
         <NavLink to="/requests" className={navClass}>
+          <Inbox size={18} />
           <span>Pending requests</span>
-          {waiting > 0 && <span className="pill pill-blue">{waiting}</span>}
+          {waiting > 0 && <span className="pill pill-blue nav-count">{waiting}</span>}
         </NavLink>
         <NavLink to="/organizations" className={navClass}>
-          Organizations
+          <Building2 size={18} />
+          <span>Organizations</span>
         </NavLink>
         <NavLink to="/teachers" className={navClass}>
-          Individual teachers
+          <Users size={18} />
+          <span>Individual teachers</span>
         </NavLink>
         <NavLink to="/subscriptions" className={navClass}>
-          Subscriptions
+          <CreditCard size={18} />
+          <span>Subscriptions</span>
         </NavLink>
         <NavLink to="/activity" className={navClass}>
-          Activity
+          <Activity size={18} />
+          <span>Activity</span>
         </NavLink>
 
         <span className="nav-spacer" />
@@ -57,6 +72,7 @@ export function Shell() {
           <div style={{ fontWeight: 600, color: 'var(--text)' }}>{user?.full_name}</div>
           <div style={{ marginBottom: 10 }}>{user?.email}</div>
           <button className="btn-quiet" onClick={() => void signOut()}>
+            <LogOut size={18} />
             Sign out
           </button>
         </div>

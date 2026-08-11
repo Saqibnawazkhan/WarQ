@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { UserMinus, Users } from 'lucide-react'
 import { useQuery } from '../../lib/useQuery'
 import { org } from '../../lib/org'
 import { useUser } from '../../lib/session'
@@ -60,6 +61,7 @@ export function OrgTeachers() {
         <QueryBoundary
           state={teachers}
           what="teachers"
+          emptyIcon={<Users size={20} />}
           emptyTitle="No teachers yet"
           emptyHint="Invite one, and they join automatically when they register with that email address."
           isEmpty={(rows) => rows.length === 0}
@@ -112,6 +114,7 @@ export function OrgTeachers() {
                           <span className="subtle">—</span>
                         ) : (
                           <button className="btn-danger" onClick={() => setRemoving(teacher)}>
+                            <UserMinus size={16} />
                             Remove
                           </button>
                         )}
