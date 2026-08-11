@@ -334,10 +334,6 @@ class _RosterList extends StatelessWidget {
           icon: const Icon(Icons.group_add_outlined, size: 20),
           label: const Text('Enroll an existing student'),
         ),
-        if (scale != null) ...<Widget>[
-          const Gap.lg(),
-          GradeScaleLegend(scale: scale!),
-        ],
         const Gap.md(),
         Text(
           '${Format.plural(controller.studentCount, 'student')} in this class.',

@@ -12,12 +12,10 @@ import '../../../../domain/entities/student_performance.dart';
 import '../../../../domain/services/report_service.dart';
 import '../../../state/class_detail_controller.dart';
 import '../../../state/session_controller.dart';
-import '../../../widgets/common/app_badge.dart';
 import '../../../widgets/common/app_card.dart';
 import '../../../widgets/feedback/dialogs.dart';
 import '../../../widgets/feedback/state_views.dart';
 import '../../../widgets/layout/app_page.dart';
-import 'widgets/class_assessments_tab.dart';
 import 'widgets/class_attendance_tab.dart';
 import 'widgets/class_students_tab.dart';
 
@@ -53,9 +51,9 @@ class _ClassDetailView extends StatefulWidget {
 class _ClassDetailViewState extends State<_ClassDetailView>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController = TabController(
-    length: 3,
+    length: 2,
     vsync: this,
-    initialIndex: widget.initialTab.clamp(0, 2),
+    initialIndex: widget.initialTab.clamp(0, 1),
   );
 
   @override
@@ -219,10 +217,13 @@ class _ClassDetailViewState extends State<_ClassDetailView>
               color: context.colors.surface,
               child: TabBar(
                 controller: _tabController,
+                // Marks live on their own tab in the bottom bar, where a
+                // teacher can see every class at once and create an
+                // assessment. Repeating them here was a second way into the
+                // same screens rather than anything this page adds.
                 tabs: <Widget>[
                   Tab(text: 'Students (${controller.studentCount})'),
                   Tab(text: 'Attendance (${controller.sessions.length})'),
-                  Tab(text: 'Marks (${controller.assessments.length})'),
                 ],
               ),
             ),
@@ -232,7 +233,6 @@ class _ClassDetailViewState extends State<_ClassDetailView>
                 children: const <Widget>[
                   ClassStudentsTab(),
                   ClassAttendanceTab(),
-                  ClassAssessmentsTab(),
                 ],
               ),
             ),
@@ -282,17 +282,6 @@ class _ClassOverviewHeader extends StatelessWidget {
                     ),
                     icon: Icons.event_available_rounded,
                     color: context.semantic.success,
-                  ),
-                ),
-                Expanded(
-                  child: _MiniStat(
-                    label: 'Class average',
-                    value: Format.percentOrDash(
-                      performance?.averagePercentage,
-                      decimals: 0,
-                    ),
-                    icon: Icons.trending_up_rounded,
-                    color: context.semantic.info,
                   ),
                 ),
                 Expanded(
@@ -413,43 +402,3 @@ class ClassRosterEmptyState extends StatelessWidget {
   }
 }
 
-/// Small grade legend used at the bottom of the roster.
-class GradeScaleLegend extends StatelessWidget {
-  const GradeScaleLegend({super.key, required this.scale});
-
-  final GradeScale scale;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      color: context.colors.surfaceContainerHigh,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            'Grading scale · ${scale.name}',
-            style: context.text.labelMedium
-                ?.copyWith(color: context.semantic.mutedText),
-          ),
-          const Gap.sm(),
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            children: <Widget>[
-              for (final GradeBand band in scale.bands)
-                AppBadge(
-                  '${band.label} · ${Format.marks(band.minPercent)}+',
-                  tone: GradeBadge.toneForPercent(band.minPercent),
-                  dense: true,
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}

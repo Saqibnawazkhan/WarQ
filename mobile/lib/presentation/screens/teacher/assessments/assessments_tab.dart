@@ -223,10 +223,7 @@ class _AssessmentsView extends StatelessWidget {
                               ),
                               onPressed: () => Navigator.of(context).pushNamed(
                                 Routes.classDetail,
-                                arguments: ClassDetailArgs(
-                                  classId: summary.assessment.classId,
-                                  initialTab: 2,
-                                ),
+                                arguments: ClassDetailArgs(classId: summary.assessment.classId),
                               ),
                             ),
                           );
