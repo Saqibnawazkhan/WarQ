@@ -20,11 +20,17 @@ class ClassGridTile extends StatelessWidget {
     required this.summary,
     this.onTap,
     this.onOptions,
+    this.statusIcon,
   });
 
   final ClassSummary summary;
   final VoidCallback? onTap;
   final VoidCallback? onOptions;
+
+  /// Shown in the corner where the options button would otherwise sit, for
+  /// screens that need to say something about the class rather than offer
+  /// actions on it — a tick on the register a teacher has already taken.
+  final IconData? statusIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +141,13 @@ class ClassGridTile extends StatelessWidget {
                   ),
                 ),
 
-                if (onOptions != null)
+                if (statusIcon != null)
+                  Positioned(
+                    top: AppSpacing.md,
+                    right: AppSpacing.md,
+                    child: Icon(statusIcon, color: Colors.white, size: 24),
+                  )
+                else if (onOptions != null)
                   Positioned(
                     top: AppSpacing.xs,
                     right: AppSpacing.xs,

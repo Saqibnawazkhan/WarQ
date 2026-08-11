@@ -13,7 +13,7 @@ import '../../../../domain/entities/dashboard_data.dart';
 import '../../../state/class_list_controller.dart';
 import '../../../state/session_controller.dart';
 import '../../../widgets/common/app_card.dart';
-import '../../../widgets/domain/class_card.dart';
+import '../../../widgets/domain/class_grid_tile.dart';
 import '../../../widgets/feedback/state_views.dart';
 import '../../../widgets/layout/app_page.dart';
 
@@ -88,16 +88,10 @@ class _AttendanceHubView extends StatelessWidget {
                   title: 'Pending today',
                   subtitle: AppDate.formatLong(DateTime.now()),
                 ),
-                for (final ClassSummary summary in pending)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                    child: ClassCard(
-                      summary: summary,
-                      showAttendanceCta: true,
-                      onTap: () => _mark(context, summary),
-                      onMarkAttendance: () => _mark(context, summary),
-                    ),
-                  ),
+                _ClassGrid(
+                  classes: pending,
+                  onTap: (ClassSummary summary) => _mark(context, summary),
+                ),
                 const Gap.lg(),
               ],
               if (done.isNotEmpty) ...<Widget>[
@@ -105,18 +99,11 @@ class _AttendanceHubView extends StatelessWidget {
                   title: 'Marked today',
                   subtitle: 'Tap to review or edit',
                 ),
-                for (final ClassSummary summary in done)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                    child: ClassCard(
-                      summary: summary,
-                      onTap: () => _mark(context, summary),
-                      trailing: Icon(
-                        Icons.check_circle_rounded,
-                        color: context.semantic.success,
-                      ),
-                    ),
-                  ),
+                _ClassGrid(
+                  classes: done,
+                  onTap: (ClassSummary summary) => _mark(context, summary),
+                  statusIcon: Icons.check_circle_rounded,
+                ),
                 const Gap.lg(),
               ],
               if (empty.isNotEmpty) ...<Widget>[
@@ -124,17 +111,13 @@ class _AttendanceHubView extends StatelessWidget {
                   title: 'Waiting for students',
                   subtitle: 'Add students before taking attendance',
                 ),
-                for (final ClassSummary summary in empty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                    child: ClassCard(
-                      summary: summary,
-                      onTap: () => Navigator.of(context).pushNamed(
-                        Routes.classDetail,
-                        arguments: ClassDetailArgs(classId: summary.id),
-                      ),
-                    ),
+                _ClassGrid(
+                  classes: empty,
+                  onTap: (ClassSummary summary) => Navigator.of(context).pushNamed(
+                    Routes.classDetail,
+                    arguments: ClassDetailArgs(classId: summary.id),
                   ),
+                ),
               ],
               const Gap.xxl(),
             ],
@@ -214,6 +197,43 @@ class _TodayHeader extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// The same coloured tiles the Classes tab uses, laid out in a grid.
+///
+/// Nested inside the page's own scroll view, so it never scrolls itself: a
+/// section here holds a handful of classes, and a second scrolling area inside
+/// the first is a way to lose them.
+class _ClassGrid extends StatelessWidget {
+  const _ClassGrid({required this.classes, required this.onTap, this.statusIcon});
+
+  final List<ClassSummary> classes;
+  final void Function(ClassSummary summary) onTap;
+  final IconData? statusIcon;
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
+      itemCount: classes.length,
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 220,
+        mainAxisSpacing: AppSpacing.md,
+        crossAxisSpacing: AppSpacing.md,
+        childAspectRatio: 1,
+      ),
+      itemBuilder: (BuildContext context, int index) {
+        final ClassSummary summary = classes[index];
+        return ClassGridTile(
+          summary: summary,
+          onTap: () => onTap(summary),
+          statusIcon: statusIcon,
+        );
+      },
     );
   }
 }
