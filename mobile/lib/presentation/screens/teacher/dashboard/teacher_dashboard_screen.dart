@@ -155,25 +155,13 @@ class _DashboardView extends StatelessWidget {
                 onOpenClass: _openClass,
               ),
               const Gap.xxl(),
-              if (data.today.pendingClasses.isNotEmpty) ...<Widget>[
-                _PendingAttendanceCard(
-                  pending: data.today.pendingClasses,
-                  onMark: (SchoolClass schoolClass) =>
-                      Navigator.of(context).pushNamed(
-                    Routes.markAttendance,
-                    arguments: MarkAttendanceArgs(classId: schoolClass.id),
-                  ),
-                ),
-                const Gap.xxl(),
-              ],
               if (data.today.hasAnyRecords) ...<Widget>[
                 _TodayAttendanceCard(today: data.today),
                 const Gap.xxl(),
               ],
               // A teacher with no classes still needs somewhere to start. Once
-              // they have some, the list used to be repeated here from the
-              // Classes tab; the pending-attendance card above already names
-              // the classes that actually need something doing today.
+              // they have some, the Classes and Attendance tabs own the lists —
+              // Home is the summary, not a second copy of them.
               if (data.recentClasses.isEmpty) ...<Widget>[
                 EmptyView(
                   compact: true,
@@ -428,70 +416,6 @@ class _QuickActions extends StatelessWidget {
           onTap: () => Navigator.of(context).pushNamed(Routes.reports),
         ),
       ],
-    );
-  }
-}
-
-class _PendingAttendanceCard extends StatelessWidget {
-  const _PendingAttendanceCard({required this.pending, required this.onMark});
-
-  final List<SchoolClass> pending;
-  final void Function(SchoolClass schoolClass) onMark;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      color: context.semantic.warningContainer,
-      borderColor: context.semantic.warning.withValues(alpha: 0.4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              Icon(
-                Icons.pending_actions_rounded,
-                color: context.semantic.warning,
-                size: 22,
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Text(
-                  'Attendance pending for today',
-                  style: context.text.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: context.semantic.onWarningContainer,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const Gap.lg(),
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            children: <Widget>[
-              for (final SchoolClass schoolClass in pending)
-                ActionChip(
-                  avatar: const Icon(Icons.how_to_reg_rounded, size: 18),
-                  // A long class name is otherwise squeezed into whatever width
-                  // the run has left and clipped mid-word. Capping it keeps the
-                  // chip on one line and leaves room for a neighbour.
-                  label: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: context.screenWidth * 0.5,
-                    ),
-                    child: Text(
-                      schoolClass.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  onPressed: () => onMark(schoolClass),
-                ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }
