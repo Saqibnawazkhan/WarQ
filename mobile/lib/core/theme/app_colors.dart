@@ -9,9 +9,12 @@ import 'package:flutter/material.dart';
 class AppColors {
   const AppColors._();
 
-  static const Color brand = Color(0xFF2E5BFF);
-  static const Color brandDark = Color(0xFF1B3FCC);
-  static const Color brandLight = Color(0xFFEAEFFF);
+  // The indigo from the prototype, not the blue the app was built with. It
+  // carries the sign-in button, the selected tab, the compose button and the
+  // filled statistic card, so changing it here changes the app's colour.
+  static const Color brand = Color(0xFF4A2FD0);
+  static const Color brandDark = Color(0xFF3A22A8);
+  static const Color brandLight = Color(0xFFECE9FB);
 
   static const Color accent = Color(0xFF00B894);
   static const Color accentLight = Color(0xFFE1F7F1);
