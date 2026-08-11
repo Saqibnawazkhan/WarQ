@@ -93,32 +93,41 @@ class _AssessmentsView extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'fab-assessments',
-        onPressed: () => _createAssessment(context, controller),
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('New assessment'),
-      ),
+      // Hidden while there is nothing to add to: the empty state below carries
+      // the one button, and two ways to do the same thing on an otherwise
+      // blank screen is a choice about nothing.
+      floatingActionButton: controller.totalCount == 0
+          ? null
+          : FloatingActionButton.extended(
+              heroTag: 'fab-assessments',
+              onPressed: () => _createAssessment(context, controller),
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('New assessment'),
+            ),
       body: SafeArea(
         bottom: false,
         child: Column(
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.sm,
-                AppSpacing.lg,
-                AppSpacing.md,
-              ),
-              child: ContentWidth(
-                child: SearchField(
-                  hintText: 'Search assessments',
-                  initialValue: controller.query,
-                  onChanged: controller.search,
+            // Searching and filtering nothing is not a thing anyone needs to
+            // do, and it takes up the top of the screen a teacher is trying to
+            // read. Both appear as soon as there is a first assessment.
+            if (controller.totalCount > 0)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.sm,
+                  AppSpacing.lg,
+                  AppSpacing.md,
+                ),
+                child: ContentWidth(
+                  child: SearchField(
+                    hintText: 'Search assessments',
+                    initialValue: controller.query,
+                    onChanged: controller.search,
+                  ),
                 ),
               ),
-            ),
-            if (controller.classes.isNotEmpty)
+            if (controller.totalCount > 0 && controller.classes.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 child: ContentWidth(
