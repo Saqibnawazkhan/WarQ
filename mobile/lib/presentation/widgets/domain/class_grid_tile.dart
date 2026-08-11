@@ -21,6 +21,7 @@ class ClassGridTile extends StatelessWidget {
     this.onTap,
     this.onOptions,
     this.statusIcon,
+    this.wide = false,
   });
 
   final ClassSummary summary;
@@ -31,6 +32,14 @@ class ClassGridTile extends StatelessWidget {
   /// screens that need to say something about the class rather than offer
   /// actions on it — a tick on the register a teacher has already taken.
   final IconData? statusIcon;
+
+  /// Lays the tile out as a full-width row instead of a square.
+  ///
+  /// A square is right on the Classes tab, where a grid of them fills the
+  /// screen. It is wrong in a list of short sections — one square in a
+  /// two-column row leaves half the row empty and reads as a mistake. Same
+  /// colour, same contents, arranged along the row instead of down it.
+  final bool wide;
 
   @override
   Widget build(BuildContext context) {
@@ -79,66 +88,32 @@ class ClassGridTile extends StatelessWidget {
 
                 Padding(
                   padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Container(
-                        width: 46,
-                        height: 46,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.22),
-                          borderRadius: BorderRadius.circular(AppRadii.md),
-                        ),
-                        child: const Icon(
-                          Icons.school_rounded,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-
-                      const Spacer(),
-
-                      Text(
-                        summary.name,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.text.titleMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          height: 1.2,
-                        ),
-                      ),
-                      if (summary.schoolClass.subtitle.isNotEmpty) ...<Widget>[
-                        const SizedBox(height: 2),
-                        Text(
-                          summary.schoolClass.subtitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.text.bodySmall?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.85),
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: AppSpacing.sm),
-                      Row(
-                        children: <Widget>[
-                          _Pill(
-                            icon: Icons.group_rounded,
-                            label: '${summary.studentCount}',
-                          ),
-                          if (archived) ...<Widget>[
-                            const SizedBox(width: AppSpacing.xs),
-                            const Flexible(
-                              child: _Pill(
-                                icon: Icons.inventory_2_outlined,
-                                label: 'Archived',
+                  child: wide
+                      ? Row(
+                          children: <Widget>[
+                            _IconBadge(),
+                            const SizedBox(width: AppSpacing.lg),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: _details(context, archived),
                               ),
                             ),
+                            // Room for the status glyph pinned to the corner,
+                            // so a long class name never runs underneath it.
+                            if (statusIcon != null)
+                              const SizedBox(width: AppSpacing.xl),
                           ],
-                        ],
-                      ),
-                    ],
-                  ),
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            _IconBadge(),
+                            const Spacer(),
+                            ..._details(context, archived),
+                          ],
+                        ),
                 ),
 
                 if (statusIcon != null)
@@ -167,6 +142,66 @@ class ClassGridTile extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Name, session and the student count — the same three things in both
+/// layouts, so the two only differ in how they are arranged.
+extension on ClassGridTile {
+  List<Widget> _details(BuildContext context, bool archived) => <Widget>[
+        Text(
+          summary.name,
+          maxLines: wide ? 1 : 2,
+          overflow: TextOverflow.ellipsis,
+          style: context.text.titleMedium?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+            height: 1.2,
+          ),
+        ),
+        if (summary.schoolClass.subtitle.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 2),
+          Text(
+            summary.schoolClass.subtitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.text.bodySmall?.copyWith(
+              color: Colors.white.withValues(alpha: 0.85),
+            ),
+          ),
+        ],
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          children: <Widget>[
+            _Pill(icon: Icons.group_rounded, label: '${summary.studentCount}'),
+            if (archived) ...<Widget>[
+              const SizedBox(width: AppSpacing.xs),
+              const Flexible(
+                child: _Pill(
+                  icon: Icons.inventory_2_outlined,
+                  label: 'Archived',
+                ),
+              ),
+            ],
+          ],
+        ),
+      ];
+}
+
+class _IconBadge extends StatelessWidget {
+  const _IconBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 46,
+      height: 46,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.22),
+        borderRadius: BorderRadius.circular(AppRadii.md),
+      ),
+      child: const Icon(Icons.school_rounded, color: Colors.white, size: 24),
     );
   }
 }

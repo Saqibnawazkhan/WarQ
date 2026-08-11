@@ -215,25 +215,19 @@ class _ClassGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero,
-      itemCount: classes.length,
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 220,
-        mainAxisSpacing: AppSpacing.md,
-        crossAxisSpacing: AppSpacing.md,
-        childAspectRatio: 1,
-      ),
-      itemBuilder: (BuildContext context, int index) {
-        final ClassSummary summary = classes[index];
-        return ClassGridTile(
-          summary: summary,
-          onTap: () => onTap(summary),
-          statusIcon: statusIcon,
-        );
-      },
+    return Column(
+      children: <Widget>[
+        for (final ClassSummary summary in classes)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: ClassGridTile(
+              summary: summary,
+              wide: true,
+              onTap: () => onTap(summary),
+              statusIcon: statusIcon,
+            ),
+          ),
+      ],
     );
   }
 }
