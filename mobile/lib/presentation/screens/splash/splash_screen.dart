@@ -45,7 +45,12 @@ class SplashScreen extends StatelessWidget {
   }
 }
 
-/// The app mark: a rounded square with the wordmark initial.
+/// The app mark.
+///
+/// The device on its own rather than the full lockup: the wordmark beside it is
+/// dark navy and would disappear in dark mode, while the mark's blue reads on
+/// either ground. Wherever the name is needed it is set in the app's own type
+/// beside this, which does follow the theme.
 class AppLogo extends StatelessWidget {
   const AppLogo({super.key, this.size = 48});
 
@@ -53,26 +58,14 @@ class AppLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Image.asset(
+      'assets/brand/warq_mark.png',
       width: size,
       height: size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            context.colors.primary,
-            context.colors.primary.withValues(alpha: 0.75),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(size * 0.28),
-      ),
-      child: Icon(
-        Icons.school_rounded,
-        size: size * 0.52,
-        color: context.colors.onPrimary,
-      ),
+      fit: BoxFit.contain,
+      // Decorative: the name is always written out next to it, so a screen
+      // reader announcing the logo as well would only repeat itself.
+      excludeFromSemantics: true,
     );
   }
 }

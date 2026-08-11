@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Modify this file to customize your launch splash screen -->
+<!-- What Android draws between tapping the icon and Flutter's first frame.
+     Showing the logo here rather than a blank white rectangle means the app
+     never appears to hang on nothing while the engine starts. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@android:color/white" />
-
-    <!-- You can insert your own image assets here -->
-    <!-- <item>
+    <item>
         <bitmap
             android:gravity="center"
-            android:src="@mipmap/launch_image" />
-    </item> -->
+            android:src="@drawable/launch_logo" />
+    </item>
 </layer-list>

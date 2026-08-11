@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The logo is drawn for a white ground; anything else muddies the gradient in
+     the mark. Kept as a colour resource because the adaptive icon needs a
+     drawable it can scale to any launcher shape. -->
+<resources>
+    <color name="ic_launcher_background">#FFFFFFFF</color>
+</resources>
