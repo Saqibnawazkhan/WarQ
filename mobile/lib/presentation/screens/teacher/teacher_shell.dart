@@ -18,7 +18,12 @@ enum TeacherTab {
         TeacherTab.dashboard => 'Home',
         TeacherTab.classes => 'Classes',
         TeacherTab.attendance => 'Attendance',
-        TeacherTab.assessments => 'Assessments',
+        // "Assessments" is one character too long for a fifth of a phone
+        // screen at the current label size: it wraps and breaks the bar's
+        // alignment. "Marks" is both shorter and what a teacher calls the
+        // thing they come here to do; the screen itself still says
+        // Assessments.
+        TeacherTab.assessments => 'Marks',
         TeacherTab.profile => 'Profile',
       };
 

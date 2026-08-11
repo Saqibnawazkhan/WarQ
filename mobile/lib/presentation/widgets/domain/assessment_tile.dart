@@ -39,16 +39,16 @@ class AssessmentTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Container(
-                width: 42,
-                height: 42,
+                width: 48,
+                height: 48,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: context.colors.primary.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(AppRadii.sm),
+                  borderRadius: BorderRadius.circular(AppRadii.md),
                 ),
                 child: Icon(
                   iconFor(assessment.type),
-                  size: 20,
+                  size: 24,
                   color: context.colors.primary,
                 ),
               ),
@@ -61,10 +61,10 @@ class AssessmentTile extends StatelessWidget {
                       assessment.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: context.text.titleSmall
+                      style: context.text.titleMedium
                           ?.copyWith(fontWeight: FontWeight.w700),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       <String>[
                         assessment.typeLabel,
@@ -72,7 +72,9 @@ class AssessmentTile extends StatelessWidget {
                         AppDate.formatShort(assessment.date),
                         '${Format.marks(assessment.totalMarks)} marks',
                       ].join(' · '),
-                      maxLines: 1,
+                      // On a mixed list this line carries the class and the due
+                      // date, so it wraps once rather than losing its tail.
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: context.text.bodySmall
                           ?.copyWith(color: context.semantic.mutedText),
@@ -80,18 +82,21 @@ class AssessmentTile extends StatelessWidget {
                   ],
                 ),
               ),
-              if (trailing != null) trailing!,
+              if (trailing != null) ...<Widget>[
+                const SizedBox(width: AppSpacing.sm),
+                trailing!,
+              ],
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.lg),
           Row(
             children: <Widget>[
               Expanded(
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(AppRadii.xs),
                   child: LinearProgressIndicator(
                     value: summary.progress,
-                    minHeight: 6,
+                    minHeight: 8,
                     backgroundColor: context.semantic.subtleBorder,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       summary.isFullyGraded
@@ -104,43 +109,52 @@ class AssessmentTile extends StatelessWidget {
               const SizedBox(width: AppSpacing.md),
               Text(
                 '${summary.gradedCount}/${summary.studentCount}',
-                style: context.text.labelMedium
+                style: context.text.labelLarge
                     ?.copyWith(color: context.semantic.mutedText),
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          Row(
-            children: <Widget>[
-              if (summary.averagePercentage != null)
-                AppBadge(
-                  'Avg ${Format.percent(summary.averagePercentage!, decimals: 0)}',
-                  tone: GradeBadge.toneForPercent(summary.averagePercentage),
-                  dense: true,
-                )
-              else
-                const AppBadge('Not graded yet', dense: true),
-              const Spacer(),
-              if (onEnterMarks != null)
-                TextButton.icon(
-                  onPressed: onEnterMarks,
-                  icon: Icon(
-                    summary.gradedCount == 0
-                        ? Icons.edit_note_rounded
-                        : Icons.checklist_rounded,
-                    size: 18,
+          const SizedBox(height: AppSpacing.lg),
+          // Badge and action share a line at normal type; wrapping lets the
+          // action drop underneath instead of overflowing once text is scaled.
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: <Widget>[
+                if (summary.averagePercentage != null)
+                  AppBadge(
+                    'Avg ${Format.percent(summary.averagePercentage!, decimals: 0)}',
+                    tone: GradeBadge.toneForPercent(summary.averagePercentage),
+                  )
+                else
+                  const AppBadge('Not graded yet'),
+                if (onEnterMarks != null)
+                  TextButton.icon(
+                    onPressed: onEnterMarks,
+                    icon: Icon(
+                      summary.gradedCount == 0
+                          ? Icons.edit_note_rounded
+                          : Icons.checklist_rounded,
+                      size: 20,
+                    ),
+                    label: Text(
+                      summary.gradedCount == 0 ? 'Add marks' : 'Edit marks',
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.sm,
+                      ),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                   ),
-                  label: Text(
-                    summary.gradedCount == 0 ? 'Add marks' : 'Edit marks',
-                  ),
-                  style: TextButton.styleFrom(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

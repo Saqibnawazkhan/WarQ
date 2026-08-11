@@ -20,8 +20,11 @@ class AppSpacing {
   /// Padding for the content of a page that also needs vertical breathing room.
   static const EdgeInsets pageInsets = EdgeInsets.fromLTRB(lg, lg, lg, xxxl);
 
-  static const EdgeInsets cardPadding = EdgeInsets.all(lg);
-  static const EdgeInsets tilePadding = EdgeInsets.symmetric(horizontal: lg, vertical: md);
+  /// Cards and rows carry the larger type scale, so they were given room to
+  /// hold it. A tile is now comfortably past the 48dp minimum touch target
+  /// without anything having to be measured per screen.
+  static const EdgeInsets cardPadding = EdgeInsets.all(xl);
+  static const EdgeInsets tilePadding = EdgeInsets.symmetric(horizontal: lg, vertical: lg);
 
   /// Extra bottom padding so floating action buttons never cover content.
   static const double fabClearance = 88;

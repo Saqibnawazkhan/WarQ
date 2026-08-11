@@ -50,10 +50,17 @@ class AppAvatar extends StatelessWidget {
       child: icon != null
           ? Icon(icon, size: size * 0.48, color: color)
           : Text(
+              // The fraction stops the initials looking lost beside the name
+              // they sit next to. The circle cannot grow with the system font
+              // setting, so scaling the letters inside it would only push wide
+              // pairs like "MW" out of the frame — the name itself is what
+              // carries the user's text size.
               Format.initials(name),
+              maxLines: 1,
+              textScaler: TextScaler.noScaling,
               style: TextStyle(
                 color: color,
-                fontSize: size * 0.36,
+                fontSize: size * 0.40,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.2,
               ),
@@ -98,9 +105,12 @@ class ClassAvatar extends StatelessWidget {
       ),
       child: Text(
         Format.initials(name),
+        maxLines: 1,
+        // Fixed box, same as [AppAvatar].
+        textScaler: TextScaler.noScaling,
         style: TextStyle(
           color: color,
-          fontSize: size * 0.34,
+          fontSize: size * 0.38,
           fontWeight: FontWeight.w700,
         ),
       ),

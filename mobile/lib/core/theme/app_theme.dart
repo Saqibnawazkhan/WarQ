@@ -167,7 +167,10 @@ class AppTheme {
         backgroundColor: scheme.surface,
         surfaceTintColor: Colors.transparent,
         indicatorColor: scheme.primary.withValues(alpha: isDark ? 0.24 : 0.12),
-        height: 68,
+        // Room for the larger label beneath a 24dp icon, including when the
+        // system text size is turned up. The bar clips rather than grows, so
+        // this has to lead the type scale rather than follow it.
+        height: 74,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final bool selected = states.contains(WidgetState.selected);
@@ -253,70 +256,84 @@ class AppTheme {
     );
   }
 
+  /// The one place text size is decided.
+  ///
+  /// Every screen styles itself from this theme rather than hard-coding sizes,
+  /// so the whole app moves together and no screen drifts smaller than the
+  /// rest. The scale below is roughly a tenth larger than it was: the previous
+  /// one was legible on a desk and tiring in a classroom, which is where this
+  /// is actually used — often at arm's length, often standing up.
+  ///
+  /// Nothing here goes below 13. That is the point at which a number on a
+  /// register stops being readable at a glance, and a register that has to be
+  /// squinted at gets marked wrong.
   static TextTheme _textTheme(ColorScheme scheme) {
     final Color primary = scheme.onSurface;
     return TextTheme(
       displaySmall: TextStyle(
-        fontSize: 32,
+        fontSize: 34,
         height: 1.2,
         fontWeight: FontWeight.w700,
         letterSpacing: -0.6,
         color: primary,
       ),
       headlineMedium: TextStyle(
-        fontSize: 26,
+        fontSize: 28,
         height: 1.25,
         fontWeight: FontWeight.w700,
         letterSpacing: -0.4,
         color: primary,
       ),
       headlineSmall: TextStyle(
-        fontSize: 22,
+        fontSize: 24,
         height: 1.3,
         fontWeight: FontWeight.w700,
         letterSpacing: -0.3,
         color: primary,
       ),
       titleLarge: TextStyle(
-        fontSize: 19,
+        fontSize: 21,
         height: 1.3,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         letterSpacing: -0.2,
         color: primary,
       ),
       titleMedium: TextStyle(
+        fontSize: 18,
+        height: 1.35,
+        fontWeight: FontWeight.w600,
+        color: primary,
+      ),
+      // Carries most of the names in the app - a student on a register, a class
+      // on the hub - so it is deliberately close to titleMedium rather than
+      // being a step down towards a caption.
+      titleSmall: TextStyle(
         fontSize: 16,
         height: 1.35,
         fontWeight: FontWeight.w600,
         color: primary,
       ),
-      titleSmall: TextStyle(
-        fontSize: 14.5,
-        height: 1.35,
-        fontWeight: FontWeight.w600,
-        color: primary,
-      ),
-      bodyLarge: TextStyle(fontSize: 16, height: 1.45, color: primary),
-      bodyMedium: TextStyle(fontSize: 14, height: 1.45, color: primary),
-      bodySmall: TextStyle(fontSize: 12.5, height: 1.4, color: primary),
+      bodyLarge: TextStyle(fontSize: 17, height: 1.45, color: primary),
+      bodyMedium: TextStyle(fontSize: 15.5, height: 1.45, color: primary),
+      bodySmall: TextStyle(fontSize: 14, height: 1.4, color: primary),
       labelLarge: TextStyle(
-        fontSize: 13.5,
+        fontSize: 15,
         height: 1.3,
         fontWeight: FontWeight.w600,
         color: primary,
       ),
       labelMedium: TextStyle(
-        fontSize: 12,
+        fontSize: 13.5,
         height: 1.3,
         fontWeight: FontWeight.w600,
         letterSpacing: 0.1,
         color: primary,
       ),
       labelSmall: TextStyle(
-        fontSize: 11,
+        fontSize: 13,
         height: 1.3,
         fontWeight: FontWeight.w600,
-        letterSpacing: 0.3,
+        letterSpacing: 0.2,
         color: primary,
       ),
     );

@@ -31,19 +31,19 @@ class ActivityTile extends StatelessWidget {
           Column(
             children: <Widget>[
               Container(
-                width: 30,
-                height: 30,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(iconFor(log.type), size: 15, color: color),
+                child: Icon(iconFor(log.type), size: 18, color: color),
               ),
               if (!isLast)
                 Expanded(
                   child: Container(
                     width: 1.5,
-                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                     color: context.semantic.subtleBorder,
                   ),
                 ),
@@ -52,19 +52,25 @@ class ActivityTile extends StatelessWidget {
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.lg),
+              // The top nudge centres the first line of text against the dot.
+              padding: EdgeInsets.only(
+                top: AppSpacing.xs,
+                bottom: isLast ? 0 : AppSpacing.xl,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(log.summary, style: context.text.bodyMedium),
-                  const SizedBox(height: 2),
+                  Text(log.summary, style: context.text.titleSmall),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     <String>[
                       if (showActor && log.actorName != null) log.actorName!,
                       AppDate.relativeTime(log.createdAt),
                       if (log.detail != null) log.detail!,
                     ].join(' · '),
-                    style: context.text.labelSmall
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.text.bodySmall
                         ?.copyWith(color: context.semantic.mutedText),
                   ),
                 ],
@@ -144,10 +150,7 @@ class NotificationTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color color = colorFor(context, notification.category);
     final Widget tile = Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
+      padding: AppSpacing.tilePadding,
       decoration: BoxDecoration(
         color: notification.isRead
             ? context.colors.surface
@@ -163,13 +166,13 @@ class NotificationTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
-            width: 36,
-            height: 36,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(AppRadii.sm),
+              borderRadius: BorderRadius.circular(AppRadii.md),
             ),
-            child: Icon(iconFor(notification.category), size: 18, color: color),
+            child: Icon(iconFor(notification.category), size: 22, color: color),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -177,34 +180,41 @@ class NotificationTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Expanded(
                       child: Text(
                         notification.title,
-                        style: context.text.titleSmall?.copyWith(
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.text.titleMedium?.copyWith(
                           fontWeight: notification.isRead
                               ? FontWeight.w600
                               : FontWeight.w700,
                         ),
                       ),
                     ),
-                    if (!notification.isRead)
+                    if (!notification.isRead) ...<Widget>[
+                      const SizedBox(width: AppSpacing.sm),
                       Container(
-                        width: 8,
-                        height: 8,
+                        width: 10,
+                        height: 10,
+                        // Sits against the first line of a title that wraps.
+                        margin: const EdgeInsets.only(top: AppSpacing.sm),
                         decoration: BoxDecoration(
                           color: context.colors.primary,
                           shape: BoxShape.circle,
                         ),
                       ),
+                    ],
                   ],
                 ),
-                const SizedBox(height: 3),
-                Text(notification.body, style: context.text.bodySmall),
+                const SizedBox(height: AppSpacing.xs),
+                Text(notification.body, style: context.text.bodyMedium),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   AppDate.relativeTime(notification.createdAt),
-                  style: context.text.labelSmall
+                  style: context.text.bodySmall
                       ?.copyWith(color: context.semantic.mutedText),
                 ),
               ],

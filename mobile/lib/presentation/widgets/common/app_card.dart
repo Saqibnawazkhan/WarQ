@@ -96,13 +96,16 @@ class SectionCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
+                    // A card heading and a [SectionHeader] label the same level
+                    // of the page, so they are set at the same size. titleSmall
+                    // put this heading level with the row names underneath it.
                     Text(
                       title,
-                      style: context.text.titleSmall
+                      style: context.text.titleMedium
                           ?.copyWith(fontWeight: FontWeight.w700),
                     ),
                     if (subtitle != null) ...<Widget>[
-                      const SizedBox(height: 2),
+                      const Gap.xs(),
                       Text(
                         subtitle!,
                         style: context.text.bodySmall
@@ -166,7 +169,7 @@ class SectionHeader extends StatelessWidget {
                       ?.copyWith(fontWeight: FontWeight.w700),
                 ),
                 if (subtitle != null) ...<Widget>[
-                  const SizedBox(height: 2),
+                  const Gap.xs(),
                   Text(
                     subtitle!,
                     style: context.text.bodySmall

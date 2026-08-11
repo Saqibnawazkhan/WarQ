@@ -50,8 +50,25 @@ dev_dependencies:
     sdk: flutter
 
   # Drives the real app on a real device (see integration_test/).
-  integration_test:
-    sdk: flutter
+  #
+  # Commented out because Flutter 3.35.7 writes every plugin in
+  # .flutter-plugins-dependencies into GeneratedPluginRegistrant.java, including
+  # the ones it has itself marked "dev_dependency": true. integration_test's
+  # Android library is not on the release classpath, so the registrant fails to
+  # compile and `flutter build apk --release` dies with
+  #
+  #   package dev.flutter.plugins.integration_test does not exist
+  #
+  # Release builds only started failing after a `flutter clean`, because the
+  # manifest that had been on disk predated the entry.
+  #
+  # The tests themselves are unaffected: they run against a debug build, where
+  # the plugin is present. Uncomment this line, run `flutter pub get`, and
+  # `flutter test integration_test` works as before - then comment it out again
+  # to ship a release build.
+  #
+  # integration_test:
+  #   sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

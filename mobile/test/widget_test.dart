@@ -93,7 +93,9 @@ void main() {
     // The five-destination bottom navigation from the spec.
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(find.text('Attendance'), findsWidgets);
-    expect(find.text('Assessments'), findsWidgets);
+    // Labelled "Marks": "Assessments" wraps onto two lines in a fifth of a
+    // phone screen at the current text size and breaks the bar's alignment.
+    expect(find.text('Marks'), findsWidgets);
   });
 
   testWidgets('an organization admin lands on the organization dashboard',

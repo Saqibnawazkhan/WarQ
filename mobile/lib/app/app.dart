@@ -54,8 +54,11 @@ class EduManagerApp extends StatelessWidget {
               final MediaQueryData media = MediaQuery.of(context);
               return MediaQuery(
                 data: media.copyWith(
+                  // The floor sits at 1.0 now: the app's own scale is already
+                  // sized for a classroom, and letting the system shrink it
+                  // below that undoes the point. Enlarging is still honoured.
                   textScaler: media.textScaler.clamp(
-                    minScaleFactor: 0.85,
+                    minScaleFactor: 1.0,
                     maxScaleFactor: 1.35,
                   ),
                 ),

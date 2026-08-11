@@ -76,7 +76,7 @@ class _DashboardView extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.xl,
-                AppSpacing.sm,
+                AppSpacing.lg,
                 AppSpacing.xl,
                 AppSpacing.md,
               ),
@@ -93,14 +93,29 @@ class _DashboardView extends StatelessWidget {
                 itemBuilder: (BuildContext context, int index) {
                   final ClassSummary summary = classes[index];
                   return ListTile(
+                    // Aligns the rows with the sheet's heading and gives each one
+                    // room to breathe at the larger type scale.
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xl,
+                      vertical: AppSpacing.sm,
+                    ),
                     leading: ClassAvatar(
                       name: summary.name,
                       seed: summary.schoolClass.avatarKey,
-                      size: 38,
                     ),
-                    title: Text(summary.name),
+                    title: Text(
+                      summary.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.text.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w600),
+                    ),
                     subtitle: Text(
                       Format.plural(summary.studentCount, 'student'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.text.bodySmall
+                          ?.copyWith(color: context.semantic.mutedText),
                     ),
                     onTap: () => Navigator.of(sheetContext).pop(summary),
                   );
@@ -131,9 +146,9 @@ class _DashboardView extends StatelessWidget {
             onRefresh: controller.refresh,
             children: <Widget>[
               _Header(controller: controller),
-              const Gap.xl(),
+              const Gap.xxl(),
               _StatsSection(data: data),
-              const Gap.xl(),
+              const Gap.xxl(),
               const SectionHeader(title: 'Quick actions'),
               _QuickActions(
                 data: data,
@@ -189,7 +204,9 @@ class _DashboardView extends StatelessWidget {
                       ),
                     ),
                   ),
-                const Gap.lg(),
+                // The last card already carries its own bottom padding, so this
+                // lands on the same 24pt gap that separates every other section.
+                const Gap.md(),
               ],
               if (data.recentAssessments.isNotEmpty) ...<Widget>[
                 SectionHeader(
@@ -214,7 +231,7 @@ class _DashboardView extends StatelessWidget {
                       ),
                     ),
                   ),
-                const Gap.lg(),
+                const Gap.md(),
               ],
               if (data.recentActivity.isNotEmpty)
                 SectionCard(
@@ -249,27 +266,33 @@ class _Header extends StatelessWidget {
 
     return Row(
       children: <Widget>[
-        AppAvatar(name: teacher.displayName, seed: teacher.id, size: 46),
-        const SizedBox(width: AppSpacing.md),
+        AppAvatar(name: teacher.displayName, seed: teacher.id, size: 52),
+        const SizedBox(width: AppSpacing.lg),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              // The greeting is a quiet kicker; the name below it is what the
+              // eye should land on first.
               Text(
                 controller.greeting,
-                style: context.text.bodySmall
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.text.bodyMedium
                     ?.copyWith(color: context.semantic.mutedText),
               ),
+              const SizedBox(height: AppSpacing.xxs),
               Text(
                 teacher.displayName,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: context.text.titleLarge
+                style: context.text.headlineSmall
                     ?.copyWith(fontWeight: FontWeight.w700),
               ),
             ],
           ),
         ),
+        const SizedBox(width: AppSpacing.sm),
         IconButton.filledTonal(
           onPressed: () => Navigator.of(context).pushNamed(Routes.notifications),
           icon: Badge(
@@ -309,9 +332,11 @@ class _StatsSection extends StatelessWidget {
           value: '${data.today.summary.attended}',
           icon: Icons.check_circle_rounded,
           accent: context.semantic.success,
+          // Kept short: the tile is half a screen wide and the caption is
+          // clipped to one line, so "classes marked" would be cut off.
           caption: data.today.classesTotal == 0
               ? null
-              : '${data.today.classesMarked}/${data.today.classesTotal} classes marked',
+              : '${data.today.classesMarked}/${data.today.classesTotal} marked',
         ),
         StatTile(
           label: 'Absent today',
@@ -446,13 +471,13 @@ class _PendingAttendanceCard extends StatelessWidget {
               Icon(
                 Icons.pending_actions_rounded,
                 color: context.semantic.warning,
-                size: 20,
+                size: 22,
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(
                   'Attendance pending for today',
-                  style: context.text.titleSmall?.copyWith(
+                  style: context.text.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: context.semantic.onWarningContainer,
                   ),
@@ -460,15 +485,27 @@ class _PendingAttendanceCard extends StatelessWidget {
               ),
             ],
           ),
-          const Gap.md(),
+          const Gap.lg(),
           Wrap(
             spacing: AppSpacing.sm,
             runSpacing: AppSpacing.sm,
             children: <Widget>[
               for (final SchoolClass schoolClass in pending)
                 ActionChip(
-                  avatar: const Icon(Icons.how_to_reg_rounded, size: 16),
-                  label: Text(schoolClass.name),
+                  avatar: const Icon(Icons.how_to_reg_rounded, size: 18),
+                  // A long class name is otherwise squeezed into whatever width
+                  // the run has left and clipped mid-word. Capping it keeps the
+                  // chip on one line and leaves room for a neighbour.
+                  label: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: context.screenWidth * 0.5,
+                    ),
+                    child: Text(
+                      schoolClass.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                   onPressed: () => onMark(schoolClass),
                 ),
             ],

@@ -123,7 +123,11 @@ class _AssessmentsView extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 child: ContentWidth(
                   child: SizedBox(
-                    height: 40,
+                    // A horizontal list has to be given a height, and this one
+                    // holds chips whose labels follow the text theme. Sized for
+                    // the chip rather than the old label size, or the row clips
+                    // the moment anyone enlarges text.
+                    height: 52,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       children: <Widget>[

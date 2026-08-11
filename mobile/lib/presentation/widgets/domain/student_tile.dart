@@ -32,20 +32,20 @@ class StudentTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool atRisk = showRisk && performance.isAtRisk;
+    final TextStyle? detailStyle = context.text.bodySmall?.copyWith(
+      color: context.semantic.mutedText,
+    );
 
     return AppCard(
       onTap: onTap,
       onLongPress: onLongPress,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
+      padding: AppSpacing.tilePadding,
       borderColor: atRisk
           ? context.semantic.warning.withValues(alpha: 0.5)
           : null,
       child: Row(
         children: <Widget>[
-          AppAvatar(name: student.fullName, seed: student.id, size: 42),
+          AppAvatar(name: student.fullName, seed: student.id, size: 44),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
@@ -56,47 +56,42 @@ class StudentTile extends StatelessWidget {
                   student.fullName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.text.titleSmall,
+                  style: context.text.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-                const SizedBox(height: 3),
-                Row(
-                  children: <Widget>[
-                    if (student.rollNumber != null) ...<Widget>[
-                      Text(
-                        student.rollNumber!,
-                        style: context.text.bodySmall?.copyWith(
-                          color: context.semantic.mutedText,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        '·',
-                        style: context.text.bodySmall?.copyWith(
-                          color: context.semantic.mutedText,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                    ],
-                    Flexible(
-                      child: Text(
-                        performance.attendance.hasData
+                const SizedBox(height: AppSpacing.xs),
+                // One run of text rather than a row of flexible parts: two
+                // flexible children split the width evenly, so a short roll
+                // number would clip the attendance figure while leaving dead
+                // space beside it. As one span the line uses every pixel it
+                // has and can never overflow.
+                Text.rich(
+                  TextSpan(
+                    children: <InlineSpan>[
+                      if (student.rollNumber != null)
+                        TextSpan(text: '${student.rollNumber!} · '),
+                      TextSpan(
+                        text: performance.attendance.hasData
                             ? '${Format.percentOrDash(performance.attendance.percentage, decimals: 0)} attendance'
                             : 'No attendance yet',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.text.bodySmall?.copyWith(
-                          color: performance.hasLowAttendance
-                              ? context.semantic.warning
-                              : context.semantic.mutedText,
-                        ),
+                        style: performance.hasLowAttendance
+                            ? TextStyle(
+                                color: context.semantic.warning,
+                                fontWeight: FontWeight.w600,
+                              )
+                            : null,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: detailStyle,
                 ),
               ],
             ),
           ),
-          const SizedBox(width: AppSpacing.sm),
+          const SizedBox(width: AppSpacing.md),
           if (trailing != null)
             trailing!
           else
@@ -106,15 +101,14 @@ class StudentTile extends StatelessWidget {
               children: <Widget>[
                 Text(
                   Format.percentOrDash(performance.percentage, decimals: 0),
-                  style: context.text.titleSmall?.copyWith(
+                  style: context.text.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: AppSpacing.xs),
                 GradeBadge(
                   grade: performance.grade?.label,
                   percent: performance.percentage,
-                  dense: true,
                 ),
               ],
             ),
@@ -146,15 +140,29 @@ class StudentPickerTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-      leading: AppAvatar(name: student.fullName, seed: student.id, size: 40),
-      title: Text(student.fullName, style: context.text.titleSmall),
-      subtitle: Text(
-        subtitle ?? student.rollNumber ?? 'No roll number',
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.sm,
+      ),
+      leading: AppAvatar(name: student.fullName, seed: student.id, size: 44),
+      // Matches the roster tile so a name reads the same wherever it appears.
+      title: Text(
+        student.fullName,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: context.text.bodySmall?.copyWith(
-          color: context.semantic.mutedText,
+        style: context.text.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(top: AppSpacing.xxs),
+        child: Text(
+          subtitle ?? student.rollNumber ?? 'No roll number',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: context.text.bodySmall?.copyWith(
+            color: context.semantic.mutedText,
+          ),
         ),
       ),
       trailing:
@@ -185,15 +193,15 @@ class AlphabetHeader extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.xs,
-        AppSpacing.lg,
+        AppSpacing.xl,
         AppSpacing.xs,
-        AppSpacing.sm,
+        AppSpacing.md,
       ),
       child: Row(
         children: <Widget>[
           Text(
             letter,
-            style: context.text.labelLarge?.copyWith(
+            style: context.text.titleSmall?.copyWith(
               color: context.colors.primary,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.6,
@@ -205,7 +213,7 @@ class AlphabetHeader extends StatelessWidget {
             const SizedBox(width: AppSpacing.md),
             Text(
               '$count',
-              style: context.text.labelSmall?.copyWith(
+              style: context.text.bodySmall?.copyWith(
                 color: context.semantic.mutedText,
               ),
             ),

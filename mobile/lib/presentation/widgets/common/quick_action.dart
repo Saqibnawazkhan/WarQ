@@ -29,15 +29,22 @@ class QuickActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 96,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.zero,
-        itemCount: actions.length,
-        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.md),
-        itemBuilder: (BuildContext context, int index) =>
-            _QuickActionTile(action: actions[index]),
+    // The bar takes the height of its tallest tile instead of a fixed one: at
+    // the larger type scale a two-line label ("Mark attendance") no longer fits
+    // a hard-coded box, and clipping a shortcut's name mid-word hides what it
+    // does. Stretching the row also keeps every card the same height.
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            for (int i = 0; i < actions.length; i++) ...<Widget>[
+              if (i > 0) const SizedBox(width: AppSpacing.md),
+              _QuickActionTile(action: actions[i]),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -56,7 +63,9 @@ class _QuickActionTile extends StatelessWidget {
     return Opacity(
       opacity: enabled ? 1 : 0.45,
       child: SizedBox(
-        width: 92,
+        // Wide enough that the longest word in a label ("attendance") still
+        // sits on one line at the 1.35 text scale the app allows.
+        width: 116,
         child: Material(
           color: context.colors.surface,
           borderRadius: AppRadii.cardRadius,
@@ -66,7 +75,7 @@ class _QuickActionTile extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.sm,
-                vertical: AppSpacing.sm,
+                vertical: AppSpacing.md,
               ),
               decoration: BoxDecoration(
                 borderRadius: AppRadii.cardRadius,
@@ -76,24 +85,25 @@ class _QuickActionTile extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Container(
-                    width: 38,
-                    height: 38,
+                    width: 44,
+                    height: 44,
                     decoration: BoxDecoration(
                       color: color.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(AppRadii.sm),
                     ),
-                    child: Icon(action.icon, size: 20, color: color),
+                    child: Icon(action.icon, size: 22, color: color),
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  // Flexible so a long label or a large font scale shrinks the
-                  // text block instead of overflowing the fixed-height tile.
+                  const SizedBox(height: AppSpacing.md),
+                  // Flexible so an unusually long label still degrades to an
+                  // ellipsis rather than an overflow, even though the bar now
+                  // grows to fit two lines.
                   Flexible(
                     child: Text(
                       action.label,
                       maxLines: 2,
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
-                      style: context.text.labelSmall?.copyWith(height: 1.2),
+                      style: context.text.labelMedium?.copyWith(height: 1.25),
                     ),
                   ),
                 ],

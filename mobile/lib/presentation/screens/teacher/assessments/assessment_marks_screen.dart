@@ -144,8 +144,12 @@ class _MarksView extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
+          // Two lines of the larger type overflow a standard toolbar once the
+          // system text scale is turned up, so the bar is given room to hold it.
+          toolbarHeight: kToolbarHeight + AppSpacing.lg,
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Text(
                 assessment?.name ?? 'Marks',
@@ -156,6 +160,8 @@ class _MarksView extends StatelessWidget {
                 Text(
                   '${controller.schoolClass?.name ?? ''} · '
                   '${Format.marks(assessment.totalMarks)} marks',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: context.text.bodySmall
                       ?.copyWith(color: context.semantic.mutedText),
                 ),
@@ -205,7 +211,7 @@ class _MarksView extends StatelessWidget {
               ),
         body: ControllerStateView(
           controller: controller,
-          loading: const SkeletonList(itemCount: 6, itemHeight: 72),
+          loading: const SkeletonList(itemCount: 6, itemHeight: 76),
           empty: const EmptyView(
             icon: Icons.people_outline_rounded,
             title: 'No students in this class',
@@ -238,7 +244,7 @@ class _MarksView extends StatelessWidget {
                       AppSpacing.xxl,
                     ),
                     itemCount: controller.visibleStudents.length,
-                    separatorBuilder: (_, __) => const Gap.sm(),
+                    separatorBuilder: (_, __) => const Gap.md(),
                     itemBuilder: (BuildContext context, int index) {
                       final Student student = controller.visibleStudents[index];
                       return _MarkRow(
@@ -274,7 +280,7 @@ class _ProgressStrip extends StatelessWidget {
         AppSpacing.lg,
         AppSpacing.md,
         AppSpacing.lg,
-        AppSpacing.md,
+        AppSpacing.lg,
       ),
       child: ContentWidth(
         child: Column(
@@ -282,25 +288,41 @@ class _ProgressStrip extends StatelessWidget {
             Row(
               children: <Widget>[
                 Expanded(
-                  child: Text(
-                    '${controller.gradedCount} of $total graded',
-                    style: context.text.labelLarge,
+                  // The count is the number a teacher glances at, so it leads
+                  // and the rest of the sentence supports it.
+                  child: Text.rich(
+                    TextSpan(
+                      children: <InlineSpan>[
+                        TextSpan(
+                          text: '${controller.gradedCount}',
+                          style: context.text.titleLarge,
+                        ),
+                        TextSpan(
+                          text: ' of $total graded',
+                          style: context.text.bodyMedium
+                              ?.copyWith(color: context.semantic.mutedText),
+                        ),
+                      ],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                if (controller.averagePercentage != null)
+                if (controller.averagePercentage != null) ...<Widget>[
+                  const SizedBox(width: AppSpacing.sm),
                   AppBadge(
                     'Avg ${Format.percent(controller.averagePercentage!, decimals: 0)}',
                     tone: GradeBadge.toneForPercent(controller.averagePercentage),
-                    dense: true,
                   ),
+                ],
               ],
             ),
-            const Gap.sm(),
+            const Gap.md(),
             ClipRRect(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(AppRadii.pill),
               child: LinearProgressIndicator(
                 value: progress,
-                minHeight: 6,
+                minHeight: 8,
                 backgroundColor: context.semantic.subtleBorder,
               ),
             ),
@@ -379,17 +401,22 @@ class _MarkRowState extends State<_MarkRow> {
     final double? percent = controller.percentFor(widget.student.id);
     final GradeBand? grade = controller.gradeFor(widget.student.id);
 
+    final TextStyle? subtle = context.text.bodySmall
+        ?.copyWith(color: context.semantic.mutedText);
+
     return AppCard(
+      // Horizontal padding stays tighter than a plain tile's: this row also
+      // carries a field and a toggle, and the width it saves goes to the name.
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
+        vertical: AppSpacing.md,
       ),
       child: Row(
         children: <Widget>[
           AppAvatar(
             name: widget.student.fullName,
             seed: widget.student.id,
-            size: 38,
+            size: 42,
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -401,26 +428,39 @@ class _MarkRowState extends State<_MarkRow> {
                   widget.student.fullName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.text.titleSmall,
+                  style: context.text.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w700),
                 ),
+                const SizedBox(height: AppSpacing.xxs),
                 Row(
                   children: <Widget>[
-                    if (widget.student.rollNumber != null)
-                      Text(
-                        '${widget.student.rollNumber} · ',
-                        style: context.text.labelSmall
-                            ?.copyWith(color: context.semantic.mutedText),
-                      ),
-                    Text(
-                      draft.absent
-                          ? 'Marked absent'
-                          : percent == null
-                              ? 'Not graded'
-                              : Format.percent(percent, decimals: 0),
-                      style: context.text.labelSmall?.copyWith(
-                        color: draft.absent
-                            ? context.semantic.danger
-                            : context.semantic.mutedText,
+                    // One paragraph rather than two adjacent Texts: the roll
+                    // number and the status together are wider than this column
+                    // on a narrow phone, and only a single Text can ellipsize.
+                    Flexible(
+                      child: Text.rich(
+                        TextSpan(
+                          children: <InlineSpan>[
+                            if (widget.student.rollNumber != null)
+                              TextSpan(text: '${widget.student.rollNumber} · '),
+                            TextSpan(
+                              text: draft.absent
+                                  ? 'Marked absent'
+                                  : percent == null
+                                      ? 'Not graded'
+                                      : Format.percent(percent, decimals: 0),
+                              style: draft.absent
+                                  ? subtle?.copyWith(
+                                      color: context.semantic.danger,
+                                      fontWeight: FontWeight.w600,
+                                    )
+                                  : null,
+                            ),
+                          ],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: subtle,
                       ),
                     ),
                     if (grade != null) ...<Widget>[
@@ -434,11 +474,17 @@ class _MarkRowState extends State<_MarkRow> {
           ),
           const SizedBox(width: AppSpacing.sm),
           SizedBox(
-            width: 74,
+            // Roomy enough to tap and to read the value back at a glance; the
+            // mark is the point of the row, so it is set larger than its label.
+            // The `/total` suffix eats into the same box, so this has to hold
+            // three digits *and* the suffix at the largest text scale allowed,
+            // or a teacher entering 100 cannot see what they typed.
+            width: 92,
             child: TextField(
               controller: _field,
               enabled: !draft.absent,
               textAlign: TextAlign.center,
+              style: context.text.titleMedium,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
@@ -446,12 +492,12 @@ class _MarkRowState extends State<_MarkRow> {
               decoration: InputDecoration(
                 isDense: true,
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
+                  horizontal: AppSpacing.xs,
                   vertical: AppSpacing.md,
                 ),
                 hintText: '—',
                 suffixText: '/${Format.marks(controller.totalMarks)}',
-                suffixStyle: context.text.labelSmall,
+                suffixStyle: subtle,
               ),
               onChanged: _onChanged,
             ),
@@ -466,7 +512,7 @@ class _MarkRowState extends State<_MarkRow> {
               draft.absent
                   ? Icons.person_off_rounded
                   : Icons.person_off_outlined,
-              size: 20,
+              size: 22,
               color: draft.absent
                   ? context.semantic.danger
                   : context.semantic.mutedText,

@@ -130,12 +130,23 @@ class _MarkAttendanceViewState extends State<_MarkAttendanceView> {
       },
       child: Scaffold(
         appBar: AppBar(
+          // Two stacked lines at the current type scale need more than the
+          // 56dp default, which clips them as soon as the system text size is
+          // turned up.
+          toolbarHeight: 72,
           title: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(controller.schoolClass?.name ?? 'Attendance'),
+              Text(
+                controller.schoolClass?.name ?? 'Attendance',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
               Text(
                 AppDate.relativeDay(controller.date),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: context.text.bodySmall
                     ?.copyWith(color: context.semantic.mutedText),
               ),
@@ -160,7 +171,7 @@ class _MarkAttendanceViewState extends State<_MarkAttendanceView> {
             : null,
         body: ControllerStateView(
           controller: controller,
-          loading: const SkeletonList(itemCount: 6, itemHeight: 64),
+          loading: const SkeletonList(itemCount: 5, itemHeight: 140),
           empty: const EmptyView(
             icon: Icons.people_outline_rounded,
             title: 'No students in this class',
@@ -178,17 +189,20 @@ class _MarkAttendanceViewState extends State<_MarkAttendanceView> {
                     vertical: AppSpacing.md,
                   ),
                   child: Row(
+                    // Keeps the icon beside the first line when the message
+                    // wraps rather than floating in the middle of it.
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Icon(
                         Icons.error_outline_rounded,
-                        size: 18,
+                        size: 20,
                         color: context.semantic.danger,
                       ),
                       const SizedBox(width: AppSpacing.md),
                       Expanded(
                         child: Text(
                           _error!,
-                          style: context.text.bodySmall?.copyWith(
+                          style: context.text.bodyMedium?.copyWith(
                             color: context.semantic.onDangerContainer,
                           ),
                         ),
@@ -203,12 +217,12 @@ class _MarkAttendanceViewState extends State<_MarkAttendanceView> {
                   child: ListView.separated(
                     padding: const EdgeInsets.fromLTRB(
                       AppSpacing.lg,
-                      AppSpacing.sm,
+                      AppSpacing.md,
                       AppSpacing.lg,
                       AppSpacing.xxl,
                     ),
                     itemCount: controller.roster.length,
-                    separatorBuilder: (_, __) => const Gap.sm(),
+                    separatorBuilder: (_, __) => const Gap.md(),
                     itemBuilder: (BuildContext context, int index) {
                       final Student student = controller.roster[index];
                       return _AttendanceRow(
@@ -240,10 +254,13 @@ class _SummaryStrip extends StatelessWidget {
       color: context.colors.surface,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
+        vertical: AppSpacing.lg,
       ),
       child: ContentWidth(
         child: Row(
+          // A caption that wraps to two lines must not drag its number out of
+          // line with the other three.
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             _Count(
               label: 'Present',
@@ -283,16 +300,23 @@ class _Count extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text(
             '$value',
-            style: context.text.titleLarge?.copyWith(
+            style: context.text.headlineSmall?.copyWith(
               fontWeight: FontWeight.w700,
               color: color,
             ),
           ),
+          const Gap.xs(),
           Text(
             label,
+            textAlign: TextAlign.center,
+            // "Short leave" cannot fit a quarter of a phone width on one line,
+            // so it wraps instead of being clipped or ellipsised into nonsense.
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: context.text.labelSmall
                 ?.copyWith(color: context.semantic.mutedText),
           ),
@@ -306,6 +330,15 @@ class _BulkActions extends StatelessWidget {
   const _BulkActions({required this.controller});
 
   final AttendanceMarkingController controller;
+
+  /// Half a phone width has to hold an icon and two words, so the button hands
+  /// most of its own horizontal padding to the label to keep it on one line.
+  /// The height is left to the theme, which is what every other button in the
+  /// app stands at.
+  static ButtonStyle _bulkStyle(Color foreground) => OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+        foregroundColor: foreground,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -323,24 +356,18 @@ class _BulkActions extends StatelessWidget {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: () => controller.markAll(AttendanceStatus.present),
-                icon: const Icon(Icons.done_all_rounded, size: 18),
-                label: const Text('All present'),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(42),
-                  foregroundColor: context.semantic.success,
-                ),
+                icon: const Icon(Icons.done_all_rounded, size: 20),
+                label: const Text('All present', textAlign: TextAlign.center),
+                style: _bulkStyle(context.semantic.success),
               ),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: () => controller.markAll(AttendanceStatus.absent),
-                icon: const Icon(Icons.remove_done_rounded, size: 18),
-                label: const Text('All absent'),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(42),
-                  foregroundColor: context.semantic.danger,
-                ),
+                icon: const Icon(Icons.remove_done_rounded, size: 20),
+                label: const Text('All absent', textAlign: TextAlign.center),
+                style: _bulkStyle(context.semantic.danger),
               ),
             ),
           ],
@@ -351,6 +378,12 @@ class _BulkActions extends StatelessWidget {
 }
 
 /// One student row with a four-way status selector.
+///
+/// The name and the selector are stacked rather than side by side. Sharing one
+/// line left a phone barely 90dp for the name — long enough for "Muhammad A…"
+/// and nothing more — while squeezing four buttons below the size a thumb can
+/// hit reliably. Given a line each, the name reads in full and every button is
+/// a comfortable target.
 class _AttendanceRow extends StatelessWidget {
   const _AttendanceRow({
     required this.student,
@@ -364,58 +397,79 @@ class _AttendanceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool showMeta = student.rollNumber != null || !student.hasAnyContact;
+
     return AppCard(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
+      padding: AppSpacing.tilePadding,
       borderColor: AttendanceStatusChip.colorFor(context, status)
           .withValues(alpha: 0.35),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          AppAvatar(name: student.fullName, seed: student.id, size: 38),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(
-                  student.fullName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.text.titleSmall,
-                ),
-                Row(
+          Row(
+            children: <Widget>[
+              AppAvatar(name: student.fullName, seed: student.id, size: 44),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    if (student.rollNumber != null)
-                      Text(
-                        student.rollNumber!,
-                        style: context.text.labelSmall
-                            ?.copyWith(color: context.semantic.mutedText),
-                      ),
-                    if (student.rollNumber != null &&
-                        !student.hasAnyContact)
-                      Text(
-                        ' · ',
-                        style: context.text.labelSmall
-                            ?.copyWith(color: context.semantic.mutedText),
-                      ),
-                    if (!student.hasAnyContact)
-                      Text(
-                        'No contact number',
-                        style: context.text.labelSmall
-                            ?.copyWith(color: context.semantic.warning),
-                      ),
+                    Text(
+                      student.fullName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.text.titleMedium,
+                    ),
+                    if (showMeta) ...<Widget>[
+                      const Gap.xs(),
+                      _StudentMeta(student: student),
+                    ],
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          const SizedBox(width: AppSpacing.sm),
+          const Gap.md(),
           _StatusSelector(status: status, onChanged: onChanged),
         ],
       ),
+    );
+  }
+}
+
+/// The quiet second line under a student's name.
+class _StudentMeta extends StatelessWidget {
+  const _StudentMeta({required this.student});
+
+  final Student student;
+
+  @override
+  Widget build(BuildContext context) {
+    final TextStyle? muted =
+        context.text.bodySmall?.copyWith(color: context.semantic.mutedText);
+    final bool needsContact = !student.hasAnyContact;
+
+    // One text run rather than a row of them: a long roll number then eats into
+    // the space it actually needs instead of squeezing the contact warning,
+    // which is the part the teacher has to act on.
+    return Text.rich(
+      TextSpan(
+        children: <InlineSpan>[
+          if (student.rollNumber != null)
+            TextSpan(text: student.rollNumber, style: muted),
+          if (student.rollNumber != null && needsContact)
+            TextSpan(text: ' · ', style: muted),
+          if (needsContact)
+            TextSpan(
+              text: 'No contact number',
+              style: context.text.bodySmall
+                  ?.copyWith(color: context.semantic.warning),
+            ),
+        ],
+      ),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }
@@ -428,18 +482,21 @@ class _StatusSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const List<AttendanceStatus> options = AttendanceStatus.values;
     return Row(
-      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        for (final AttendanceStatus option in AttendanceStatus.values)
-          Padding(
-            padding: const EdgeInsets.only(left: 4),
+        for (int i = 0; i < options.length; i++) ...<Widget>[
+          if (i > 0) const SizedBox(width: AppSpacing.sm),
+          // Equal shares of the card width: the four buttons land in the same
+          // place on every row, so a register can be marked without aiming.
+          Expanded(
             child: _StatusButton(
-              option: option,
-              selected: option == status,
-              onTap: () => onChanged(option),
+              option: options[i],
+              selected: options[i] == status,
+              onTap: () => onChanged(options[i]),
             ),
           ),
+        ],
       ],
     );
   }
@@ -459,6 +516,7 @@ class _StatusButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color color = AttendanceStatusChip.colorFor(context, option);
+    final Color foreground = selected ? Colors.white : color;
     return Tooltip(
       message: option.label,
       child: Semantics(
@@ -470,22 +528,36 @@ class _StatusButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadii.sm),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 140),
-            width: 34,
-            height: 34,
+            height: 48,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: selected ? color : color.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(AppRadii.sm),
               border: Border.all(
                 color: selected ? color : color.withValues(alpha: 0.25),
+                width: selected ? 1.5 : 1,
               ),
             ),
-            child: Text(
-              option.shortLabel,
-              style: context.text.labelMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: selected ? Colors.white : color,
-              ),
+            // The icon carries the same meaning as the letter, so the state is
+            // still readable across a room and to anyone who cannot separate
+            // the green button from the red one.
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Icon(
+                  AttendanceStatusChip.iconFor(option),
+                  size: 18,
+                  color: foreground,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  option.shortLabel,
+                  style: context.text.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: foreground,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -528,8 +600,12 @@ class _SaveBar extends StatelessWidget {
           fillHeight: false,
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            // Everywhere else in the app a primary button spans its container,
+            // because a list body stretches its children. This column did not,
+            // leaving the one button that ends the task sized to its label.
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              if (controller.absentCount > 0)
+              if (controller.absentCount > 0) ...<Widget>[
                 SwitchListTile.adaptive(
                   value: notifyGuardians,
                   onChanged: onToggleNotify,
@@ -537,7 +613,7 @@ class _SaveBar extends StatelessWidget {
                   contentPadding: EdgeInsets.zero,
                   title: Text(
                     'Notify guardians of absences',
-                    style: context.text.bodyMedium,
+                    style: context.text.titleSmall,
                   ),
                   subtitle: Text(
                     <String>[
@@ -546,10 +622,12 @@ class _SaveBar extends StatelessWidget {
                       if (unreachable > 0)
                         '$unreachable without a phone number',
                     ].join(' · '),
-                    style: context.text.labelSmall
+                    style: context.text.bodySmall
                         ?.copyWith(color: context.semantic.mutedText),
                   ),
                 ),
+                const Gap.sm(),
+              ],
               FilledButton.icon(
                 onPressed: controller.isBusy ? null : onSave,
                 icon: controller.isBusy

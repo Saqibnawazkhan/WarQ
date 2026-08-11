@@ -10,7 +10,7 @@ import '../../../data/models/models.dart';
 /// Semantic tone applied to pills and chips.
 enum BadgeTone { neutral, brand, success, warning, danger, info }
 
-/// Small rounded label used for grades, statuses and counts.
+/// Rounded label used for grades, statuses and counts.
 class AppBadge extends StatelessWidget {
   const AppBadge(
     this.label, {
@@ -28,10 +28,18 @@ class AppBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (Color background, Color foreground) = _colors(context, tone);
+
+    // A badge carries a status or a grade, not decoration — it has to be
+    // readable at arm's length. So both sizes use the same label and `dense`
+    // only tightens the padding around it.
+    final TextStyle? labelStyle = context.text.labelLarge
+        ?.copyWith(color: foreground, fontWeight: FontWeight.w700);
+    final double? labelSize = labelStyle?.fontSize;
+
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: dense ? AppSpacing.sm : AppSpacing.md,
-        vertical: dense ? 2 : 4,
+        horizontal: dense ? AppSpacing.md : AppSpacing.lg,
+        vertical: dense ? AppSpacing.xs : AppSpacing.sm,
       ),
       decoration: BoxDecoration(
         color: background,
@@ -41,13 +49,28 @@ class AppBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           if (icon != null) ...<Widget>[
-            Icon(icon, size: dense ? 11 : 13, color: foreground),
-            const SizedBox(width: 4),
+            // Measured off the label rather than carrying a size of its own,
+            // and scaled alongside it, so the glyph and the word beside it
+            // cannot drift apart when either scale moves.
+            Icon(
+              icon,
+              size: labelSize == null ? null : labelSize + 2,
+              applyTextScaling: true,
+              color: foreground,
+            ),
+            const SizedBox(width: AppSpacing.xs),
           ],
-          Text(
-            label,
-            style: (dense ? context.text.labelSmall : context.text.labelMedium)
-                ?.copyWith(color: foreground, fontWeight: FontWeight.w700),
+          // A badge sits inline beside a class or student name and takes its
+          // width first, so where the row is tight it has to give way rather
+          // than overflow. Flexible resolves here because the badge is always
+          // laid out inside something that bounds it.
+          Flexible(
+            child: Text(
+              label,
+              style: labelStyle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
