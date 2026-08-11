@@ -173,31 +173,55 @@ class _AssessmentFormScreenState extends State<AssessmentFormScreen> {
                 ),
                 const Gap.lg(),
               ],
-              Text(
-                'Assessment type',
-                style:
-                    context.text.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+              // The name comes first because it is what the teacher opened this
+              // screen to type. The eight types used to sit above it as three
+              // rows of chips, which pushed the only required field below the
+              // fold to choose something that is Quiz nine times out of ten.
+              TextFormField(
+                controller: _name,
+                autofocus: !isEditing,
+                textCapitalization: TextCapitalization.words,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(
+                  labelText: 'Assessment name *',
+                  hintText: 'e.g. Quiz 1',
+                  prefixIcon: Icon(Icons.title_rounded),
+                ),
+                validator: (String? v) =>
+                    Validators.name(v, field: 'Assessment name'),
               ),
-              const Gap.md(),
-              Wrap(
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
-                children: <Widget>[
+              const Gap.lg(),
+              DropdownButtonFormField<AssessmentType>(
+                initialValue: _type,
+                // No prefix icon: each item carries the icon for its own type,
+                // and the field would otherwise show two side by side.
+                decoration: const InputDecoration(
+                  labelText: 'Type',
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.md,
+                  ),
+                ),
+                items: <DropdownMenuItem<AssessmentType>>[
                   for (final AssessmentType type in AssessmentType.values)
-                    ChoiceChip(
-                      avatar: Icon(
-                        AssessmentTile.iconFor(type),
-                        size: 16,
-                        color: _type == type
-                            ? context.colors.primary
-                            : context.semantic.mutedText,
+                    DropdownMenuItem<AssessmentType>(
+                      value: type,
+                      child: Row(
+                        children: <Widget>[
+                          Icon(
+                            AssessmentTile.iconFor(type),
+                            size: 18,
+                            color: context.semantic.mutedText,
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          Text(type.label),
+                        ],
                       ),
-                      label: Text(type.label),
-                      selected: _type == type,
-                      showCheckmark: false,
-                      onSelected: (_) => _onTypeChanged(type),
                     ),
                 ],
+                onChanged: (AssessmentType? type) {
+                  if (type != null) _onTypeChanged(type);
+                },
               ),
               if (_type == AssessmentType.custom) ...<Widget>[
                 const Gap.lg(),
@@ -214,20 +238,6 @@ class _AssessmentFormScreenState extends State<AssessmentFormScreen> {
                       : null,
                 ),
               ],
-              const Gap.xl(),
-              TextFormField(
-                controller: _name,
-                autofocus: !isEditing,
-                textCapitalization: TextCapitalization.words,
-                textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  labelText: 'Assessment name *',
-                  hintText: 'e.g. Quiz 1',
-                  prefixIcon: Icon(Icons.title_rounded),
-                ),
-                validator: (String? v) =>
-                    Validators.name(v, field: 'Assessment name'),
-              ),
               const Gap.lg(),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,17 +274,20 @@ class _AssessmentFormScreenState extends State<AssessmentFormScreen> {
               const Gap.lg(),
               TextFormField(
                 controller: _description,
-                maxLines: 3,
+                maxLines: 2,
                 textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
-                  labelText: 'Description',
-                  hintText: 'Optional — topics covered, instructions, …',
+                  labelText: 'Description (optional)',
+                  hintText: 'Topics covered, instructions, …',
                   alignLabelWithHint: true,
                 ),
                 validator: (String? v) =>
                     Validators.maxLength(v, 400, field: 'Description'),
               ),
-              const Gap.xxl(),
+              const Gap.xl(),
+              // One button that looks like the answer, and the other route as
+              // plain text under it. Two filled-looking buttons side by side
+              // made a teacher stop and choose before they had done anything.
               FilledButton.icon(
                 onPressed: _saving ? null : () => _save(),
                 icon: _saving
@@ -290,11 +303,11 @@ class _AssessmentFormScreenState extends State<AssessmentFormScreen> {
                 label: Text(isEditing ? 'Save changes' : 'Create assessment'),
               ),
               if (!isEditing) ...<Widget>[
-                const Gap.md(),
-                OutlinedButton.icon(
+                const Gap.sm(),
+                TextButton.icon(
                   onPressed: _saving ? null : () => _save(thenEnterMarks: true),
                   icon: const Icon(Icons.edit_note_rounded, size: 20),
-                  label: const Text('Create and enter marks'),
+                  label: const Text('Create, then enter marks now'),
                 ),
               ],
             ],
