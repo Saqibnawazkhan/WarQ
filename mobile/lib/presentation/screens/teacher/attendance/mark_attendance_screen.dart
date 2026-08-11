@@ -210,7 +210,6 @@ class _MarkAttendanceViewState extends State<_MarkAttendanceView> {
                   ),
                 ),
               _SummaryStrip(controller: controller),
-              _BulkActions(controller: controller),
               Expanded(
                 child: ContentWidth(
                   child: ListView.separated(
@@ -249,98 +248,10 @@ class _SummaryStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: context.colors.surface,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.lg,
-      ),
-      child: ContentWidth(
-        child: Row(
-          // A caption that wraps to two lines must not drag its number out of
-          // line with the other three.
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            _Count(
-              label: 'Present',
-              value: controller.presentCount,
-              color: context.semantic.success,
-            ),
-            _Count(
-              label: 'Absent',
-              value: controller.absentCount,
-              color: context.semantic.danger,
-            ),
-            _Count(
-              label: 'Late',
-              value: controller.lateCount,
-              color: context.semantic.warning,
-            ),
-            _Count(
-              label: 'Short leave',
-              value: controller.shortLeaveCount,
-              color: context.semantic.info,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Count extends StatelessWidget {
-  const _Count({required this.label, required this.value, required this.color});
-
-  final String label;
-  final int value;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Text(
-            '$value',
-            style: context.text.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: color,
-            ),
-          ),
-          const Gap.xs(),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            // "Short leave" cannot fit a quarter of a phone width on one line,
-            // so it wraps instead of being clipped or ellipsised into nonsense.
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: context.text.labelSmall
-                ?.copyWith(color: context.semantic.mutedText),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BulkActions extends StatelessWidget {
-  const _BulkActions({required this.controller});
-
-  final AttendanceMarkingController controller;
-
-  /// Half a phone width has to hold an icon and two words, so the button hands
-  /// most of its own horizontal padding to the label to keep it on one line.
-  /// The height is left to the theme, which is what every other button in the
-  /// app stands at.
-  static ButtonStyle _bulkStyle(Color foreground) => OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-        foregroundColor: foreground,
-      );
-
-  @override
-  Widget build(BuildContext context) {
+    // One line, the way the prototype has it: the tally on the left and the
+    // bulk action on the right. Four stacked number-and-caption columns plus a
+    // separate row of buttons underneath cost about a fifth of the screen to
+    // say something a teacher reads in a glance.
     return Container(
       color: context.colors.surface,
       padding: const EdgeInsets.fromLTRB(
@@ -350,27 +261,103 @@ class _BulkActions extends StatelessWidget {
         AppSpacing.md,
       ),
       child: ContentWidth(
-        child: Row(
-          children: <Widget>[
-            Expanded(
-              child: OutlinedButton.icon(
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            color: context.colors.surfaceContainerHigh,
+            borderRadius: AppRadii.cardRadius,
+          ),
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                // Scrolls rather than wraps: with four counts and a long word
+                // like "short leave" there is no width at which all of it fits
+                // every phone, and a tally that reflows to two lines moves the
+                // bulk action around under the teacher's thumb.
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: <Widget>[
+                      _Count(
+                        label: 'present',
+                        value: controller.presentCount,
+                        color: context.semantic.success,
+                      ),
+                      _Count(
+                        label: 'absent',
+                        value: controller.absentCount,
+                        color: context.semantic.danger,
+                      ),
+                      _Count(
+                        label: 'late',
+                        value: controller.lateCount,
+                        color: context.semantic.warning,
+                      ),
+                      // "leave" rather than "short leave": the tally has a
+                      // fourth figure the prototype did not, and the full
+                      // phrase pushes it off the end of the line. In a row
+                      // that already reads present, absent, late, the short
+                      // word is unambiguous.
+                      _Count(
+                        label: 'leave',
+                        value: controller.shortLeaveCount,
+                        color: context.semantic.info,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              TextButton(
                 onPressed: () => controller.markAll(AttendanceStatus.present),
-                icon: const Icon(Icons.done_all_rounded, size: 20),
-                label: const Text('All present', textAlign: TextAlign.center),
-                style: _bulkStyle(context.semantic.success),
+                style: TextButton.styleFrom(
+                  foregroundColor: context.colors.primary,
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                  minimumSize: const Size(0, 40),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text('All present'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One figure in the tally: the number in its status colour, the word after it.
+class _Count extends StatelessWidget {
+  const _Count({required this.label, required this.value, required this.color});
+
+  final String label;
+  final int value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: AppSpacing.md),
+      child: Text.rich(
+        TextSpan(
+          children: <InlineSpan>[
+            TextSpan(
+              text: '$value ',
+              style: context.text.titleSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: color,
               ),
             ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => controller.markAll(AttendanceStatus.absent),
-                icon: const Icon(Icons.remove_done_rounded, size: 20),
-                label: const Text('All absent', textAlign: TextAlign.center),
-                style: _bulkStyle(context.semantic.danger),
-              ),
+            TextSpan(
+              text: label,
+              style: context.text.bodySmall?.copyWith(color: color),
             ),
           ],
         ),
+        maxLines: 1,
       ),
     );
   }
@@ -416,12 +403,16 @@ class _AttendanceRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
+                // Two lines, because four mark buttons leave the name about
+                // 150dp and a register full of "Muhammad Saqib …" is a register
+                // where two students cannot be told apart. Only long names
+                // take the second line, so most rows stay one line tall.
                 Text(
                   student.fullName,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: context.text.titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w600),
+                      ?.copyWith(fontWeight: FontWeight.w600, height: 1.2),
                 ),
                 if (showMeta) _StudentMeta(student: student),
               ],
