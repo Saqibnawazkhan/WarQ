@@ -16,7 +16,6 @@ import '../../../widgets/common/app_card.dart';
 import '../../../widgets/feedback/dialogs.dart';
 import '../../../widgets/feedback/state_views.dart';
 import '../../../widgets/layout/app_page.dart';
-import 'widgets/class_assessments_tab.dart';
 import 'widgets/class_attendance_tab.dart';
 import 'widgets/class_students_tab.dart';
 
@@ -52,9 +51,9 @@ class _ClassDetailView extends StatefulWidget {
 class _ClassDetailViewState extends State<_ClassDetailView>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController = TabController(
-    length: 3,
+    length: 2,
     vsync: this,
-    initialIndex: widget.initialTab.clamp(0, 2),
+    initialIndex: widget.initialTab.clamp(0, 1),
   );
 
   @override
@@ -126,9 +125,25 @@ class _ClassDetailViewState extends State<_ClassDetailView>
     final SchoolClass? schoolClass = controller.schoolClass;
 
     return Scaffold(
-      // The class name belongs to the page, not the bar above it, so the bar
-      // is left holding only the way back and the actions.
       appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              schoolClass?.name ?? 'Class',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (schoolClass != null && schoolClass.subtitle.isNotEmpty)
+              Text(
+                schoolClass.subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.text.bodySmall
+                    ?.copyWith(color: context.semantic.mutedText),
+              ),
+          ],
+        ),
         actions: <Widget>[
           IconButton(
             tooltip: 'Class report',
@@ -197,21 +212,18 @@ class _ClassDetailViewState extends State<_ClassDetailView>
         loading: const SkeletonList(itemCount: 5),
         builder: (BuildContext context) => Column(
           children: <Widget>[
-            _ClassHeader(controller: controller),
+            _ClassOverviewHeader(controller: controller),
             Material(
-              color: context.semantic.canvas,
+              color: context.colors.surface,
               child: TabBar(
                 controller: _tabController,
-                // Three labels at this type scale do not fit a phone's width
-                // when the row is divided equally, and a fixed tab bar fades
-                // the text it cannot fit. Scrolling keeps every label whole,
-                // including when the system font size is turned up.
-                isScrollable: true,
-                tabAlignment: TabAlignment.start,
-                tabs: const <Widget>[
-                  Tab(text: 'Students'),
-                  Tab(text: 'Attendance'),
-                  Tab(text: 'Assessments'),
+                // Marks live on their own tab in the bottom bar, where a
+                // teacher can see every class at once and create an
+                // assessment. Repeating them here was a second way into the
+                // same screens rather than anything this page adds.
+                tabs: <Widget>[
+                  Tab(text: 'Students (${controller.studentCount})'),
+                  Tab(text: 'Attendance (${controller.sessions.length})'),
                 ],
               ),
             ),
@@ -221,7 +233,6 @@ class _ClassDetailViewState extends State<_ClassDetailView>
                 children: const <Widget>[
                   ClassStudentsTab(),
                   ClassAttendanceTab(),
-                  ClassAssessmentsTab(),
                 ],
               ),
             ),
@@ -232,69 +243,56 @@ class _ClassDetailViewState extends State<_ClassDetailView>
   }
 }
 
-/// The page's own heading: the way back, the class name, and the one line that
-/// describes the class.
-class _ClassHeader extends StatelessWidget {
-  const _ClassHeader({required this.controller});
+class _ClassOverviewHeader extends StatelessWidget {
+  const _ClassOverviewHeader({required this.controller});
 
   final ClassDetailController controller;
 
   @override
   Widget build(BuildContext context) {
-    final SchoolClass? schoolClass = controller.schoolClass;
+    final ClassPerformance? performance = controller.performance;
     final List<StudentPerformance> atRisk = controller.atRiskStudents;
 
-    // Spelled out here rather than taken from SchoolClass.subtitle. That getter
-    // is the compact form for dropdowns and report headers, where a bare year
-    // is unambiguous; on this line it would sit between a section and a head
-    // count as one more number to work out.
-    final String? subject = schoolClass?.subject;
-    final String summary = <String>[
-      if (schoolClass != null) ...<String>[
-        if (subject != null && subject != schoolClass.name) subject,
-        if (schoolClass.section != null) 'Section ${schoolClass.section}',
-        if (schoolClass.session != null) 'Session ${schoolClass.session}',
-      ],
-      Format.plural(controller.studentCount, 'student'),
-    ].join(' · ');
-
-    return Padding(
+    return Container(
+      color: context.colors.surface,
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
-        0,
+        AppSpacing.md,
         AppSpacing.lg,
         AppSpacing.lg,
       ),
       child: ContentWidth(
-        fillHeight: false,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            // Names the destination rather than leaving an arrow to interpret,
-            // which matters most on the tab a teacher lands on from a link.
-            TextButton.icon(
-              onPressed: () => Navigator.of(context).maybePop(),
-              icon: const Icon(Icons.chevron_left_rounded, size: 20),
-              label: const Text('Classes'),
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                minimumSize: Size.zero,
-              ),
-            ),
-            const Gap.xs(),
-            Text(
-              schoolClass?.name ?? 'Class',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: context.text.headlineSmall,
-            ),
-            const Gap.xs(),
-            Text(
-              summary,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: context.text.bodyMedium
-                  ?.copyWith(color: context.semantic.mutedText),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: _MiniStat(
+                    label: 'Students',
+                    value: '${controller.studentCount}',
+                    icon: Icons.people_alt_rounded,
+                  ),
+                ),
+                Expanded(
+                  child: _MiniStat(
+                    label: 'Attendance',
+                    value: Format.percentOrDash(
+                      performance?.averageAttendance,
+                      decimals: 0,
+                    ),
+                    icon: Icons.event_available_rounded,
+                    color: context.semantic.success,
+                  ),
+                ),
+                Expanded(
+                  child: _MiniStat(
+                    label: 'Sessions',
+                    value: '${performance?.sessionCount ?? 0}',
+                    icon: Icons.history_rounded,
+                    color: context.semantic.warning,
+                  ),
+                ),
+              ],
             ),
             if (atRisk.isNotEmpty) ...<Widget>[
               const Gap.md(),
@@ -341,6 +339,40 @@ class _ClassHeader extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _MiniStat extends StatelessWidget {
+  const _MiniStat({
+    required this.label,
+    required this.value,
+    required this.icon,
+    this.color,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Icon(icon, size: 18, color: color ?? context.colors.primary),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          value,
+          style: context.text.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        ),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: context.text.labelSmall
+              ?.copyWith(color: context.semantic.mutedText),
+        ),
+      ],
     );
   }
 }

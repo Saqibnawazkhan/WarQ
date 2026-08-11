@@ -6,10 +6,10 @@ import '../../../../app/app_dependencies.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/routing/route_args.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/utils/date_utils.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/models.dart';
 import '../../../state/assessment_marks_controller.dart';
+import '../../../widgets/common/app_avatar.dart';
 import '../../../widgets/common/app_badge.dart';
 import '../../../widgets/common/app_card.dart';
 import '../../../widgets/common/search_field.dart';
@@ -132,6 +132,7 @@ class _MarksView extends StatelessWidget {
   Widget build(BuildContext context) {
     final AssessmentMarksController controller =
         context.watch<AssessmentMarksController>();
+    final Assessment? assessment = controller.assessment;
 
     return PopScope(
       canPop: !controller.hasUnsavedChanges,
@@ -143,9 +144,29 @@ class _MarksView extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          // The assessment names itself in the body, where it can be set large
-          // and carry its own detail line, so the bar is left to the back
-          // button and the actions.
+          // Two lines of the larger type overflow a standard toolbar once the
+          // system text scale is turned up, so the bar is given room to hold it.
+          toolbarHeight: kToolbarHeight + AppSpacing.lg,
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                assessment?.name ?? 'Marks',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (assessment != null)
+                Text(
+                  '${controller.schoolClass?.name ?? ''} · '
+                  '${Format.marks(assessment.totalMarks)} marks',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.text.bodySmall
+                      ?.copyWith(color: context.semantic.mutedText),
+                ),
+            ],
+          ),
           actions: <Widget>[
             IconButton(
               tooltip: 'Bulk actions',
@@ -196,32 +217,46 @@ class _MarksView extends StatelessWidget {
             title: 'No students in this class',
             message: 'Add students before entering marks.',
           ),
-          builder: (BuildContext context) => ContentWidth(
-            child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.sm,
-                AppSpacing.lg,
-                AppSpacing.xxl,
+          builder: (BuildContext context) => Column(
+            children: <Widget>[
+              _ProgressStrip(controller: controller),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.md,
+                  AppSpacing.lg,
+                  AppSpacing.sm,
+                ),
+                child: ContentWidth(
+                  child: SearchField(
+                    hintText: 'Find a student',
+                    onChanged: controller.search,
+                  ),
+                ),
               ),
-              // The heading and the search box scroll with the register rather
-              // than being pinned above it. Every row on this screen opens the
-              // keyboard, and a fixed block this tall leaves a small phone with
-              // no room to type into — at a large text scale it pushes the list
-              // off the bottom of the screen entirely.
-              itemCount: controller.visibleStudents.length + 1,
-              separatorBuilder: (_, __) => const Gap.md(),
-              itemBuilder: (BuildContext context, int index) {
-                if (index == 0) return _MarksIntro(controller: controller);
-                final Student student =
-                    controller.visibleStudents[index - 1];
-                return _MarkRow(
-                  key: ValueKey<String>(student.id),
-                  student: student,
-                  controller: controller,
-                );
-              },
-            ),
+              Expanded(
+                child: ContentWidth(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg,
+                      AppSpacing.sm,
+                      AppSpacing.lg,
+                      AppSpacing.xxl,
+                    ),
+                    itemCount: controller.visibleStudents.length,
+                    separatorBuilder: (_, __) => const Gap.md(),
+                    itemBuilder: (BuildContext context, int index) {
+                      final Student student = controller.visibleStudents[index];
+                      return _MarkRow(
+                        key: ValueKey<String>(student.id),
+                        student: student,
+                        controller: controller,
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -229,136 +264,66 @@ class _MarksView extends StatelessWidget {
   }
 }
 
-/// The first row of the register: the heading, then the box that filters it.
-class _MarksIntro extends StatelessWidget {
-  const _MarksIntro({required this.controller});
+class _ProgressStrip extends StatelessWidget {
+  const _ProgressStrip({required this.controller});
 
   final AssessmentMarksController controller;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        _MarksHeader(controller: controller),
-        const Gap.lg(),
-        SearchField(
-          hintText: 'Find a student',
-          // Seeded from the controller because this box scrolls: once it leaves
-          // the list's cache its state is rebuilt, and without the query it
-          // would come back empty while the roster stayed filtered.
-          initialValue: controller.query,
-          onChanged: controller.search,
-        ),
-      ],
-    );
-  }
-}
-
-/// The screen's own heading: where these marks belong, what the paper was, and
-/// how far the grading has got.
-class _MarksHeader extends StatelessWidget {
-  const _MarksHeader({required this.controller});
-
-  final AssessmentMarksController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final Assessment? assessment = controller.assessment;
-    if (assessment == null) return const SizedBox.shrink();
-
-    final double? average = controller.averagePercentage;
     final int total = controller.roster.length;
     final double progress = total == 0 ? 0 : controller.gradedCount / total;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        if (controller.schoolClass != null) ...<Widget>[
-          _ClassBackLink(name: controller.schoolClass!.name),
-          const Gap.xs(),
-        ],
-        Text(
-          assessment.name,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: context.text.headlineSmall,
-        ),
-        const Gap.xs(),
-        Text(
-          <String>[
-            assessment.typeLabel,
-            AppDate.formatShort(assessment.date),
-            'out of ${Format.marks(assessment.totalMarks)}',
-            if (average != null)
-              'class avg ${Format.percent(average, decimals: 0)}',
-          ].join(' · '),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: context.text.bodyMedium
-              ?.copyWith(color: context.semantic.mutedText),
-        ),
-        const Gap.lg(),
-        Row(
+    return Container(
+      color: context.colors.surface,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        AppSpacing.lg,
+      ),
+      child: ContentWidth(
+        child: Column(
           children: <Widget>[
-            Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(AppRadii.pill),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 8,
-                  backgroundColor: context.semantic.subtleBorder,
+            Row(
+              children: <Widget>[
+                Expanded(
+                  // The count is the number a teacher glances at, so it leads
+                  // and the rest of the sentence supports it.
+                  child: Text.rich(
+                    TextSpan(
+                      children: <InlineSpan>[
+                        TextSpan(
+                          text: '${controller.gradedCount}',
+                          style: context.text.titleLarge,
+                        ),
+                        TextSpan(
+                          text: ' of $total graded',
+                          style: context.text.bodyMedium
+                              ?.copyWith(color: context.semantic.mutedText),
+                        ),
+                      ],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
+                if (controller.averagePercentage != null) ...<Widget>[
+                  const SizedBox(width: AppSpacing.sm),
+                  AppBadge(
+                    'Avg ${Format.percent(controller.averagePercentage!, decimals: 0)}',
+                    tone: GradeBadge.toneForPercent(controller.averagePercentage),
+                  ),
+                ],
+              ],
             ),
-            const SizedBox(width: AppSpacing.md),
-            Text(
-              '${controller.gradedCount}/$total graded',
-              style: context.text.labelMedium
-                  ?.copyWith(color: context.semantic.mutedText),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-/// Breadcrumb back to the class the assessment belongs to.
-class _ClassBackLink extends StatelessWidget {
-  const _ClassBackLink({required this.name});
-
-  final String name;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      // maybePop rather than pop: this is the app bar's back button in a second
-      // place, so it has to hand the same chance to the unsaved-marks guard
-      // instead of dropping a half-entered register.
-      onTap: () => Navigator.maybePop(context),
-      borderRadius: BorderRadius.circular(AppRadii.sm),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(
-              Icons.chevron_left_rounded,
-              size: 20,
-              applyTextScaling: true,
-              color: context.colors.primary,
-            ),
-            const SizedBox(width: AppSpacing.xxs),
-            Flexible(
-              child: Text(
-                name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.text.labelLarge
-                    ?.copyWith(color: context.colors.primary),
+            const Gap.md(),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadii.pill),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 8,
+                backgroundColor: context.semantic.subtleBorder,
               ),
             ),
           ],
@@ -440,22 +405,20 @@ class _MarkRowState extends State<_MarkRow> {
         ?.copyWith(color: context.semantic.mutedText);
 
     return AppCard(
-      // Absent is a status, not an error, so the card carries it at its edge
-      // and leaves the row itself to read normally.
-      borderColor: draft.absent
-          ? context.semantic.danger.withValues(alpha: 0.4)
-          : null,
-      // Tighter than a plain tile's, and tighter still on the right where the
-      // toggle brings its own breathing room: this row carries a field, a grade
-      // and a button, and every pixel it saves goes to the name.
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        AppSpacing.sm,
-        AppSpacing.sm,
-        AppSpacing.sm,
+      // Horizontal padding stays tighter than a plain tile's: this row also
+      // carries a field and a toggle, and the width it saves goes to the name.
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.md,
       ),
       child: Row(
         children: <Widget>[
+          AppAvatar(
+            name: widget.student.fullName,
+            seed: widget.student.id,
+            size: 42,
+          ),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -469,43 +432,54 @@ class _MarkRowState extends State<_MarkRow> {
                       ?.copyWith(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: AppSpacing.xxs),
-                // One paragraph rather than two adjacent Texts: the roll number
-                // and the status together are wider than this column on a
-                // narrow phone, and only a single Text can ellipsize.
-                Text.rich(
-                  TextSpan(
-                    children: <InlineSpan>[
-                      if (widget.student.rollNumber != null)
-                        TextSpan(text: '${widget.student.rollNumber} · '),
-                      TextSpan(
-                        text: draft.absent
-                            ? 'Marked absent'
-                            : percent == null
-                                ? 'Not graded'
-                                : Format.percent(percent, decimals: 0),
-                        style: draft.absent
-                            ? subtle?.copyWith(
-                                color: context.semantic.danger,
-                                fontWeight: FontWeight.w600,
-                              )
-                            : null,
+                Row(
+                  children: <Widget>[
+                    // One paragraph rather than two adjacent Texts: the roll
+                    // number and the status together are wider than this column
+                    // on a narrow phone, and only a single Text can ellipsize.
+                    Flexible(
+                      child: Text.rich(
+                        TextSpan(
+                          children: <InlineSpan>[
+                            if (widget.student.rollNumber != null)
+                              TextSpan(text: '${widget.student.rollNumber} · '),
+                            TextSpan(
+                              text: draft.absent
+                                  ? 'Marked absent'
+                                  : percent == null
+                                      ? 'Not graded'
+                                      : Format.percent(percent, decimals: 0),
+                              style: draft.absent
+                                  ? subtle?.copyWith(
+                                      color: context.semantic.danger,
+                                      fontWeight: FontWeight.w600,
+                                    )
+                                  : null,
+                            ),
+                          ],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: subtle,
                       ),
+                    ),
+                    if (grade != null) ...<Widget>[
+                      const SizedBox(width: AppSpacing.sm),
+                      GradeBadge(grade: grade.label, percent: percent, dense: true),
                     ],
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: subtle,
+                  ],
                 ),
               ],
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
           SizedBox(
-            // Holds three digits at the largest text scale allowed — a teacher
-            // entering 100 has to be able to read back what they typed. What
-            // the paper is out of is said once in the header instead of on
-            // every row, which is what buys the box its width.
-            width: 78,
+            // Roomy enough to tap and to read the value back at a glance; the
+            // mark is the point of the row, so it is set larger than its label.
+            // The `/total` suffix eats into the same box, so this has to hold
+            // three digits *and* the suffix at the largest text scale allowed,
+            // or a teacher entering 100 cannot see what they typed.
+            width: 92,
             child: TextField(
               controller: _field,
               enabled: !draft.absent,
@@ -515,38 +489,21 @@ class _MarkRowState extends State<_MarkRow> {
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
               ],
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 isDense: true,
-                contentPadding: EdgeInsets.symmetric(
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.xs,
                   vertical: AppSpacing.md,
                 ),
                 hintText: '—',
+                suffixText: '/${Format.marks(controller.totalMarks)}',
+                suffixStyle: subtle,
               ),
               onChanged: _onChanged,
             ),
           ),
-          // The slot is held open whether or not there is a grade yet, so the
-          // score boxes stay in one column down the register.
-          SizedBox(
-            width: 60,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: grade == null
-                  ? const SizedBox.shrink()
-                  : GradeBadge(
-                      grade: grade.label,
-                      percent: percent,
-                      dense: true,
-                    ),
-            ),
-          ),
           IconButton(
             tooltip: draft.absent ? 'Mark as present' : 'Mark absent',
-            // Trimmed to the icon: the row already spends its width on three
-            // columns of content, and the toggle keeps a full-height target.
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints.tightFor(width: 44, height: 44),
             onPressed: () {
               controller.setAbsent(widget.student.id, !draft.absent);
               if (!draft.absent) _field.clear();

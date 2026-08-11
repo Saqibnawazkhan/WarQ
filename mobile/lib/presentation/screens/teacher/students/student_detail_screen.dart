@@ -15,6 +15,10 @@ import '../../../../domain/entities/student_performance.dart';
 import '../../../../domain/services/report_service.dart';
 import '../../../state/session_controller.dart';
 import '../../../state/student_profile_controller.dart';
+import '../../../widgets/charts/bar_chart.dart';
+import '../../../widgets/charts/chart_data.dart';
+import '../../../widgets/charts/donut_chart.dart';
+import '../../../widgets/charts/trend_chart.dart';
 import '../../../widgets/common/app_avatar.dart';
 import '../../../widgets/common/app_badge.dart';
 import '../../../widgets/common/app_card.dart';
@@ -121,9 +125,7 @@ class _StudentDetailView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        // The name is the profile card's headline now, so repeating it here
-        // would only push the same words twice down the top of the screen.
-        title: const Text('Student performance'),
+        title: Text(student?.fullName ?? 'Student'),
         actions: <Widget>[
           if (!readOnly)
             IconButton(
@@ -203,16 +205,37 @@ class _StudentDetailView extends StatelessWidget {
           return AppPageBody(
             onRefresh: controller.refresh,
             children: <Widget>[
-              _ProfileCard(
+              _ProfileHeader(
                 student: student,
                 performance: performance,
-                schoolClass: controller.schoolClass,
+                className: controller.schoolClass?.name,
+              ),
+              const Gap.xl(),
+              _InformationCard(
+                student: student,
                 classes: controller.enrolledClasses,
               ),
               const Gap.xl(),
-              _ContactsCard(student: student),
-              const Gap.xl(),
               _AttendanceCard(summary: performance.attendance),
+              const Gap.xl(),
+              _AcademicCard(performance: performance),
+              if (controller.gradedResults.isNotEmpty) ...<Widget>[
+                const Gap.xl(),
+                SectionCard(
+                  title: 'Marks progression',
+                  subtitle: 'Percentage scored in each graded assessment',
+                  child: TrendChart(
+                    points: <TrendPoint>[
+                      for (final AssessmentResult result
+                          in controller.gradedResults)
+                        TrendPoint(
+                          label: Format.truncate(result.assessment.name, 12),
+                          value: result.percentage ?? 0,
+                        ),
+                    ],
+                  ),
+                ),
+              ],
               const Gap.xl(),
               _AssessmentsCard(performance: performance),
               if (controller.attendanceLog.isNotEmpty) ...<Widget>[
@@ -235,92 +258,25 @@ class _StudentDetailView extends StatelessWidget {
   }
 }
 
-/// Track and fill on its own.
-///
-/// `LabeledProgressBar` brings its own caption typography; here the label and
-/// the figure belong to the card's own heading row and to the assessment row,
-/// so only the bar itself is wanted.
-class _Bar extends StatelessWidget {
-  const _Bar({required this.value, required this.color});
-
-  static const double _height = AppSpacing.sm;
-
-  /// 0–1.
-  final double value;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(_height),
-      child: LinearProgressIndicator(
-        value: value.isNaN ? 0 : value.clamp(0, 1),
-        minHeight: _height,
-        backgroundColor: context.semantic.subtleBorder,
-        valueColor: AlwaysStoppedAnimation<Color>(color),
-      ),
-    );
-  }
-}
-
-/// Ceiling for the grade pill at the end of the profile row.
-///
-/// A grade scale is teacher-configurable and its band label is free text, so a
-/// long one would otherwise size the pill off the card — the pill is laid out
-/// before the name and takes whatever width it asks for. Bounding it makes the
-/// label ellipsize inside the pill instead. `StudentTileStats` bounds the
-/// roster row for the same reason.
-const double _gradeBadgeMaxWidth = 112;
-
-/// Resolves a score to a colour through the badge rule, so a bar, its figure
-/// and the grade pill beside them can never disagree.
-Color _scoreColor(BuildContext context, double? percent) {
-  return switch (GradeBadge.toneForPercent(percent)) {
-    BadgeTone.success => context.semantic.success,
-    BadgeTone.brand => context.colors.primary,
-    BadgeTone.warning => context.semantic.warning,
-    BadgeTone.danger => context.semantic.danger,
-    BadgeTone.info => context.semantic.info,
-    BadgeTone.neutral => context.semantic.mutedText,
-  };
-}
-
-class _ProfileCard extends StatelessWidget {
-  const _ProfileCard({
+class _ProfileHeader extends StatelessWidget {
+  const _ProfileHeader({
     required this.student,
     required this.performance,
-    required this.classes,
-    this.schoolClass,
+    this.className,
   });
 
   final Student student;
   final StudentPerformance performance;
-  final List<SchoolClass> classes;
-
-  /// Only set when the profile is scoped to one class.
-  final SchoolClass? schoolClass;
+  final String? className;
 
   @override
   Widget build(BuildContext context) {
-    final SchoolClass? scoped = schoolClass;
-    final String? subject = scoped?.subject;
-    final String? session = scoped?.session;
-    final List<String> identity = <String>[
-      if (student.rollNumber != null) student.rollNumber!,
-      if (scoped != null) scoped.name,
-      // A class often carries its subject as its name; printing both would
-      // read as a stutter.
-      if (subject != null && subject != scoped?.name) subject,
-      if (session != null) session,
-    ];
-
     return AppCard(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Row(
             children: <Widget>[
-              AppAvatar(name: student.fullName, seed: student.id, size: 56),
+              AppAvatar(name: student.fullName, seed: student.id, size: 60),
               const SizedBox(width: AppSpacing.lg),
               Expanded(
                 child: Column(
@@ -328,70 +284,57 @@ class _ProfileCard extends StatelessWidget {
                   children: <Widget>[
                     Text(
                       student.fullName,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                       style: context.text.titleLarge
                           ?.copyWith(fontWeight: FontWeight.w700),
                     ),
-                    if (identity.isNotEmpty) ...<Widget>[
-                      const Gap.xs(),
-                      Text(
-                        identity.join(' · '),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.text.bodySmall
-                            ?.copyWith(color: context.semantic.mutedText),
-                      ),
-                    ],
+                    const SizedBox(height: 3),
+                    Text(
+                      <String>[
+                        if (student.rollNumber != null) student.rollNumber!,
+                        if (className != null) className!,
+                      ].join(' · '),
+                      style: context.text.bodySmall
+                          ?.copyWith(color: context.semantic.mutedText),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.sm,
+                      children: <Widget>[
+                        GradeBadge(
+                          grade: performance.grade?.label,
+                          percent: performance.percentage,
+                          dense: true,
+                        ),
+                        AttendanceBadge(
+                          percent: performance.attendance.percentage,
+                          dense: true,
+                        ),
+                        if (performance.isAtRisk)
+                          const AppBadge(
+                            'Needs attention',
+                            tone: BadgeTone.warning,
+                            icon: Icons.warning_amber_rounded,
+                            dense: true,
+                          ),
+                      ],
+                    ),
                   ],
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              ConstrainedBox(
-                constraints:
-                    const BoxConstraints(maxWidth: _gradeBadgeMaxWidth),
-                child: GradeBadge(
-                  grade: performance.grade?.label,
-                  percent: performance.percentage,
                 ),
               ),
             ],
           ),
-          if (performance.isAtRisk) ...<Widget>[
-            const Gap.lg(),
-            const AppBadge(
-              'Needs attention',
-              tone: BadgeTone.warning,
-              icon: Icons.warning_amber_rounded,
-              dense: true,
-            ),
-          ],
-          if (classes.isNotEmpty) ...<Widget>[
-            const Gap.lg(),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: <Widget>[
-                for (final SchoolClass schoolClass in classes)
-                  AppBadge(
-                    schoolClass.name,
-                    tone: BadgeTone.brand,
-                    icon: Icons.class_outlined,
-                    dense: true,
-                  ),
-              ],
-            ),
-          ],
         ],
       ),
     );
   }
 }
 
-class _ContactsCard extends StatelessWidget {
-  const _ContactsCard({required this.student});
+class _InformationCard extends StatelessWidget {
+  const _InformationCard({required this.student, required this.classes});
 
   final Student student;
+  final List<SchoolClass> classes;
 
   void _copy(BuildContext context, String value, String label) {
     Clipboard.setData(ClipboardData(text: value));
@@ -400,29 +343,59 @@ class _ContactsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<({RecipientRelation relation, String phone})> numbers =
-        student.contactNumbers;
-
     return SectionCard(
-      title: 'Contacts',
-      subtitle: 'Absence alerts go to these numbers',
+      title: 'Student information',
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          for (final ({RecipientRelation relation, String phone}) contact
-              in numbers)
+          DetailRow(
+            label: 'Roll / student number',
+            value: student.rollNumber ?? '—',
+            icon: Icons.tag_rounded,
+          ),
+          DetailRow(
+            label: 'Student phone',
+            value: student.studentPhone ?? '—',
+            icon: Icons.smartphone_rounded,
+            onTap: student.studentPhone == null
+                ? null
+                : () => _copy(context, student.studentPhone!, 'Student phone'),
+          ),
+          DetailRow(
+            label: "Father's phone",
+            value: student.fatherPhone ?? '—',
+            icon: Icons.man_rounded,
+            onTap: student.fatherPhone == null
+                ? null
+                : () => _copy(context, student.fatherPhone!, "Father's phone"),
+          ),
+          DetailRow(
+            label: "Mother's phone",
+            value: student.motherPhone ?? '—',
+            icon: Icons.woman_rounded,
+            onTap: student.motherPhone == null
+                ? null
+                : () => _copy(context, student.motherPhone!, "Mother's phone"),
+          ),
+          if (student.guardianName != null)
             DetailRow(
-              label: contact.relation.label,
-              value: contact.phone,
-              // The row label alone ("Father") does not survive being dropped
-              // into the confirmation sentence.
-              onTap: () => _copy(
-                context,
-                contact.phone,
-                "${contact.relation.label}'s number",
-              ),
+              label: 'Guardian',
+              value: student.guardianName!,
+              icon: Icons.family_restroom_rounded,
             ),
-          if (numbers.isEmpty)
+          if (student.email != null)
+            DetailRow(
+              label: 'Email',
+              value: student.email!,
+              icon: Icons.alternate_email_rounded,
+            ),
+          if (student.address != null)
+            DetailRow(
+              label: 'Address',
+              value: student.address!,
+              icon: Icons.home_outlined,
+            ),
+          if (!student.hasAnyContact) ...<Widget>[
+            const Gap.sm(),
             Container(
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
@@ -449,12 +422,26 @@ class _ContactsCard extends StatelessWidget {
                 ],
               ),
             ),
-          if (student.guardianName != null)
-            DetailRow(label: 'Guardian', value: student.guardianName!),
-          if (student.email != null)
-            DetailRow(label: 'Email', value: student.email!),
-          if (student.address != null)
-            DetailRow(label: 'Address', value: student.address!),
+          ],
+          if (classes.isNotEmpty) ...<Widget>[
+            const Gap.md(),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: <Widget>[
+                  for (final SchoolClass schoolClass in classes)
+                    AppBadge(
+                      schoolClass.name,
+                      tone: BadgeTone.brand,
+                      icon: Icons.class_outlined,
+                      dense: true,
+                    ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -468,56 +455,126 @@ class _AttendanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color tone = summary.percentageOrZero >= 75
-        ? context.semantic.success
-        : context.semantic.warning;
+    if (!summary.hasData) {
+      return SectionCard(
+        title: 'Attendance',
+        child: Text(
+          'No attendance has been recorded yet.',
+          style: context.text.bodyMedium
+              ?.copyWith(color: context.semantic.mutedText),
+        ),
+      );
+    }
 
-    return AppCard(
+    return SectionCard(
+      title: 'Attendance',
+      subtitle: '${summary.totalSessions} recorded '
+          'session${summary.totalSessions == 1 ? '' : 's'}',
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: <Widget>[
-              Expanded(
-                child: Text(
-                  'Attendance',
-                  style: context.text.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w700),
-                ),
+          DonutChart(
+            slices: <ChartSlice>[
+              ChartSlice(
+                label: 'Present',
+                value: summary.present.toDouble(),
+                color: context.semantic.success,
               ),
-              const SizedBox(width: AppSpacing.md),
-              Text(
-                Format.percentOrDash(summary.percentage, decimals: 0),
-                style: context.text.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: summary.hasData ? tone : context.semantic.mutedText,
+              ChartSlice(
+                label: 'Absent',
+                value: summary.absent.toDouble(),
+                color: context.semantic.danger,
+              ),
+              if (summary.late > 0)
+                ChartSlice(
+                  label: 'Late',
+                  value: summary.late.toDouble(),
+                  color: context.semantic.warning,
                 ),
+              if (summary.shortLeave > 0)
+                ChartSlice(
+                  label: 'Short leave',
+                  value: summary.shortLeave.toDouble(),
+                  color: context.semantic.info,
+                ),
+            ],
+            centerValue: Format.percentOrDash(summary.percentage, decimals: 0),
+            centerLabel: 'attendance',
+          ),
+          const Gap.lg(),
+          LabeledProgressBar(
+            label: 'Attendance rate',
+            value: (summary.percentage ?? 0) / 100,
+            trailingLabel: Format.percentOrDash(summary.percentage),
+            color: summary.percentageOrZero >= 75
+                ? context.semantic.success
+                : context.semantic.warning,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AcademicCard extends StatelessWidget {
+  const _AcademicCard({required this.performance});
+
+  final StudentPerformance performance;
+
+  @override
+  Widget build(BuildContext context) {
+    return SectionCard(
+      title: 'Academic performance',
+      subtitle: performance.hasMarks
+          ? '${performance.gradedCount} of ${performance.results.length} '
+              'assessments graded'
+          : 'No marks recorded yet',
+      child: Column(
+        children: <Widget>[
+          StatGrid(
+            columns: 3,
+            tiles: <Widget>[
+              StatTile(
+                label: 'Marks obtained',
+                value: performance.hasMarks
+                    ? Format.marks(performance.obtainedTotal)
+                    : '—',
+                icon: Icons.functions_rounded,
+              ),
+              StatTile(
+                label: 'Total marks',
+                value: performance.hasMarks
+                    ? Format.marks(performance.maxTotal)
+                    : '—',
+                icon: Icons.calculate_outlined,
+              ),
+              StatTile(
+                label: 'Percentage',
+                value: Format.percentOrDash(performance.percentage, decimals: 0),
+                icon: Icons.percent_rounded,
+                accent: context.semantic.info,
+                caption: performance.grade?.label,
               ),
             ],
           ),
-          if (!summary.hasData) ...<Widget>[
-            const Gap.md(),
-            Text(
-              'No attendance has been recorded yet.',
-              style: context.text.bodyMedium
-                  ?.copyWith(color: context.semantic.mutedText),
-            ),
-          ] else ...<Widget>[
+          if (performance.bestResult != null ||
+              performance.weakestResult != null) ...<Widget>[
             const Gap.lg(),
-            _Bar(value: (summary.percentage ?? 0) / 100, color: tone),
-            const Gap.md(),
-            Text(
-              <String>[
-                '${summary.present} present',
-                '${summary.absent} absent',
-                '${summary.late} late',
-                '${summary.shortLeave} short leave',
-                Format.plural(summary.totalSessions, 'session'),
-              ].join('  ·  '),
-              style: context.text.bodySmall
-                  ?.copyWith(color: context.semantic.mutedText),
-            ),
+            if (performance.bestResult != null)
+              DetailRow(
+                label: 'Strongest assessment',
+                value: '${performance.bestResult!.assessment.name} · '
+                    '${Format.percentOrDash(performance.bestResult!.percentage, decimals: 0)}',
+                icon: Icons.trending_up_rounded,
+                valueColor: context.semantic.success,
+              ),
+            if (performance.weakestResult != null)
+              DetailRow(
+                label: 'Needs work',
+                value: '${performance.weakestResult!.assessment.name} · '
+                    '${Format.percentOrDash(performance.weakestResult!.percentage, decimals: 0)}',
+                icon: Icons.trending_down_rounded,
+                valueColor: context.semantic.warning,
+              ),
           ],
         ],
       ),
@@ -534,7 +591,7 @@ class _AssessmentsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     if (performance.results.isEmpty) {
       return SectionCard(
-        title: 'Assessment performance',
+        title: 'Assessments',
         child: Text(
           'No assessments have been created yet.',
           style: context.text.bodyMedium
@@ -543,93 +600,59 @@ class _AssessmentsCard extends StatelessWidget {
       );
     }
 
-    final String overall = performance.hasMarks
-        ? <String>[
-            Format.fraction(performance.obtainedTotal, performance.maxTotal),
-            Format.percentOrDash(performance.percentage, decimals: 0),
-            if (performance.grade != null) 'Grade ${performance.grade!.label}',
-          ].join(' · ')
-        : 'Not graded yet';
-
     return SectionCard(
-      title: 'Assessment performance',
-      subtitle: performance.hasMarks
-          ? '${performance.gradedCount} of ${performance.results.length} '
-              'assessments graded'
-          : 'No marks recorded yet',
+      title: 'Assessments',
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           for (final AssessmentResult result in performance.results.reversed)
             Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
               child: Row(
                 children: <Widget>[
                   Expanded(
-                    flex: 5,
-                    child: Text(
-                      result.assessment.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.text.titleSmall,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          result.assessment.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.text.titleSmall,
+                        ),
+                        Text(
+                          '${result.assessment.typeLabel} · '
+                          '${AppDate.formatShort(result.assessment.date)}',
+                          style: context.text.labelSmall
+                              ?.copyWith(color: context.semantic.mutedText),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    flex: 4,
-                    child: _Bar(
-                      value: (result.percentage ?? 0) / 100,
-                      color: _scoreColor(context, result.percentage),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  // Left free to take its natural width: the two bars beside it
-                  // give way instead, so a wide total can never truncate into a
-                  // figure that reads as the wrong mark.
-                  Text(
-                    result.wasAbsent
-                        ? 'Absent'
-                        : Format.fraction(
-                            result.mark?.marksObtained,
-                            result.total,
-                          ),
-                    style: context.text.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color:
-                          result.wasAbsent ? context.semantic.danger : null,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: <Widget>[
+                      Text(
+                        result.wasAbsent
+                            ? 'Absent'
+                            : Format.fraction(
+                                result.mark?.marksObtained,
+                                result.total,
+                              ),
+                        style: context.text.titleSmall
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 3),
+                      GradeBadge(
+                        grade: result.grade?.label,
+                        percent: result.percentage,
+                        dense: true,
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-          Divider(height: AppSpacing.lg, color: context.semantic.subtleBorder),
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.lg),
-            child: Row(
-              children: <Widget>[
-                Text(
-                  'Overall',
-                  style: context.text.titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Text(
-                    overall,
-                    textAlign: TextAlign.end,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.text.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: performance.hasMarks
-                          ? _scoreColor(context, performance.percentage)
-                          : context.semantic.mutedText,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -654,52 +677,23 @@ class _AttendanceLogCard extends StatelessWidget {
         children: <Widget>[
           for (final StudentAttendanceEntry entry in visible)
             Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.md),
-              child: IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Container(
-                      width: AppSpacing.xs,
-                      decoration: BoxDecoration(
-                        color: AttendanceStatusChip.colorFor(
-                          context,
-                          entry.status,
-                        ),
-                        borderRadius: BorderRadius.circular(AppRadii.pill),
-                      ),
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      AppDate.format(entry.date),
+                      style: context.text.bodyMedium,
                     ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            AppDate.format(entry.date),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: context.text.bodyMedium
-                                ?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          Text(
-                            entry.className,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: context.text.labelMedium
-                                ?.copyWith(color: context.semantic.mutedText),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    // Stretch would otherwise pull the pill to the full row
-                    // height and turn it into a block.
-                    Center(
-                      child: AttendanceStatusChip(entry.status, dense: true),
-                    ),
-                  ],
-                ),
+                  ),
+                  Text(
+                    entry.className,
+                    style: context.text.labelSmall
+                        ?.copyWith(color: context.semantic.mutedText),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  AttendanceStatusChip(entry.status, dense: true),
+                ],
               ),
             ),
         ],

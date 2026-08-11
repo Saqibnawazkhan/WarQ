@@ -6,6 +6,7 @@ import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/routing/route_args.dart';
 import '../../../../core/routing/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/models.dart';
 import '../../../../domain/entities/dashboard_data.dart';
 import '../../../state/assessment_list_controller.dart';
@@ -86,24 +87,23 @@ class _AssessmentsView extends StatelessWidget {
         title: const Text('Assessments'),
         actions: <Widget>[
           IconButton(
-            tooltip: 'New assessment',
-            onPressed: () => _createAssessment(context, controller),
-            icon: const Icon(Icons.add_rounded),
-          ),
-          IconButton(
             tooltip: 'Reports',
             onPressed: () => Navigator.of(context).pushNamed(Routes.reports),
             icon: const Icon(Icons.picture_as_pdf_outlined),
           ),
         ],
       ),
-      // No floating button on this tab any more: the shell's compose button is
-      // docked in the centre of the bar and an extended FAB here landed
-      // underneath it, with the + drawn over the word "assessment". Creating
-      // moved up to the app bar, where it cannot collide.
-      //
-      // The empty state keeps its own button, which is the whole screen when
-      // there is nothing in the list and sits nowhere near the bar.
+      // Hidden while there is nothing to add to: the empty state below carries
+      // the one button, and two ways to do the same thing on an otherwise
+      // blank screen is a choice about nothing.
+      floatingActionButton: controller.totalCount == 0
+          ? null
+          : FloatingActionButton.extended(
+              heroTag: 'fab-assessments',
+              onPressed: () => _createAssessment(context, controller),
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('New assessment'),
+            ),
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -258,46 +258,39 @@ class _GradingSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final int pending = controller.pendingCount;
-    final bool allGraded = pending == 0;
 
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.md),
       child: AppCard(
-        color: allGraded ? context.semantic.successContainer : null,
-        borderColor: allGraded
+        color: pending == 0
+            ? context.semantic.successContainer
+            : context.colors.surfaceContainerHigh,
+        borderColor: pending == 0
             ? context.semantic.success.withValues(alpha: 0.3)
             : null,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
-          vertical: AppSpacing.lg,
+          vertical: AppSpacing.md,
         ),
         child: Row(
           children: <Widget>[
-            if (allGraded)
-              Icon(
-                Icons.check_circle_outline_rounded,
-                size: 20,
-                applyTextScaling: true,
-                color: context.semantic.success,
-              )
-            else
-              // The count is what a teacher is scanning the footer for, so it
-              // leads the line rather than sitting inside a sentence.
-              Text(
-                '$pending',
-                style: context.text.headlineSmall
-                    ?.copyWith(color: context.colors.primary),
-              ),
+            Icon(
+              pending == 0
+                  ? Icons.check_circle_outline_rounded
+                  : Icons.pending_actions_rounded,
+              size: 18,
+              color: pending == 0
+                  ? context.semantic.success
+                  : context.semantic.mutedText,
+            ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(
-                allGraded
+                pending == 0
                     ? 'Every assessment is fully graded.'
-                    : pending == 1
-                        ? 'assessment still needs marks.'
-                        : 'assessments still need marks.',
-                style: context.text.bodyMedium?.copyWith(
-                  color: allGraded
+                    : '${Format.plural(pending, 'assessment')} still need marks.',
+                style: context.text.bodySmall?.copyWith(
+                  color: pending == 0
                       ? context.semantic.onSuccessContainer
                       : context.semantic.mutedText,
                 ),

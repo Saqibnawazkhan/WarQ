@@ -18,12 +18,7 @@ class AppSpacing {
   static const EdgeInsets pagePadding = EdgeInsets.symmetric(horizontal: lg);
 
   /// Padding for the content of a page that also needs vertical breathing room.
-  ///
-  /// The bottom is deep because the compose button is docked into the middle of
-  /// the navigation bar and stands proud of it. Anything ending at the old
-  /// 32pt sat underneath the button — on the dashboard the last row of quick
-  /// actions was half covered by it.
-  static const EdgeInsets pageInsets = EdgeInsets.fromLTRB(lg, lg, lg, fabClearance);
+  static const EdgeInsets pageInsets = EdgeInsets.fromLTRB(lg, lg, lg, xxxl);
 
   /// Cards and rows carry the larger type scale, so they were given room to
   /// hold it. A tile is now comfortably past the 48dp minimum touch target

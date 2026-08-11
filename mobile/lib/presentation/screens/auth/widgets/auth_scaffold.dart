@@ -6,11 +6,6 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../splash/splash_screen.dart';
 
 /// Shared chrome for the sign-in, sign-up and password screens.
-///
-/// Every auth screen opens the same way: the brand, then one large headline
-/// with a single muted line under it. [showBackButton] decides only whether the
-/// step can be backed out of — the header stays identical throughout so signing
-/// up never looks like a different app from signing in.
 class AuthScaffold extends StatelessWidget {
   const AuthScaffold({
     super.key,
@@ -45,31 +40,29 @@ class AuthScaffold extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      const AppLogo(size: 44),
-                      const SizedBox(width: AppSpacing.md),
-                      Flexible(
-                        child: Text(
+                  if (!showBackButton) ...<Widget>[
+                    Row(
+                      children: <Widget>[
+                        const AppLogo(size: 44),
+                        const SizedBox(width: AppSpacing.md),
+                        Text(
                           AppConstants.appName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                           style: context.text.titleLarge?.copyWith(
                             fontWeight: FontWeight.w800,
                             letterSpacing: -0.4,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.xxxl),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.xxxl),
+                  ],
                   Text(
                     title,
-                    style: context.text.displaySmall?.copyWith(
+                    style: context.text.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     subtitle,
                     style: context.text.bodyMedium?.copyWith(

@@ -13,6 +13,7 @@ import '../../../state/attendance_marking_controller.dart';
 import '../../../state/session_controller.dart';
 import 'widgets/absence_dispatch_sheet.dart';
 import '../../../widgets/common/app_badge.dart';
+import '../../../widgets/common/app_card.dart';
 import '../../../widgets/feedback/dialogs.dart';
 import '../../../widgets/feedback/state_views.dart';
 import '../../../widgets/layout/app_page.dart';
@@ -251,7 +252,8 @@ class _SummaryStrip extends StatelessWidget {
     // bulk action on the right. Four stacked number-and-caption columns plus a
     // separate row of buttons underneath cost about a fifth of the screen to
     // say something a teacher reads in a glance.
-    return Padding(
+    return Container(
+      color: context.colors.surface,
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         0,
@@ -264,13 +266,9 @@ class _SummaryStrip extends StatelessWidget {
             horizontal: AppSpacing.md,
             vertical: AppSpacing.sm,
           ),
-          // A white card on the page's own background, like every other surface
-          // in the prototype — the strip used to paint a white band behind
-          // itself, which read as a second toolbar under the real one.
           decoration: BoxDecoration(
-            color: context.colors.surface,
+            color: context.colors.surfaceContainerHigh,
             borderRadius: AppRadii.cardRadius,
-            border: Border.all(color: context.semantic.subtleBorder),
           ),
           child: Row(
             children: <Widget>[
@@ -391,8 +389,13 @@ class _AttendanceRow extends StatelessWidget {
     // Stacking them put three students on a screen; a class of thirty is the
     // normal case, and a teacher should be able to see who is left to mark
     // without scrolling away from the ones they just did.
-    return _MarkCard(
-      accent: AttendanceStatusChip.colorFor(context, status),
+    return AppCard(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      borderColor: AttendanceStatusChip.colorFor(context, status)
+          .withValues(alpha: 0.35),
       child: Row(
         children: <Widget>[
           Expanded(
@@ -409,7 +412,7 @@ class _AttendanceRow extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: context.text.titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w700, height: 1.2),
+                      ?.copyWith(fontWeight: FontWeight.w600, height: 1.2),
                 ),
                 if (showMeta) _StudentMeta(student: student),
               ],
@@ -418,45 +421,6 @@ class _AttendanceRow extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           _StatusSelector(status: status, onChanged: onChanged),
         ],
-      ),
-    );
-  }
-}
-
-/// The prototype's list row: a white card with a thin colour bar down its left
-/// edge. Here the bar is the mark itself, so running an eye down the column
-/// shows who is absent without reading a single letter.
-///
-/// Drawn as a coloured card that the white content sits on top of, so the bar
-/// is exactly as tall as the row without an intrinsic-height pass measuring it.
-class _MarkCard extends StatelessWidget {
-  const _MarkCard({required this.accent, required this.child});
-
-  final Color accent;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      // Matches the mark buttons, so the bar and the button a teacher just
-      // pressed change together rather than one chasing the other.
-      duration: const Duration(milliseconds: 140),
-      clipBehavior: Clip.antiAlias,
-      // The hairline border stays: the strip above keeps one, and on this app's
-      // 2% grey page a white row without it has no edge to read.
-      decoration: BoxDecoration(
-        color: accent,
-        borderRadius: AppRadii.cardRadius,
-        border: Border.all(color: context.semantic.subtleBorder),
-      ),
-      padding: const EdgeInsets.only(left: AppSpacing.xs),
-      child: Container(
-        color: context.colors.surface,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
-        child: child,
       ),
     );
   }

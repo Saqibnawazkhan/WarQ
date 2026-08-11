@@ -9,7 +9,6 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/date_utils.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/models.dart';
-import '../../../../domain/entities/attendance_summary.dart';
 import '../../../state/attendance_history_controller.dart';
 import '../../../state/session_controller.dart';
 import '../../../widgets/common/app_badge.dart';
@@ -138,7 +137,9 @@ class _SummaryBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
+      width: double.infinity,
+      color: context.colors.surface,
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.sm,
@@ -146,100 +147,77 @@ class _SummaryBar extends StatelessWidget {
         AppSpacing.md,
       ),
       child: ContentWidth(
-        child: AppCard(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                controller.filterSummary,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: context.text.labelMedium
-                    ?.copyWith(color: context.semantic.mutedText),
-              ),
-              const Gap.md(),
-              Row(
-                // Tops aligned, so the four numbers sit on one line even when a
-                // caption below one of them wraps.
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Expanded(
-                    child: _Figure(
-                      // Days, not records: a teacher scanning this card is
-                      // counting registers taken, and the list underneath is
-                      // one row per session.
-                      value: Format.count(controller.sessionRows.length),
-                      caption: 'Sessions',
-                    ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              controller.filterSummary,
+              style: context.text.labelMedium
+                  ?.copyWith(color: context.semantic.mutedText),
+            ),
+            const Gap.sm(),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: _Stat(
+                    label: 'Records',
+                    value: '${controller.recordCount}',
                   ),
-                  Expanded(
-                    child: _Figure(
-                      value: Format.count(controller.summary.present),
-                      caption: 'Present',
-                      color: context.semantic.success,
-                    ),
+                ),
+                Expanded(
+                  child: _Stat(
+                    label: 'Present',
+                    value: '${controller.summary.present}',
+                    color: context.semantic.success,
                   ),
-                  Expanded(
-                    child: _Figure(
-                      value: Format.count(controller.summary.absent),
-                      caption: 'Absent',
-                      color: context.semantic.danger,
-                    ),
+                ),
+                Expanded(
+                  child: _Stat(
+                    label: 'Absent',
+                    value: '${controller.summary.absent}',
+                    color: context.semantic.danger,
                   ),
-                  Expanded(
-                    child: _Figure(
-                      value: Format.percentOrDash(
-                        controller.summary.percentage,
-                        decimals: 0,
-                      ),
-                      caption: 'Average',
-                      color: context.colors.primary,
+                ),
+                Expanded(
+                  child: _Stat(
+                    label: 'Rate',
+                    value: Format.percentOrDash(
+                      controller.summary.percentage,
+                      decimals: 0,
                     ),
+                    color: context.colors.primary,
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-/// A big number over a small muted caption.
-class _Figure extends StatelessWidget {
-  const _Figure({required this.value, required this.caption, this.color});
+class _Stat extends StatelessWidget {
+  const _Stat({required this.label, required this.value, this.color});
 
+  final String label;
   final String value;
-  final String caption;
   final Color? color;
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        // Four figures share the card, so a quarter of it is all the width a
-        // number gets. Scaling one down beats ellipsising it — a truncated
-        // figure reads as a wrong one.
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
-          child: Text(
-            value,
-            maxLines: 1,
-            style: context.text.headlineSmall
-                ?.copyWith(fontWeight: FontWeight.w800, color: color),
+        Text(
+          value,
+          style: context.text.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: color,
           ),
         ),
-        const SizedBox(height: AppSpacing.xs),
         Text(
-          caption,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: context.text.labelMedium
+          label,
+          style: context.text.labelSmall
               ?.copyWith(color: context.semantic.mutedText),
         ),
       ],
@@ -255,10 +233,8 @@ class _SessionGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _BarCard(
-      // Neutral rather than the class colour: a row here is a day, and the
-      // class it belongs to is already named on the line under the date.
-      accent: context.colors.primary,
+    return AppCard(
+      padding: EdgeInsets.zero,
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
@@ -269,30 +245,29 @@ class _SessionGroup extends StatelessWidget {
             AppSpacing.lg,
             AppSpacing.md,
           ),
-          // The date leads, the way the prototype has it — a teacher opening
-          // history is looking for a day, and the class is a chip away.
+          shape: const RoundedRectangleBorder(borderRadius: AppRadii.cardRadius),
+          collapsedShape:
+              const RoundedRectangleBorder(borderRadius: AppRadii.cardRadius),
           title: Text(
-            AppDate.format(row.date),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            row.className,
             style: context.text.titleSmall?.copyWith(fontWeight: FontWeight.w700),
           ),
-          // The marks sit under the class name rather than out to the right:
-          // four figures at this type scale need more width than a phone leaves
-          // beside a date, and the chevron has to keep its place.
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+          subtitle: Text(
+            '${AppDate.format(row.date)} · ${AppDate.formatWeekday(row.date)}',
+            style: context.text.bodySmall
+                ?.copyWith(color: context.semantic.mutedText),
+          ),
+          trailing: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: <Widget>[
+              AttendanceBadge(percent: row.summary.percentage, dense: true),
+              const SizedBox(height: 3),
               Text(
-                '${row.className} · ${AppDate.formatWeekday(row.date)}',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.text.bodySmall
+                '${row.summary.present}/${row.summary.assessableSessions}',
+                style: context.text.labelSmall
                     ?.copyWith(color: context.semantic.mutedText),
               ),
-              const Gap.sm(),
-              _MarkCounts(summary: row.summary),
             ],
           ),
           children: <Widget>[
@@ -301,31 +276,22 @@ class _SessionGroup extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                 child: Row(
                   children: <Widget>[
-                    // Name and roll number as one run, so a long roll number
-                    // eats into the space it needs rather than taking its width
-                    // first and pushing the chip off the end of the row.
                     Expanded(
-                      child: Text.rich(
-                        TextSpan(
-                          children: <InlineSpan>[
-                            TextSpan(
-                              text: entry.studentName,
-                              style: context.text.bodyMedium,
-                            ),
-                            if (entry.rollNumber != null)
-                              TextSpan(
-                                text: '  ${entry.rollNumber}',
-                                style: context.text.labelSmall?.copyWith(
-                                  color: context.semantic.mutedText,
-                                ),
-                              ),
-                          ],
-                        ),
+                      child: Text(
+                        entry.studentName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                        style: context.text.bodyMedium,
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.md),
+                    if (entry.rollNumber != null) ...<Widget>[
+                      Text(
+                        entry.rollNumber!,
+                        style: context.text.labelSmall
+                            ?.copyWith(color: context.semantic.mutedText),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                    ],
                     AttendanceStatusChip(entry.status, dense: true),
                   ],
                 ),
@@ -348,94 +314,6 @@ class _SessionGroup extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// `11 P  0 A  1 L  0 S`, each figure in its status colour.
-///
-/// Four marks, not the three the prototype draws: short leave is a real mark in
-/// this app and a day it was used has to say so.
-class _MarkCounts extends StatelessWidget {
-  const _MarkCounts({required this.summary});
-
-  final AttendanceSummary summary;
-
-  int _countOf(AttendanceStatus status) => switch (status) {
-        AttendanceStatus.present => summary.present,
-        AttendanceStatus.absent => summary.absent,
-        AttendanceStatus.late => summary.late,
-        AttendanceStatus.shortLeave => summary.shortLeave,
-      };
-
-  @override
-  Widget build(BuildContext context) {
-    // Only shrinks once the system text size has already grown the row past the
-    // width it has, so the figures never end up smaller than they start.
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      alignment: Alignment.centerLeft,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          for (final AttendanceStatus status in AttendanceStatus.values) ...<Widget>[
-            if (status != AttendanceStatus.values.first)
-              const SizedBox(width: AppSpacing.md),
-            Text.rich(
-              TextSpan(
-                children: <InlineSpan>[
-                  TextSpan(
-                    text: '${_countOf(status)}',
-                    style: context.text.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: AttendanceStatusChip.colorFor(context, status),
-                    ),
-                  ),
-                  TextSpan(
-                    text: ' ${status.shortLabel}',
-                    style: context.text.labelMedium?.copyWith(
-                      color: AttendanceStatusChip.colorFor(context, status),
-                    ),
-                  ),
-                ],
-              ),
-              maxLines: 1,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-/// The prototype's list row: a white card with a thin colour bar down its left
-/// edge.
-///
-/// Drawn as a coloured card the white content sits on top of, so the bar stays
-/// exactly as tall as the row — including while the row is expanding, which an
-/// intrinsic-height measurement would have to redo on every frame.
-///
-/// Keeps the app's hairline border, which the summary card above it has. The
-/// prototype separates its cards with a soft shadow on a lavender page; this
-/// app's page is a 2% grey and has no shadow anywhere, so a white row without
-/// the border has no edge at all.
-class _BarCard extends StatelessWidget {
-  const _BarCard({required this.accent, required this.child});
-
-  final Color accent;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: accent,
-        borderRadius: AppRadii.cardRadius,
-        border: Border.all(color: context.semantic.subtleBorder),
-      ),
-      padding: const EdgeInsets.only(left: AppSpacing.xs),
-      child: Material(color: context.colors.surface, child: child),
     );
   }
 }
