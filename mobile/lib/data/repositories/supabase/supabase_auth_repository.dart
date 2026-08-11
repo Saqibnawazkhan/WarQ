@@ -229,6 +229,17 @@ class SupabaseAuthRepository implements AuthRepository {
     } on AuthException catch (error) {
       throw _authFailure(error);
     }
+
+    // Whatever brought them here, the password is now one they chose, so the
+    // gate that was holding an invited teacher on this screen comes down. The
+    // function clears the flag for the caller and nobody else, so there is
+    // nothing to pass and nothing to get wrong.
+    try {
+      await _client.rpc<void>('fn_password_changed');
+    } on PostgrestException {
+      // The password really did change; failing here would tell them otherwise
+      // and send them round again. They land on the screen once more at worst.
+    }
   }
 
   @override
@@ -299,6 +310,7 @@ class SupabaseAuthRepository implements AuthRepository {
       if (profile is Map<String, dynamic>) {
         return Rows.user(profile).copyWith(
           hasAccess: Rows.boolean(me!, 'has_access', fallback: true),
+          mustChangePassword: Rows.boolean(profile, 'must_change_password'),
         );
       }
 

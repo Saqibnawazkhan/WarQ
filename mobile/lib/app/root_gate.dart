@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../data/models/models.dart';
 import '../presentation/screens/auth/login_screen.dart';
 import '../presentation/screens/auth/pending_approval_screen.dart';
+import '../presentation/screens/profile/change_password_screen.dart';
 import '../presentation/screens/org_admin/org_admin_shell.dart';
 import '../presentation/screens/splash/splash_screen.dart';
 import '../presentation/screens/teacher/teacher_shell.dart';
@@ -35,6 +36,14 @@ class RootGate extends StatelessWidget {
     // perfectly and then fail every single query, so they never get the chance.
     if (!user.hasAccess) {
       return PendingApprovalScreen(user: user);
+    }
+
+    // An invited teacher's password arrived by email, which means it also
+    // arrived in a mailbox that outlives them and that somebody else may read.
+    // They choose their own before anything else, and there is no way past this
+    // but through it.
+    if (user.mustChangePassword) {
+      return const ChangePasswordScreen(forced: true);
     }
 
     return switch (user.role) {

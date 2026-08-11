@@ -134,24 +134,49 @@ class SupabaseOrganizationRepository extends SupabaseRepositoryBase
       throw const AppFailure.validation('An email address is required.');
     }
 
-    // organizationId and invitedByUserId are not sent: the function takes both
-    // from the caller's own profile, so an invitation cannot be filed against
-    // an organization the caller does not administer.
+    // Goes through the edge function rather than straight to invite_teacher,
+    // because inviting now means creating the teacher's account and emailing
+    // them a password — and creating an auth user needs the service-role key,
+    // which can never be in this app. The function calls invite_teacher as this
+    // caller first, so every rule about who may invite whom still applies
+    // before anything privileged happens.
     //
-    // message has nowhere to go — the invitation carries no note, and Phase 1
-    // delivers nothing by email in any case.
+    // organizationId and invitedByUserId are not sent: both come from the
+    // caller's own profile. message has nowhere to go — an invitation carries
+    // no note.
     return write(
       () async {
-        final Map<String, dynamic> row = await client.rpc<Map<String, dynamic>>(
-          'invite_teacher',
-          params: <String, dynamic>{
-            'teacher_email': address,
-            'teacher_name': Format.cleanOrNull(inviteeName) ?? address,
+        final FunctionResponse response = await client.functions.invoke(
+          'invite-teacher',
+          body: <String, dynamic>{
+            'email': address,
+            'full_name': Format.cleanOrNull(inviteeName) ?? address,
           },
         );
-        return Rows.invitation(row);
+
+        final Map<String, dynamic> payload =
+            (response.data as Map<String, dynamic>?) ?? const <String, dynamic>{};
+
+        if (response.status >= 400) {
+          throw AppFailure.validation(
+            Rows.str(payload, 'error', fallback: 'The invitation could not be sent.'),
+          );
+        }
+
+        // The invitation row the function created, read back so the caller gets
+        // the same object the old path returned.
+        final String? id = Rows.strOrNull(payload, 'invitation_id');
+        if (id != null) {
+          final Map<String, dynamic>? row =
+              await _invitations.select('*').eq('id', id).maybeSingle();
+          if (row != null) return Rows.invitation(row);
+        }
+
+        throw const AppFailure.storage(
+          'The teacher was invited but the invitation could not be read back.',
+        );
       },
-      touches: <DataEntity>{DataEntity.invitations},
+      touches: <DataEntity>{DataEntity.invitations, DataEntity.users},
     );
   }
 

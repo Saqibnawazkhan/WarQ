@@ -17,6 +17,7 @@ class AppUser {
     this.organizationId,
     this.status = AccountStatus.active,
     this.hasAccess = true,
+    this.mustChangePassword = false,
     this.title,
     this.bio,
     this.avatarSeed,
@@ -74,6 +75,13 @@ class AppUser {
   /// behave exactly as before.
   final bool hasAccess;
 
+  /// True when the account's password was chosen by somebody else — an
+  /// organization admin invited them and WarQ emailed them one. The app refuses
+  /// to go anywhere but the change-password screen until they pick their own,
+  /// which is what keeps a password sitting in a mailbox from being the only
+  /// thing standing between a stranger and a class register.
+  final bool mustChangePassword;
+
   /// e.g. "Senior Lecturer" — shown on reports next to the teacher name.
   final String? title;
   final String? bio;
@@ -104,6 +112,7 @@ class AppUser {
     bool clearOrganization = false,
     AccountStatus? status,
     bool? hasAccess,
+    bool? mustChangePassword,
     String? title,
     bool clearTitle = false,
     String? bio,
@@ -124,6 +133,7 @@ class AppUser {
           clearOrganization ? null : (organizationId ?? this.organizationId),
       status: status ?? this.status,
       hasAccess: hasAccess ?? this.hasAccess,
+      mustChangePassword: mustChangePassword ?? this.mustChangePassword,
       title: clearTitle ? null : (title ?? this.title),
       bio: clearBio ? null : (bio ?? this.bio),
       avatarSeed: avatarSeed ?? this.avatarSeed,

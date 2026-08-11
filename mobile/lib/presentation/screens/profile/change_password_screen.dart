@@ -3,14 +3,22 @@ import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/validators.dart';
 import '../../state/session_controller.dart';
 import '../../widgets/layout/app_page.dart';
 import '../auth/widgets/auth_scaffold.dart';
 
 /// Change the signed-in user's password.
+///
+/// In [forced] mode this is the whole app: an invited teacher signed in with a
+/// password that arrived by email, and the root gate shows nothing else until
+/// they have chosen their own. There is no back button and no way round, so the
+/// screen explains why rather than looking like something has gone wrong.
 class ChangePasswordScreen extends StatefulWidget {
-  const ChangePasswordScreen({super.key});
+  const ChangePasswordScreen({super.key, this.forced = false});
+
+  final bool forced;
 
   @override
   State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
@@ -42,6 +50,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     );
     if (!mounted) return;
     if (ok) {
+      // Nothing to pop back to when this is the only screen: reloading the
+      // session clears the flag, and the root gate lets them through.
+      if (widget.forced) {
+        await session.load(refreshing: true);
+        if (!mounted) return;
+        context.showSuccess('Password set. Welcome to WarQ.');
+        return;
+      }
       Navigator.of(context).pop();
       context.showSuccess('Password changed.');
     }
@@ -52,12 +68,43 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     final SessionController session = context.watch<SessionController>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Change password')),
+      appBar: AppBar(
+        title: Text(widget.forced ? 'Choose your password' : 'Change password'),
+        automaticallyImplyLeading: !widget.forced,
+      ),
       body: SafeArea(
         child: Form(
           key: _formKey,
           child: AppPageBody(
             children: <Widget>[
+              if (widget.forced) ...<Widget>[
+                Container(
+                  padding: AppSpacing.cardPadding,
+                  decoration: BoxDecoration(
+                    color: context.colors.surfaceContainerHigh,
+                    borderRadius: AppRadii.cardRadius,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Icon(
+                        Icons.lock_reset_rounded,
+                        color: context.colors.primary,
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Text(
+                          'The password you signed in with was sent to you by '
+                          'email, so it is sitting in a mailbox. Choose one only '
+                          'you know and WarQ will forget the old one.',
+                          style: context.text.bodyMedium,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+              ],
               if (session.errorMessage != null)
                 AuthErrorBanner(message: session.errorMessage!),
               TextFormField(
@@ -65,7 +112,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 obscureText: _obscure,
                 textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
-                  labelText: 'Current password',
+                  labelText: widget.forced ? 'Password from the email' : 'Current password',
                   prefixIcon: const Icon(Icons.lock_outline_rounded),
                   suffixIcon: IconButton(
                     onPressed: () => setState(() => _obscure = !_obscure),
