@@ -13,7 +13,7 @@ import '../../../state/class_list_controller.dart';
 import '../../../state/session_controller.dart';
 import '../../../widgets/common/app_card.dart';
 import '../../../widgets/common/search_field.dart';
-import '../../../widgets/domain/class_card.dart';
+import '../../../widgets/domain/class_grid_tile.dart';
 import '../../../widgets/feedback/dialogs.dart';
 import '../../../widgets/feedback/state_views.dart';
 import '../../../widgets/layout/app_page.dart';
@@ -260,34 +260,57 @@ class ClassesView extends StatelessWidget {
                   return RefreshIndicator(
                     onRefresh: controller.refresh,
                     child: ContentWidth(
-                      child: ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.lg,
-                          0,
-                          AppSpacing.lg,
-                          AppSpacing.fabClearance,
-                        ),
-                        itemCount: visible.length + 1,
-                        separatorBuilder: (_, __) => const Gap.md(),
-                        itemBuilder: (BuildContext context, int index) {
-                          if (index == visible.length) {
-                            return _ListFooter(controller: controller);
-                          }
-                          final ClassSummary summary = visible[index];
-                          return ClassCard(
-                            summary: summary,
-                            onTap: () => Navigator.of(context).pushNamed(
-                              Routes.classDetail,
-                              arguments: ClassDetailArgs(classId: summary.id),
+                      // A grid rather than a list: a class is picked by
+                      // recognising it, and two coloured tiles to a row show
+                      // twice as many at a glance as full-width cards did.
+                      child: CustomScrollView(
+                        slivers: <Widget>[
+                          SliverPadding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.lg,
                             ),
-                            trailing: IconButton(
-                              tooltip: 'Class options',
-                              icon: const Icon(Icons.more_vert_rounded),
-                              onPressed: () =>
-                                  _showActions(context, controller, summary),
+                            // Sized by tile rather than by column count: two to
+                            // a row on a phone, and more on a tablet without a
+                            // breakpoint to maintain, with tiles staying
+                            // square instead of stretching.
+                            sliver: SliverGrid(
+                              gridDelegate:
+                                  const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 220,
+                                mainAxisSpacing: AppSpacing.md,
+                                crossAxisSpacing: AppSpacing.md,
+                                childAspectRatio: 1,
+                              ),
+                              delegate: SliverChildBuilderDelegate(
+                                (BuildContext context, int index) {
+                                  final ClassSummary summary = visible[index];
+                                  return ClassGridTile(
+                                    summary: summary,
+                                    onTap: () => Navigator.of(context).pushNamed(
+                                      Routes.classDetail,
+                                      arguments:
+                                          ClassDetailArgs(classId: summary.id),
+                                    ),
+                                    onOptions: () =>
+                                        _showActions(context, controller, summary),
+                                  );
+                                },
+                                childCount: visible.length,
+                              ),
                             ),
-                          );
-                        },
+                          ),
+                          SliverPadding(
+                            padding: const EdgeInsets.fromLTRB(
+                              AppSpacing.lg,
+                              AppSpacing.lg,
+                              AppSpacing.lg,
+                              AppSpacing.fabClearance,
+                            ),
+                            sliver: SliverToBoxAdapter(
+                              child: _ListFooter(controller: controller),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   );

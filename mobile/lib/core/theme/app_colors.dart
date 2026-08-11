@@ -52,6 +52,42 @@ class AppColors {
     Color(0xFF10B981),
   ];
 
+  /// The colours a class card is painted in.
+  ///
+  /// Six, because the database hands every new class a `color_index` from 0 to
+  /// 5 as it is created, so a teacher's classes come out visually distinct
+  /// without anyone choosing. Each entry is a pair: the gradient runs from the
+  /// first towards the second, top-left to bottom-right.
+  ///
+  /// Deep enough that white text sits on them at full contrast — these carry
+  /// the class name, so legibility decides the shade, not the other way round.
+  static const List<List<Color>> classPalette = <List<Color>>[
+    <Color>[Color(0xFF7C5CFC), Color(0xFF6338F0)], // violet
+    <Color>[Color(0xFF16C0A4), Color(0xFF06A88C)], // teal
+    <Color>[Color(0xFFFF8A1E), Color(0xFFF56A00)], // orange
+    <Color>[Color(0xFFEC2E70), Color(0xFFD11557)], // pink
+    <Color>[Color(0xFF2E7DFF), Color(0xFF1259E0)], // blue
+    <Color>[Color(0xFF9B4DE0), Color(0xFF7A2FC4)], // purple
+  ];
+
+  /// The pair for a class, from whatever seed it carries.
+  ///
+  /// The seed is normally the `color_index` the database assigned, so it just
+  /// indexes the list. Anything else is hashed, which keeps a class the same
+  /// colour on every device rather than shifting between sessions.
+  static List<Color> classColors(String? seed) {
+    if (seed == null || seed.isEmpty) return classPalette.first;
+
+    final int? index = int.tryParse(seed);
+    if (index != null) return classPalette[index.abs() % classPalette.length];
+
+    var hash = 0;
+    for (final unit in seed.codeUnits) {
+      hash = (hash * 31 + unit) & 0x7FFFFFFF;
+    }
+    return classPalette[hash % classPalette.length];
+  }
+
   /// Colour cycle used by charts with multiple series or categories.
   static const List<Color> chartPalette = <Color>[
     Color(0xFF2E5BFF),
