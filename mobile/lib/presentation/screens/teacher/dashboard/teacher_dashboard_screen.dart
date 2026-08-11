@@ -19,7 +19,6 @@ import '../../../widgets/common/quick_action.dart';
 import '../../../widgets/common/stat_tile.dart';
 import '../../../widgets/domain/activity_tile.dart';
 import '../../../widgets/domain/assessment_tile.dart';
-import '../../../widgets/domain/class_card.dart';
 import '../../../widgets/feedback/state_views.dart';
 import '../../../widgets/layout/app_page.dart';
 import '../teacher_shell.dart';
@@ -171,7 +170,11 @@ class _DashboardView extends StatelessWidget {
                 _TodayAttendanceCard(today: data.today),
                 const Gap.xxl(),
               ],
-              if (data.recentClasses.isEmpty)
+              // A teacher with no classes still needs somewhere to start. Once
+              // they have some, the list used to be repeated here from the
+              // Classes tab; the pending-attendance card above already names
+              // the classes that actually need something doing today.
+              if (data.recentClasses.isEmpty) ...<Widget>[
                 EmptyView(
                   compact: true,
                   icon: Icons.class_outlined,
@@ -182,31 +185,8 @@ class _DashboardView extends StatelessWidget {
                   actionLabel: 'Create a class',
                   onAction: () =>
                       Navigator.of(context).pushNamed(Routes.classForm),
-                )
-              else ...<Widget>[
-                SectionHeader(
-                  title: 'Your classes',
-                  subtitle: Format.plural(data.totalClasses, 'class', 'classes'),
-                  actionLabel: 'See all',
-                  onAction: () =>
-                      TeacherShellScope.maybeOf(context)?.goToTab(TeacherTab.classes),
                 ),
-                for (final ClassSummary summary in data.recentClasses)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                    child: ClassCard(
-                      summary: summary,
-                      showAttendanceCta: true,
-                      onTap: () => _openClass(context, summary.id),
-                      onMarkAttendance: () => Navigator.of(context).pushNamed(
-                        Routes.markAttendance,
-                        arguments: MarkAttendanceArgs(classId: summary.id),
-                      ),
-                    ),
-                  ),
-                // The last card already carries its own bottom padding, so this
-                // lands on the same 24pt gap that separates every other section.
-                const Gap.md(),
+                const Gap.xxl(),
               ],
               if (data.recentAssessments.isNotEmpty) ...<Widget>[
                 SectionHeader(
