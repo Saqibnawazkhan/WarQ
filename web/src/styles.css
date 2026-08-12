@@ -37,15 +37,55 @@
 }
 
 /* Light is the default; dark follows the operating system. Both are written as
- * the same token names so no component ever asks which one is active. */
+ * the same token names so no component ever asks which one is active.
+ *
+ * The surfaces are translucent: the page is one soft gradient and everything
+ * on it is glass over that. Only the things content physically passes behind
+ * are blurred as well — see the note above --blur. */
 :root {
-  --bg: #f7f7fb;
-  --bg-accent: radial-gradient(1200px 600px at 15% -10%, #ece9fb 0%, transparent 60%);
-  --surface: #ffffff;
-  --surface-2: #fbfbfe;
-  --surface-3: #f3f3f9;
-  --border: #e8e8f0;
-  --border-strong: #d7d7e4;
+  --bg: #f4f3fb;
+
+  /* Two pools of colour off opposite corners, the same pair the phone app
+   * paints. Fixed to the viewport so they stay put while the page scrolls,
+   * which is what makes the blurred surfaces above them read as glass rather
+   * than as a texture printed on the content. */
+  --bg-accent:
+    radial-gradient(680px 620px at 8% -12%,
+      color-mix(in oklab, var(--indigo-500) 20%, transparent) 0%, transparent 70%),
+    radial-gradient(760px 700px at 104% 108%,
+      color-mix(in oklab, #7c5cfc 16%, transparent) 0%, transparent 70%);
+
+  /* -2 lifts (a card heading, a hovered row), -3 recedes (a tab track, a
+   * progress groove). Stated as a pair so a component only has to decide
+   * whether it sits forward of the page or behind it. */
+  --surface: rgb(255 255 255 / 62%);
+  --surface-2: rgb(255 255 255 / 78%);
+  --surface-3: rgb(255 255 255 / 38%);
+
+  /* Brighter, for the things that sit forward of the page: the sidebar, a
+   * modal, an input. */
+  --surface-raised: rgb(255 255 255 / 80%);
+
+  /* Nearly solid. Only for a sticky table header, which has to hide the rows
+   * passing under it and cannot use a blur — see the note on th. */
+  --surface-sticky: rgb(252 251 255 / 96%);
+
+  /* Two hairlines, because glass needs both. --border is the lit edge where a
+   * pane meets the page, so it is brighter than the pane. --rule is a divider
+   * *inside* a pane — a row separator, the line under a card heading — and a
+   * bright line there would be invisible against the pane it sits on. */
+  --border: rgb(255 255 255 / 70%);
+  --border-strong: rgb(255 255 255 / 90%);
+  --rule: rgb(20 20 43 / 9%);
+  --rule-strong: rgb(20 20 43 / 17%);
+
+  /* backdrop-filter is not free — each one makes the compositor read back and
+   * blur what is already painted. One per region is fine; one per row, or one
+   * per table cell, is not. Applied only to the sidebar, the save bar, the
+   * sign-in card and modals: four single elements, each with the page moving
+   * behind it. */
+  --blur: blur(18px);
+  --blur-strong: blur(26px);
 
   --text: #14142b;
   --text-2: #4a4a68;
@@ -54,16 +94,19 @@
   --primary: var(--indigo-500);
   --primary-hover: var(--indigo-600);
   --primary-fg: #ffffff;
-  --primary-tint: var(--indigo-50);
   --primary-ring: color-mix(in oklab, var(--indigo-500) 35%, transparent);
 
+  /* Tinted glass rather than flat colour: a solid chip on a translucent card
+   * is the one thing that gives the whole effect away. */
+  --primary-tint: color-mix(in oklab, var(--indigo-500) 13%, transparent);
+
   --green: #0a8f56;
-  --green-tint: #e6f7ef;
+  --green-tint: color-mix(in oklab, #0a8f56 14%, transparent);
   --amber: #a85f06;
-  --amber-tint: #fdf3e5;
+  --amber-tint: color-mix(in oklab, #a85f06 15%, transparent);
   --red: #c62a24;
-  --red-tint: #fdecea;
-  --grey-tint: #f0f0f6;
+  --red-tint: color-mix(in oklab, #c62a24 13%, transparent);
+  --grey-tint: rgb(20 20 43 / 7%);
 
   --shadow-sm: 0 1px 2px rgb(20 20 43 / 5%);
   --shadow: 0 2px 4px rgb(20 20 43 / 4%), 0 8px 24px rgb(20 20 43 / 5%);
@@ -72,13 +115,25 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0c0c14;
-    --bg-accent: radial-gradient(1200px 600px at 15% -10%, #1c1638 0%, transparent 60%);
-    --surface: #15151f;
-    --surface-2: #1a1a26;
-    --surface-3: #20202e;
-    --border: #262636;
-    --border-strong: #34344a;
+    --bg: #0b0b14;
+    --bg-accent:
+      radial-gradient(680px 620px at 8% -12%,
+        color-mix(in oklab, #8b6df5 28%, transparent) 0%, transparent 70%),
+      radial-gradient(760px 700px at 104% 108%,
+        color-mix(in oklab, #16c0a4 20%, transparent) 0%, transparent 70%);
+
+    /* Glass over a dark ground is a lift, not a wash: a few per cent of white
+     * is enough to separate a card from the page, and more turns it grey. */
+    --surface: rgb(255 255 255 / 7%);
+    --surface-2: rgb(255 255 255 / 11%);
+    --surface-3: rgb(255 255 255 / 4%);
+    --surface-raised: rgb(255 255 255 / 10%);
+    --surface-sticky: #191926;
+
+    --border: rgb(255 255 255 / 12%);
+    --border-strong: rgb(255 255 255 / 20%);
+    --rule: rgb(255 255 255 / 9%);
+    --rule-strong: rgb(255 255 255 / 18%);
 
     --text: #f2f2f7;
     --text-2: #b9b9cc;
@@ -87,16 +142,16 @@
     --primary: #8b6df5;
     --primary-hover: #9a80f7;
     --primary-fg: #10091f;
-    --primary-tint: #201a3d;
     --primary-ring: color-mix(in oklab, #8b6df5 40%, transparent);
+    --primary-tint: color-mix(in oklab, #8b6df5 22%, transparent);
 
     --green: #3ddc97;
-    --green-tint: #102b22;
+    --green-tint: color-mix(in oklab, #3ddc97 18%, transparent);
     --amber: #f0b34a;
-    --amber-tint: #2e2213;
+    --amber-tint: color-mix(in oklab, #f0b34a 18%, transparent);
     --red: #ff6b64;
-    --red-tint: #33161a;
-    --grey-tint: #22222f;
+    --red-tint: color-mix(in oklab, #ff6b64 18%, transparent);
+    --grey-tint: rgb(255 255 255 / 9%);
 
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 40%);
     --shadow: 0 2px 4px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 40%);
@@ -116,6 +171,7 @@ body {
   background-color: var(--bg);
   background-image: var(--bg-accent);
   background-repeat: no-repeat;
+  background-attachment: fixed;
   color: var(--text);
   font-family: var(--font);
   font-size: 14.5px;
@@ -144,6 +200,9 @@ a:hover { text-decoration: underline; }
 
 .shell { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
 
+/* Blurred, and one of the four places that earns it: the page runs alongside
+ * this column and scrolls under it on narrow screens, so there is always
+ * something moving behind the glass. */
 .sidebar {
   position: sticky;
   top: 0;
@@ -153,7 +212,8 @@ a:hover { text-decoration: underline; }
   flex-direction: column;
   gap: 3px;
   padding: 18px 12px;
-  background: var(--surface);
+  background: var(--surface-raised);
+  backdrop-filter: var(--blur);
   border-right: 1px solid var(--border);
 }
 
@@ -212,7 +272,7 @@ a:hover { text-decoration: underline; }
 .nav-spacer { flex: 1; }
 
 .sidebar-footer {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--rule);
   margin-top: 10px;
   padding-top: 12px;
   font-size: 12.5px;
@@ -247,7 +307,7 @@ a:hover { text-decoration: underline; }
   align-items: center;
   gap: 12px;
   padding: 15px 18px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--rule);
   background: var(--surface-2);
 }
 
@@ -309,6 +369,10 @@ table { width: 100%; border-collapse: collapse; }
 
 th, td { text-align: left; padding: 13px 18px; white-space: nowrap; }
 
+/* Rows slide directly underneath this header, so it has to hide them — but not
+ * with a blur. A sticky header is a row of separate cells, and a filter on each
+ * one is a blur layer per column with a seam at every boundary. Near-opaque
+ * instead: over the card it still reads as the lifted pane it is. */
 th {
   position: sticky;
   top: 0;
@@ -318,11 +382,11 @@ th {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--muted);
-  background: var(--surface-2);
-  border-bottom: 1px solid var(--border);
+  background: var(--surface-sticky);
+  border-bottom: 1px solid var(--rule);
 }
 
-tbody td { border-bottom: 1px solid var(--border); }
+tbody td { border-bottom: 1px solid var(--rule); }
 tbody tr:last-child td { border-bottom: none; }
 tbody tr { transition: background var(--fast); }
 tbody tr:hover { background: var(--surface-2); }
@@ -392,7 +456,7 @@ button:active:not(:disabled) { translate: 0 1px; }
 
 .btn-quiet {
   background: var(--surface);
-  border-color: var(--border-strong);
+  border-color: var(--rule-strong);
   color: var(--text);
 }
 .btn-quiet:hover:not(:disabled) { background: var(--surface-3); }
@@ -410,16 +474,19 @@ button:active:not(:disabled) { translate: 0 1px; }
 
 label { display: block; font-weight: 570; margin-bottom: 6px; font-size: 13.5px; }
 
+/* Kept a shade brighter than a card so a field still reads as somewhere to
+ * type rather than as another panel. */
 input[type="text"], input[type="email"], input[type="password"],
 input[type="search"], input[type="date"], select, textarea {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--rule-strong);
   border-radius: var(--radius-sm);
   font: inherit;
-  background: var(--surface);
+  background: var(--surface-raised);
   color: var(--text);
-  transition: border-color var(--fast), box-shadow var(--fast);
+  transition: border-color var(--fast), box-shadow var(--fast),
+    background var(--fast);
 }
 
 input::placeholder, textarea::placeholder { color: var(--muted); }
@@ -507,8 +574,9 @@ input:focus, select:focus, textarea:focus {
   width: 100%;
   max-width: 400px;
   padding: 32px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  backdrop-filter: var(--blur-strong);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
 }
@@ -524,8 +592,8 @@ input:focus, select:focus, textarea:focus {
   display: grid;
   place-items: center;
   padding: 24px;
-  background: rgb(10 10 20 / 55%);
-  backdrop-filter: blur(3px);
+  background: rgb(10 10 20 / 42%);
+  backdrop-filter: blur(2px);
   animation: fade var(--fast);
 }
 
@@ -533,8 +601,9 @@ input:focus, select:focus, textarea:focus {
   width: 100%;
   max-width: 460px;
   padding: 24px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  backdrop-filter: var(--blur-strong);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
   animation: rise var(--slow);
@@ -566,7 +635,7 @@ input:focus, select:focus, textarea:focus {
 .mark-off, .mark-on {
   padding: 6px 12px;
   font-size: 13px;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--rule-strong);
   background: var(--surface);
   color: var(--muted);
 }
@@ -588,8 +657,8 @@ input:focus, select:focus, textarea:focus {
   gap: 12px;
   margin-top: 18px;
   padding: 13px 18px;
-  background: color-mix(in oklab, var(--surface) 88%, transparent);
-  backdrop-filter: blur(10px);
+  background: var(--surface-raised);
+  backdrop-filter: var(--blur);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
@@ -622,7 +691,7 @@ input:focus, select:focus, textarea:focus {
 .tab:hover { color: var(--text); }
 
 .tab.active {
-  background: var(--surface);
+  background: var(--surface-raised);
   color: var(--text);
   box-shadow: var(--shadow-sm);
 }

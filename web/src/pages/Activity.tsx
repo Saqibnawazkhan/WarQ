@@ -106,7 +106,7 @@ export function Activity() {
               </div>
 
               {rows.length >= limit && (
-                <div className="card-body" style={{ borderTop: '1px solid var(--border)' }}>
+                <div className="card-body" style={{ borderTop: '1px solid var(--rule)' }}>
                   <button className="btn-quiet" onClick={() => setLimit(limit + PAGE)}>
                     <ChevronDown size={18} />
                     Show more
