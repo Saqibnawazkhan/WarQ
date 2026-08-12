@@ -5,6 +5,7 @@ import 'attendance/attendance_tab.dart';
 import 'classes/classes_tab.dart';
 import 'dashboard/teacher_dashboard_screen.dart';
 import '../profile/profile_screen.dart';
+import '../../widgets/layout/floating_nav_bar.dart';
 
 /// The five destinations of the teacher app.
 enum TeacherTab {
@@ -18,11 +19,11 @@ enum TeacherTab {
         TeacherTab.dashboard => 'Home',
         TeacherTab.classes => 'Classes',
         TeacherTab.attendance => 'Attendance',
-        // "Assessments" is one character too long for a fifth of a phone
-        // screen at the current label size: it wraps and breaks the bar's
-        // alignment. "Marks" is both shorter and what a teacher calls the
-        // thing they come here to do; the screen itself still says
-        // Assessments.
+        // Still "Marks" even though only one label shows at a time: five
+        // destinations plus the expanded pill leaves about 90dp for the word,
+        // and "Assessments" wants more than that — it was painted over the
+        // Profile icon when tried. "Marks" is what a teacher calls it anyway;
+        // the screen itself still says Assessments.
         TeacherTab.assessments => 'Marks',
         TeacherTab.profile => 'Profile',
       };
@@ -108,17 +109,18 @@ class _TeacherShellState extends State<TeacherShell> {
               ProfileScreen(),
             ],
           ),
-          bottomNavigationBar: NavigationBar(
-            selectedIndex: _current.index,
-            onDestinationSelected: (int index) =>
-                _goToTab(TeacherTab.values[index]),
-            destinations: <NavigationDestination>[
+          // Floats clear of the screen edge, and shows only the selected
+          // destination's label. See FloatingNavBar for why.
+          extendBody: true,
+          bottomNavigationBar: FloatingNavBar(
+            currentIndex: _current.index,
+            onSelect: (int index) => _goToTab(TeacherTab.values[index]),
+            items: <NavItem>[
               for (final TeacherTab tab in TeacherTab.values)
-                NavigationDestination(
-                  icon: Icon(tab.icon),
-                  selectedIcon: Icon(tab.selectedIcon),
+                NavItem(
+                  icon: tab.icon,
+                  selectedIcon: tab.selectedIcon,
                   label: tab.label,
-                  tooltip: tab.label,
                 ),
             ],
           ),

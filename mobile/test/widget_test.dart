@@ -2,6 +2,7 @@ import 'package:edu_manager/app/app.dart';
 import 'package:edu_manager/app/app_dependencies.dart';
 import 'package:edu_manager/core/constants/app_constants.dart';
 import 'package:edu_manager/data/models/models.dart';
+import 'package:edu_manager/presentation/widgets/layout/floating_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -90,12 +91,11 @@ void main() {
     expect(find.text('Ahmed Raza'), findsWidgets);
     expect(find.text('Total classes'), findsOneWidget);
     expect(find.text('Quick actions'), findsOneWidget);
-    // The five-destination bottom navigation from the spec.
-    expect(find.byType(NavigationBar), findsOneWidget);
-    expect(find.text('Attendance'), findsWidgets);
-    // Labelled "Marks": "Assessments" wraps onto two lines in a fifth of a
-    // phone screen at the current text size and breaks the bar's alignment.
-    expect(find.text('Marks'), findsWidgets);
+    // The five-destination bottom navigation from the spec. Only the selected
+    // destination is labelled — the other four collapse to their icon — so the
+    // bar is checked by its own type and by the one label it does show.
+    expect(find.byType(FloatingNavBar), findsOneWidget);
+    expect(find.text('Home'), findsWidgets);
   });
 
   testWidgets('an organization admin lands on the organization dashboard',

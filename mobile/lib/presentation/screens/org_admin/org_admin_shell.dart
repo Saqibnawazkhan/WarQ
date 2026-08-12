@@ -5,6 +5,7 @@ import '../../../app/app_dependencies.dart';
 import '../../../data/models/models.dart';
 import '../../state/org_admin_controller.dart';
 import '../../state/session_controller.dart';
+import '../../widgets/layout/floating_nav_bar.dart';
 import '../profile/profile_screen.dart';
 import 'classes/org_classes_tab.dart';
 import 'dashboard/org_dashboard_screen.dart';
@@ -109,17 +110,18 @@ class _OrgAdminShellState extends State<OrgAdminShell> {
                 ProfileScreen(),
               ],
             ),
-            bottomNavigationBar: NavigationBar(
-              selectedIndex: _current.index,
-              onDestinationSelected: (int index) =>
-                  _goToTab(OrgTab.values[index]),
-              destinations: <NavigationDestination>[
+            // The same floating bar the teacher shell uses, so an admin who
+            // also teaches does not meet two different navigations.
+            extendBody: true,
+            bottomNavigationBar: FloatingNavBar(
+              currentIndex: _current.index,
+              onSelect: (int index) => _goToTab(OrgTab.values[index]),
+              items: <NavItem>[
                 for (final OrgTab tab in OrgTab.values)
-                  NavigationDestination(
-                    icon: Icon(tab.icon),
-                    selectedIcon: Icon(tab.selectedIcon),
+                  NavItem(
+                    icon: tab.icon,
+                    selectedIcon: tab.selectedIcon,
                     label: tab.label,
-                    tooltip: tab.label,
                   ),
               ],
             ),
