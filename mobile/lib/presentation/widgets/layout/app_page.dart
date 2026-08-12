@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_spacing.dart';
+import 'floating_nav_bar.dart';
 
 /// Constrains page content to a comfortable reading width.
 ///
@@ -38,6 +39,35 @@ class ContentWidth extends StatelessWidget {
   }
 }
 
+/// Lifts a shell tab's floating action button clear of the floating nav bar.
+///
+/// A tab has its own [Scaffold] nested inside the shell's, and that inner one
+/// knows nothing about the bar, so it drops its button at the bottom of the
+/// screen — underneath it. Padding the button pushes it up by that much,
+/// because the location that places it measures the widget it is given.
+///
+/// The height is asked for rather than read from the media query, which is
+/// what a page body does: Scaffold strips the padding from the button's slot
+/// before building it, so there it always reads as zero.
+///
+/// Only for tabs inside a shell. On a pushed route there is no bar to clear and
+/// this would leave a gap under the button.
+class ClearOfNavBar extends StatelessWidget {
+  const ClearOfNavBar({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: FloatingNavBar.reservedHeight(context),
+      ),
+      child: child,
+    );
+  }
+}
+
 /// A scrollable page body with the app's standard padding, pull-to-refresh and
 /// responsive width.
 class AppPageBody extends StatelessWidget {
@@ -58,6 +88,15 @@ class AppPageBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The shells set `extendBody: true` so the page scrolls behind the floating
+    // nav bar — that is what the bar has to blur. Scaffold reports the height it
+    // gave up as bottom padding, and it has to be added here or the last item on
+    // every page finishes underneath the bar. On a screen with no bottom bar
+    // this is zero and the padding is unchanged.
+    final EdgeInsets insets = padding.copyWith(
+      bottom: padding.bottom + MediaQuery.paddingOf(context).bottom,
+    );
+
     final Widget list = ListView(
       controller: controller,
       physics: physics ??
@@ -66,7 +105,7 @@ class AppPageBody extends StatelessWidget {
               : const AlwaysScrollableScrollPhysics(
                   parent: BouncingScrollPhysics(),
                 )),
-      padding: padding,
+      padding: insets,
       children: children,
     );
 

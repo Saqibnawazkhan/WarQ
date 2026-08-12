@@ -17,6 +17,7 @@ import '../../../widgets/domain/class_grid_tile.dart';
 import '../../../widgets/feedback/dialogs.dart';
 import '../../../widgets/feedback/state_views.dart';
 import '../../../widgets/layout/app_page.dart';
+import '../../../widgets/layout/floating_nav_bar.dart';
 
 /// Class list tab: search, archive toggle and per-class actions.
 class ClassesTab extends StatelessWidget {
@@ -203,13 +204,15 @@ class ClassesView extends StatelessWidget {
               ],
             )
           : null,
-      floatingActionButton: FloatingActionButton.extended(
-        // Shell tabs stay alive in an IndexedStack, so every FAB needs its own
-        // hero tag or the shared default collides during route transitions.
-        heroTag: 'fab-classes',
-        onPressed: () => Navigator.of(context).pushNamed(Routes.classForm),
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('New class'),
+      floatingActionButton: ClearOfNavBar(
+        child: FloatingActionButton.extended(
+          // Shell tabs stay alive in an IndexedStack, so every FAB needs its
+          // own hero tag or the shared default collides during transitions.
+          heroTag: 'fab-classes',
+          onPressed: () => Navigator.of(context).pushNamed(Routes.classForm),
+          icon: const Icon(Icons.add_rounded),
+          label: const Text('New class'),
+        ),
       ),
       body: SafeArea(
         top: !showAppBar,
@@ -300,11 +303,14 @@ class ClassesView extends StatelessWidget {
                             ),
                           ),
                           SliverPadding(
-                            padding: const EdgeInsets.fromLTRB(
+                            // Room for the action button, and for the nav bar
+                            // the grid scrolls behind on top of that.
+                            padding: EdgeInsets.fromLTRB(
                               AppSpacing.lg,
                               AppSpacing.lg,
                               AppSpacing.lg,
-                              AppSpacing.fabClearance,
+                              AppSpacing.fabClearance +
+                                  FloatingNavBar.reservedHeight(context),
                             ),
                             sliver: SliverToBoxAdapter(
                               child: _ListFooter(controller: controller),

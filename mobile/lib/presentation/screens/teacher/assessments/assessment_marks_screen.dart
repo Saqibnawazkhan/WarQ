@@ -6,6 +6,7 @@ import '../../../../app/app_dependencies.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/routing/route_args.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/glass.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/models.dart';
 import '../../../state/assessment_marks_controller.dart';
@@ -70,7 +71,8 @@ class _MarksView extends StatelessWidget {
       return;
     }
 
-    final String summary = 'Marks saved for ${controller.gradedCount} of '
+    final String summary =
+        'Marks saved for ${controller.gradedCount} of '
         '${controller.roster.length} students.';
     navigator.pop(true);
     showSuccessOn(messenger, summary);
@@ -130,8 +132,8 @@ class _MarksView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AssessmentMarksController controller =
-        context.watch<AssessmentMarksController>();
+    final AssessmentMarksController controller = context
+        .watch<AssessmentMarksController>();
     final Assessment? assessment = controller.assessment;
 
     return PopScope(
@@ -162,8 +164,9 @@ class _MarksView extends StatelessWidget {
                   '${Format.marks(assessment.totalMarks)} marks',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.text.bodySmall
-                      ?.copyWith(color: context.semantic.mutedText),
+                  style: context.text.bodySmall?.copyWith(
+                    color: context.semantic.mutedText,
+                  ),
                 ),
             ],
           ),
@@ -179,32 +182,38 @@ class _MarksView extends StatelessWidget {
         ),
         bottomNavigationBar: controller.roster.isEmpty
             ? null
-            : SafeArea(
-                child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  decoration: BoxDecoration(
-                    color: context.colors.surface,
-                    border: Border(
-                      top: BorderSide(color: context.semantic.subtleBorder),
+            // Blurred, not merely translucent: the roster scrolls underneath
+            // this bar, and a see-through fill would show the rows through it.
+            : GlassSurface(
+                blur: 20,
+                border: false,
+                raised: true,
+                child: SafeArea(
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        top: BorderSide(color: Glass.edge(context)),
+                      ),
                     ),
-                  ),
-                  child: ContentWidth(
-                    fillHeight: false,
-                    child: FilledButton.icon(
-                      onPressed: controller.isBusy
-                          ? null
-                          : () => _save(context, controller),
-                      icon: controller.isBusy
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Icon(Icons.save_rounded),
-                      label: const Text('Save marks'),
+                    child: ContentWidth(
+                      fillHeight: false,
+                      child: FilledButton.icon(
+                        onPressed: controller.isBusy
+                            ? null
+                            : () => _save(context, controller),
+                        icon: controller.isBusy
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.save_rounded),
+                        label: const Text('Save marks'),
+                      ),
                     ),
                   ),
                 ),
@@ -275,7 +284,7 @@ class _ProgressStrip extends StatelessWidget {
     final double progress = total == 0 ? 0 : controller.gradedCount / total;
 
     return Container(
-      color: context.colors.surface,
+      color: Glass.fill(context),
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.md,
@@ -299,8 +308,9 @@ class _ProgressStrip extends StatelessWidget {
                         ),
                         TextSpan(
                           text: ' of $total graded',
-                          style: context.text.bodyMedium
-                              ?.copyWith(color: context.semantic.mutedText),
+                          style: context.text.bodyMedium?.copyWith(
+                            color: context.semantic.mutedText,
+                          ),
                         ),
                       ],
                     ),
@@ -312,7 +322,9 @@ class _ProgressStrip extends StatelessWidget {
                   const SizedBox(width: AppSpacing.sm),
                   AppBadge(
                     'Avg ${Format.percent(controller.averagePercentage!, decimals: 0)}',
-                    tone: GradeBadge.toneForPercent(controller.averagePercentage),
+                    tone: GradeBadge.toneForPercent(
+                      controller.averagePercentage,
+                    ),
                   ),
                 ],
               ],
@@ -335,11 +347,7 @@ class _ProgressStrip extends StatelessWidget {
 
 /// One editable row: marks field, absent toggle, live percentage and grade.
 class _MarkRow extends StatefulWidget {
-  const _MarkRow({
-    super.key,
-    required this.student,
-    required this.controller,
-  });
+  const _MarkRow({super.key, required this.student, required this.controller});
 
   final Student student;
   final AssessmentMarksController controller;
@@ -365,7 +373,9 @@ class _MarkRowState extends State<_MarkRow> {
     super.didUpdateWidget(oldWidget);
     // Keep the text field in sync when a bulk action rewrites the draft.
     final MarkDraft draft = widget.controller.draftFor(widget.student.id);
-    final String expected = draft.marks == null ? '' : Format.marks(draft.marks!);
+    final String expected = draft.marks == null
+        ? ''
+        : Format.marks(draft.marks!);
     if (_field.text != expected) {
       _field.value = TextEditingValue(
         text: expected,
@@ -401,8 +411,9 @@ class _MarkRowState extends State<_MarkRow> {
     final double? percent = controller.percentFor(widget.student.id);
     final GradeBand? grade = controller.gradeFor(widget.student.id);
 
-    final TextStyle? subtle = context.text.bodySmall
-        ?.copyWith(color: context.semantic.mutedText);
+    final TextStyle? subtle = context.text.bodySmall?.copyWith(
+      color: context.semantic.mutedText,
+    );
 
     return AppCard(
       // Horizontal padding stays tighter than a plain tile's: this row also
@@ -428,8 +439,9 @@ class _MarkRowState extends State<_MarkRow> {
                   widget.student.fullName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.text.titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w700),
+                  style: context.text.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.xxs),
                 Row(
@@ -447,8 +459,8 @@ class _MarkRowState extends State<_MarkRow> {
                               text: draft.absent
                                   ? 'Marked absent'
                                   : percent == null
-                                      ? 'Not graded'
-                                      : Format.percent(percent, decimals: 0),
+                                  ? 'Not graded'
+                                  : Format.percent(percent, decimals: 0),
                               style: draft.absent
                                   ? subtle?.copyWith(
                                       color: context.semantic.danger,
@@ -465,7 +477,11 @@ class _MarkRowState extends State<_MarkRow> {
                     ),
                     if (grade != null) ...<Widget>[
                       const SizedBox(width: AppSpacing.sm),
-                      GradeBadge(grade: grade.label, percent: percent, dense: true),
+                      GradeBadge(
+                        grade: grade.label,
+                        percent: percent,
+                        dense: true,
+                      ),
                     ],
                   ],
                 ),
@@ -485,7 +501,9 @@ class _MarkRowState extends State<_MarkRow> {
               enabled: !draft.absent,
               textAlign: TextAlign.center,
               style: context.text.titleMedium,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
               ],

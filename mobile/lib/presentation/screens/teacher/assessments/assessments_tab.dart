@@ -17,6 +17,7 @@ import '../../../widgets/domain/assessment_tile.dart';
 import '../../../widgets/feedback/dialogs.dart';
 import '../../../widgets/feedback/state_views.dart';
 import '../../../widgets/layout/app_page.dart';
+import '../../../widgets/layout/floating_nav_bar.dart';
 
 /// Assessments across every class, with a filter for ungraded work.
 class AssessmentsTab extends StatelessWidget {
@@ -98,11 +99,13 @@ class _AssessmentsView extends StatelessWidget {
       // blank screen is a choice about nothing.
       floatingActionButton: controller.totalCount == 0
           ? null
-          : FloatingActionButton.extended(
-              heroTag: 'fab-assessments',
-              onPressed: () => _createAssessment(context, controller),
-              icon: const Icon(Icons.add_rounded),
-              label: const Text('New assessment'),
+          : ClearOfNavBar(
+              child: FloatingActionButton.extended(
+                heroTag: 'fab-assessments',
+                onPressed: () => _createAssessment(context, controller),
+                icon: const Icon(Icons.add_rounded),
+                label: const Text('New assessment'),
+              ),
             ),
       body: SafeArea(
         bottom: false,
@@ -196,11 +199,14 @@ class _AssessmentsView extends StatelessWidget {
                     onRefresh: controller.refresh,
                     child: ContentWidth(
                       child: ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(
+                        // Room for the action button, and for the nav bar the
+                        // list scrolls behind on top of that.
+                        padding: EdgeInsets.fromLTRB(
                           AppSpacing.lg,
                           AppSpacing.md,
                           AppSpacing.lg,
-                          AppSpacing.fabClearance,
+                          AppSpacing.fabClearance +
+                              FloatingNavBar.reservedHeight(context),
                         ),
                         itemCount: visible.length + 1,
                         separatorBuilder: (_, __) => const Gap.md(),

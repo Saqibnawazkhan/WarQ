@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/glass.dart';
 
 /// Confirmation dialog used before destructive actions.
 ///
@@ -21,43 +22,79 @@ Future<bool> showConfirmDialog(
       final Color accent = isDestructive
           ? dialogContext.semantic.danger
           : dialogContext.colors.primary;
-      return AlertDialog(
-        icon: icon == null
-            ? null
-            : Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, color: accent, size: 24),
-              ),
-        title: Text(title),
-        content: Text(message),
-        actionsPadding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          0,
-          AppSpacing.lg,
-          AppSpacing.lg,
+      // Built from [Dialog] rather than [AlertDialog] so the glass can be
+      // clipped to the panel itself. An AlertDialog paints its own material,
+      // and a BackdropFilter wrapped around one blurs the full inset area
+      // instead of the rounded box you can see.
+      return Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        insetPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xl,
+          vertical: AppSpacing.xxl,
         ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(cancelLabel),
+        child: GlassSurface(
+          borderRadius: BorderRadius.circular(AppRadii.lg),
+          blur: 26,
+          raised: true,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                if (icon != null) ...<Widget>[
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icon, color: accent, size: 24),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                ],
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: dialogContext.text.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: dialogContext.text.bodyMedium,
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    TextButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(false),
+                      child: Text(cancelLabel),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    FilledButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(true),
+                      style: isDestructive
+                          ? FilledButton.styleFrom(
+                              backgroundColor: dialogContext.semantic.danger,
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(0, 44),
+                            )
+                          : FilledButton.styleFrom(
+                              minimumSize: const Size(0, 44),
+                            ),
+                      child: Text(confirmLabel),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            style: isDestructive
-                ? FilledButton.styleFrom(
-                    backgroundColor: dialogContext.semantic.danger,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(0, 44),
-                  )
-                : FilledButton.styleFrom(minimumSize: const Size(0, 44)),
-            child: Text(confirmLabel),
-          ),
-        ],
+        ),
       );
     },
   );
@@ -88,7 +125,7 @@ Future<T?> showAppSheet<T>(
         padding: EdgeInsets.only(
           bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
         ),
-        child: builder(sheetContext),
+        child: GlassSheet(child: builder(sheetContext)),
       );
     },
   );
@@ -186,26 +223,27 @@ Future<T> withBlockingProgress<T>(
     builder: (BuildContext dialogContext) => PopScope(
       canPop: false,
       child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xxl,
-            vertical: AppSpacing.xl,
-          ),
-          decoration: BoxDecoration(
-            color: dialogContext.colors.surface,
-            borderRadius: BorderRadius.circular(AppRadii.md),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const SizedBox(
-                width: 26,
-                height: 26,
-                child: CircularProgressIndicator(strokeWidth: 2.6),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Text(message, style: dialogContext.text.bodyMedium),
-            ],
+        child: GlassSurface(
+          borderRadius: BorderRadius.circular(AppRadii.md),
+          blur: 26,
+          raised: true,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xxl,
+              vertical: AppSpacing.xl,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                const SizedBox(
+                  width: 26,
+                  height: 26,
+                  child: CircularProgressIndicator(strokeWidth: 2.6),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Text(message, style: dialogContext.text.bodyMedium),
+              ],
+            ),
           ),
         ),
       ),

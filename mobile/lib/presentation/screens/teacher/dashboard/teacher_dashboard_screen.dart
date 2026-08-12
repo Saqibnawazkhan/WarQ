@@ -6,6 +6,7 @@ import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/routing/route_args.dart';
 import '../../../../core/routing/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/glass.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/models.dart';
 import '../../../../domain/entities/dashboard_data.dart';
@@ -67,62 +68,70 @@ class _DashboardView extends StatelessWidget {
     final ClassSummary? picked = await showModalBottomSheet<ClassSummary>(
       context: context,
       useSafeArea: true,
-      builder: (BuildContext sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.xl,
-                AppSpacing.lg,
-                AppSpacing.xl,
-                AppSpacing.md,
+      // The sheet route is transparent app-wide now, so the panel itself comes
+      // from GlassSheet — this picker draws its own rather than going through
+      // showAppSheet because its body is a list, not a titled block.
+      builder: (BuildContext sheetContext) => GlassSheet(
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.xl,
+                  AppSpacing.lg,
+                  AppSpacing.xl,
+                  AppSpacing.md,
+                ),
+                child: Text(
+                  title,
+                  style: sheetContext.text.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
-              child: Text(
-                title,
-                style: sheetContext.text.titleLarge
-                    ?.copyWith(fontWeight: FontWeight.w700),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: classes.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final ClassSummary summary = classes[index];
+                    return ListTile(
+                      // Aligns the rows with the sheet's heading and gives each one
+                      // room to breathe at the larger type scale.
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.xl,
+                        vertical: AppSpacing.sm,
+                      ),
+                      leading: ClassAvatar(
+                        name: summary.name,
+                        seed: summary.schoolClass.avatarKey,
+                      ),
+                      title: Text(
+                        summary.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.text.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      subtitle: Text(
+                        Format.plural(summary.studentCount, 'student'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.text.bodySmall?.copyWith(
+                          color: context.semantic.mutedText,
+                        ),
+                      ),
+                      onTap: () => Navigator.of(sheetContext).pop(summary),
+                    );
+                  },
+                ),
               ),
-            ),
-            Flexible(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: classes.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final ClassSummary summary = classes[index];
-                  return ListTile(
-                    // Aligns the rows with the sheet's heading and gives each one
-                    // room to breathe at the larger type scale.
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.xl,
-                      vertical: AppSpacing.sm,
-                    ),
-                    leading: ClassAvatar(
-                      name: summary.name,
-                      seed: summary.schoolClass.avatarKey,
-                    ),
-                    title: Text(
-                      summary.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.text.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    subtitle: Text(
-                      Format.plural(summary.studentCount, 'student'),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.text.bodySmall
-                          ?.copyWith(color: context.semantic.mutedText),
-                    ),
-                    onTap: () => Navigator.of(sheetContext).pop(summary),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-          ],
+              const SizedBox(height: AppSpacing.lg),
+            ],
+          ),
         ),
       ),
     );
@@ -131,8 +140,8 @@ class _DashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TeacherDashboardController controller =
-        context.watch<TeacherDashboardController>();
+    final TeacherDashboardController controller = context
+        .watch<TeacherDashboardController>();
     final TeacherDashboardData data = controller.data;
 
     return Scaffold(
@@ -180,8 +189,9 @@ class _DashboardView extends StatelessWidget {
                 SectionHeader(
                   title: 'Recent assessments',
                   actionLabel: 'See all',
-                  onAction: () => TeacherShellScope.maybeOf(context)
-                      ?.goToTab(TeacherTab.assessments),
+                  onAction: () => TeacherShellScope.maybeOf(
+                    context,
+                  )?.goToTab(TeacherTab.assessments),
                 ),
                 for (final AssessmentSummary summary in data.recentAssessments)
                   Padding(
@@ -191,11 +201,15 @@ class _DashboardView extends StatelessWidget {
                       showClassName: true,
                       onEnterMarks: () => Navigator.of(context).pushNamed(
                         Routes.assessmentMarks,
-                        arguments: AssessmentMarksArgs(assessmentId: summary.id),
+                        arguments: AssessmentMarksArgs(
+                          assessmentId: summary.id,
+                        ),
                       ),
                       onTap: () => Navigator.of(context).pushNamed(
                         Routes.assessmentMarks,
-                        arguments: AssessmentMarksArgs(assessmentId: summary.id),
+                        arguments: AssessmentMarksArgs(
+                          assessmentId: summary.id,
+                        ),
                       ),
                     ),
                   ),
@@ -246,23 +260,26 @@ class _Header extends StatelessWidget {
                 controller.greeting,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: context.text.bodyMedium
-                    ?.copyWith(color: context.semantic.mutedText),
+                style: context.text.bodyMedium?.copyWith(
+                  color: context.semantic.mutedText,
+                ),
               ),
               const SizedBox(height: AppSpacing.xxs),
               Text(
                 teacher.displayName,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: context.text.headlineSmall
-                    ?.copyWith(fontWeight: FontWeight.w700),
+                style: context.text.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
         IconButton.filledTonal(
-          onPressed: () => Navigator.of(context).pushNamed(Routes.notifications),
+          onPressed: () =>
+              Navigator.of(context).pushNamed(Routes.notifications),
           icon: Badge(
             isLabelVisible: controller.unreadNotifications > 0,
             label: Text('${controller.unreadNotifications}'),
@@ -334,8 +351,10 @@ class _QuickActions extends StatelessWidget {
     required List<ClassSummary> classes,
     required void Function(ClassSummary summary) onPicked,
     String emptyMessage,
-  }) onPickClass;
-  final void Function(BuildContext context, String classId, {int tab}) onOpenClass;
+  })
+  onPickClass;
+  final void Function(BuildContext context, String classId, {int tab})
+  onOpenClass;
 
   @override
   Widget build(BuildContext context) {
@@ -398,7 +417,8 @@ class _QuickActions extends StatelessWidget {
           icon: Icons.edit_note_rounded,
           color: context.colors.secondary,
           onTap: () {
-            final List<AssessmentSummary> pending = data.assessmentsAwaitingMarks;
+            final List<AssessmentSummary> pending =
+                data.assessmentsAwaitingMarks;
             if (pending.isEmpty) {
               context.showInfo('Every assessment is fully graded.');
               return;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/glass.dart';
 
 /// One destination on [FloatingNavBar].
 class NavItem {
@@ -39,6 +40,22 @@ class FloatingNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onSelect;
 
+  /// Height of a cell, and so of the bar's contents.
+  static const double _cellHeight = 46;
+
+  /// Everything this bar covers, measured from the bottom of the screen: the
+  /// cells, the padding around them, the gap it floats above the edge by, and
+  /// the system inset underneath all of it.
+  ///
+  /// The shells set `extendBody: true` so pages scroll behind the bar, which
+  /// means nothing below it is laid out around it. Anything that must stay
+  /// clear — a page's last row, a tab's action button — asks for this.
+  static double reservedHeight(BuildContext context) =>
+      _cellHeight +
+      AppSpacing.sm * 2 +
+      AppSpacing.md +
+      MediaQuery.viewPaddingOf(context).bottom;
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -50,44 +67,44 @@ class FloatingNavBar extends StatelessWidget {
           AppSpacing.md,
           AppSpacing.md,
         ),
+        // Real glass here, and worth the saved layer: the page scrolls right
+        // underneath this bar, so the blur is the thing you actually see doing
+        // its job. There is exactly one of these on screen at a time.
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: context.colors.surface,
             borderRadius: BorderRadius.circular(AppRadii.xl),
-            border: Border.all(color: context.semantic.subtleBorder),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: context.colors.shadow.withValues(alpha: 0.10),
-                blurRadius: 24,
-                offset: const Offset(0, 6),
-              ),
-            ],
+            boxShadow: Glass.shadow(context),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.sm,
-            ),
-            child: Row(
-              children: <Widget>[
-                // Three shares to the selected cell against one each for the
-                // rest, because it is the only one carrying a word. An even
-                // split left it a fifth of the bar, which fitted the icon and
-                // one letter; two shares still clipped "Attendance", the
-                // longest label either shell uses.
-                //
-                // Expanded rather than Flexible so the cells fill the bar
-                // rather than bunching in the middle.
-                for (int i = 0; i < items.length; i++)
-                  Expanded(
-                    flex: i == currentIndex ? 3 : 1,
-                    child: _NavCell(
-                      item: items[i],
-                      selected: i == currentIndex,
-                      onTap: () => onSelect(i),
+          child: GlassSurface(
+            borderRadius: BorderRadius.circular(AppRadii.xl),
+            blur: 22,
+            raised: true,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: AppSpacing.sm,
+              ),
+              child: Row(
+                children: <Widget>[
+                  // Three shares to the selected cell against one each for the
+                  // rest, because it is the only one carrying a word. An even
+                  // split left it a fifth of the bar, which fitted the icon and
+                  // one letter; two shares still clipped "Attendance", the
+                  // longest label either shell uses.
+                  //
+                  // Expanded rather than Flexible so the cells fill the bar
+                  // rather than bunching in the middle.
+                  for (int i = 0; i < items.length; i++)
+                    Expanded(
+                      flex: i == currentIndex ? 3 : 1,
+                      child: _NavCell(
+                        item: items[i],
+                        selected: i == currentIndex,
+                        onTap: () => onSelect(i),
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -109,8 +126,9 @@ class _NavCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color foreground =
-        selected ? context.colors.primary : context.semantic.mutedText;
+    final Color foreground = selected
+        ? context.colors.primary
+        : context.semantic.mutedText;
 
     return Semantics(
       button: true,
@@ -126,7 +144,7 @@ class _NavCell extends StatelessWidget {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 220),
             curve: Curves.easeOutCubic,
-            height: 46,
+            height: FloatingNavBar._cellHeight,
             padding: EdgeInsets.symmetric(
               horizontal: selected ? AppSpacing.lg : AppSpacing.md,
             ),

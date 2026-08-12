@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/glass.dart';
 
 /// Compact metric card: label, big value, optional icon and trend line.
 class StatTile extends StatelessWidget {
@@ -29,7 +30,7 @@ class StatTile extends StatelessWidget {
     final Color color = accent ?? context.colors.primary;
 
     return Material(
-      color: context.colors.surface,
+      color: Glass.fill(context),
       borderRadius: AppRadii.cardRadius,
       child: InkWell(
         onTap: onTap,
@@ -127,8 +128,9 @@ class StatGrid extends StatelessWidget {
 
         final List<Widget> rows = <Widget>[];
         for (int start = 0; start < tiles.length; start += count) {
-          final int end =
-              start + count < tiles.length ? start + count : tiles.length;
+          final int end = start + count < tiles.length
+              ? start + count
+              : tiles.length;
           if (rows.isNotEmpty) rows.add(const SizedBox(height: spacing));
           rows.add(
             // Laid out row by row rather than wrapped so tiles that sit side by

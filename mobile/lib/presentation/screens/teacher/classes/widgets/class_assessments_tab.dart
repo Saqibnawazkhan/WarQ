@@ -30,7 +30,8 @@ class ClassAssessmentsTab extends StatelessWidget {
       context,
       builder: (BuildContext sheetContext) => AppSheet(
         title: summary.assessment.name,
-        subtitle: '${summary.assessment.typeLabel} · '
+        subtitle:
+            '${summary.assessment.typeLabel} · '
             '${Format.marks(summary.assessment.totalMarks)} marks',
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -99,18 +100,20 @@ class ClassAssessmentsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ClassDetailController controller =
-        context.watch<ClassDetailController>();
+    final ClassDetailController controller = context
+        .watch<ClassDetailController>();
     final List<AssessmentSummary> assessments = controller.assessments;
     final ClassPerformance? performance = controller.performance;
 
     void createAssessment() => Navigator.of(context).pushNamed(
-          Routes.assessmentForm,
-          arguments: AssessmentFormArgs(classId: controller.classId),
-        );
+      Routes.assessmentForm,
+      arguments: AssessmentFormArgs(classId: controller.classId),
+    );
 
     return Scaffold(
-      backgroundColor: context.semantic.canvas,
+      // Transparent so the app's gradient shows through: this is a tab inside
+      // another Scaffold, not a page of its own.
+      backgroundColor: Colors.transparent,
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'add-assessment',
         onPressed: createAssessment,
@@ -139,8 +142,9 @@ class ClassAssessmentsTab extends StatelessWidget {
                   ),
                   children: <Widget>[
                     if (performance != null &&
-                        performance.gradeDistribution.values
-                            .any((int count) => count > 0)) ...<Widget>[
+                        performance.gradeDistribution.values.any(
+                          (int count) => count > 0,
+                        )) ...<Widget>[
                       SectionCard(
                         title: 'Grade distribution',
                         subtitle: 'Based on total marks across all assessments',
@@ -165,13 +169,15 @@ class ClassAssessmentsTab extends StatelessWidget {
                           summary: summary,
                           onTap: () => Navigator.of(context).pushNamed(
                             Routes.assessmentMarks,
-                            arguments:
-                                AssessmentMarksArgs(assessmentId: summary.id),
+                            arguments: AssessmentMarksArgs(
+                              assessmentId: summary.id,
+                            ),
                           ),
                           onEnterMarks: () => Navigator.of(context).pushNamed(
                             Routes.assessmentMarks,
-                            arguments:
-                                AssessmentMarksArgs(assessmentId: summary.id),
+                            arguments: AssessmentMarksArgs(
+                              assessmentId: summary.id,
+                            ),
                           ),
                           trailing: IconButton(
                             tooltip: 'Assessment options',

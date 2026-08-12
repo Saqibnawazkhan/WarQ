@@ -18,27 +18,39 @@ class AppTheme {
   static ThemeData _build(Brightness brightness) {
     final bool isDark = brightness == Brightness.dark;
 
-    final ColorScheme scheme = ColorScheme.fromSeed(
-      seedColor: AppColors.brand,
-      brightness: brightness,
-    ).copyWith(
-      primary: isDark ? const Color(0xFF7D9BFF) : AppColors.brand,
-      onPrimary: isDark ? const Color(0xFF06122F) : Colors.white,
-      secondary: isDark ? const Color(0xFF4FD1B0) : AppColors.accent,
-      surface: isDark ? AppColors.darkSurface : Colors.white,
-      onSurface: isDark ? const Color(0xFFE7EAF0) : AppColors.neutral900,
-      surfaceContainerLowest: isDark ? AppColors.darkBackground : AppColors.neutral50,
-      surfaceContainerLow: isDark ? const Color(0xFF121824) : Colors.white,
-      surfaceContainer: isDark ? AppColors.darkSurface : AppColors.neutral50,
-      surfaceContainerHigh: isDark ? AppColors.darkSurfaceElevated : AppColors.neutral100,
-      surfaceContainerHighest: isDark ? const Color(0xFF232D3E) : AppColors.neutral100,
-      outline: isDark ? const Color(0xFF3A4557) : AppColors.neutral300,
-      outlineVariant: isDark ? const Color(0xFF2A3444) : AppColors.neutral200,
-      error: isDark ? const Color(0xFFFF7B7F) : AppColors.danger,
-    );
+    final ColorScheme scheme =
+        ColorScheme.fromSeed(
+          seedColor: AppColors.brand,
+          brightness: brightness,
+        ).copyWith(
+          primary: isDark ? const Color(0xFF7D9BFF) : AppColors.brand,
+          onPrimary: isDark ? const Color(0xFF06122F) : Colors.white,
+          secondary: isDark ? const Color(0xFF4FD1B0) : AppColors.accent,
+          surface: isDark ? AppColors.darkSurface : Colors.white,
+          onSurface: isDark ? const Color(0xFFE7EAF0) : AppColors.neutral900,
+          surfaceContainerLowest: isDark
+              ? AppColors.darkBackground
+              : AppColors.neutral50,
+          surfaceContainerLow: isDark ? const Color(0xFF121824) : Colors.white,
+          surfaceContainer: isDark
+              ? AppColors.darkSurface
+              : AppColors.neutral50,
+          surfaceContainerHigh: isDark
+              ? AppColors.darkSurfaceElevated
+              : AppColors.neutral100,
+          surfaceContainerHighest: isDark
+              ? const Color(0xFF232D3E)
+              : AppColors.neutral100,
+          outline: isDark ? const Color(0xFF3A4557) : AppColors.neutral300,
+          outlineVariant: isDark
+              ? const Color(0xFF2A3444)
+              : AppColors.neutral200,
+          error: isDark ? const Color(0xFFFF7B7F) : AppColors.danger,
+        );
 
-    final AppSemanticColors semantic =
-        isDark ? AppSemanticColors.dark : AppSemanticColors.light;
+    final AppSemanticColors semantic = isDark
+        ? AppSemanticColors.dark
+        : AppSemanticColors.light;
 
     final TextTheme textTheme = _textTheme(scheme);
 
@@ -46,30 +58,39 @@ class AppTheme {
       useMaterial3: true,
       brightness: brightness,
       colorScheme: scheme,
-      scaffoldBackgroundColor: semantic.canvas,
-      canvasColor: semantic.canvas,
+      // Transparent so the app's one painted background shows through every
+      // screen. Without this each Scaffold would cover it with a flat colour
+      // and the glass above would have nothing to blur.
+      scaffoldBackgroundColor: Colors.transparent,
+      canvasColor: Colors.transparent,
       splashFactory: InkSparkle.splashFactory,
       visualDensity: VisualDensity.standard,
       textTheme: textTheme,
       extensions: <ThemeExtension<dynamic>>[semantic],
       appBarTheme: AppBarTheme(
-        backgroundColor: semantic.canvas,
+        // Fully transparent, so the background runs unbroken from the status
+        // bar down. A tinted bar was tried first and read as a grey slab pasted
+        // over the gradient — the seam along its bottom edge was the giveaway.
+        // Nothing scrolls behind an ordinary AppBar (the body starts below it),
+        // so there is nothing here for a BackdropFilter to blur either.
+        backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         foregroundColor: scheme.onSurface,
         elevation: 0,
-        scrolledUnderElevation: 0.5,
+        scrolledUnderElevation: 0,
         centerTitle: false,
         titleTextStyle: textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.w700,
           color: scheme.onSurface,
         ),
-        systemOverlayStyle:
-            isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+        systemOverlayStyle: isDark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
       ),
       cardTheme: CardThemeData(
         elevation: 0,
         margin: EdgeInsets.zero,
-        color: scheme.surface,
+        color: Colors.white.withValues(alpha: isDark ? 0.07 : 0.62),
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: AppRadii.cardRadius,
@@ -83,14 +104,19 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? const Color(0xFF121824) : Colors.white,
+        // The same translucent white as [Glass.fill], written literally
+        // because a theme is built without a BuildContext. Kept a little
+        // brighter than a card so a field still reads as somewhere to type.
+        fillColor: Colors.white.withValues(alpha: isDark ? 0.06 : 0.70),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.lg,
         ),
         hintStyle: textTheme.bodyMedium?.copyWith(color: semantic.mutedText),
         labelStyle: textTheme.bodyMedium?.copyWith(color: semantic.mutedText),
-        floatingLabelStyle: textTheme.bodyMedium?.copyWith(color: scheme.primary),
+        floatingLabelStyle: textTheme.bodyMedium?.copyWith(
+          color: scheme.primary,
+        ),
         prefixIconColor: semantic.mutedText,
         suffixIconColor: semantic.mutedText,
         border: OutlineInputBorder(
@@ -117,8 +143,12 @@ class AppTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           minimumSize: const Size.fromHeight(52),
-          shape: const RoundedRectangleBorder(borderRadius: AppRadii.fieldRadius),
-          textStyle: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+          shape: const RoundedRectangleBorder(
+            borderRadius: AppRadii.fieldRadius,
+          ),
+          textStyle: textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -127,8 +157,12 @@ class AppTheme {
           minimumSize: const Size.fromHeight(52),
           backgroundColor: scheme.primary,
           foregroundColor: scheme.onPrimary,
-          shape: const RoundedRectangleBorder(borderRadius: AppRadii.fieldRadius),
-          textStyle: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+          shape: const RoundedRectangleBorder(
+            borderRadius: AppRadii.fieldRadius,
+          ),
+          textStyle: textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -136,25 +170,34 @@ class AppTheme {
           minimumSize: const Size.fromHeight(52),
           foregroundColor: scheme.onSurface,
           side: BorderSide(color: semantic.subtleBorder),
-          shape: const RoundedRectangleBorder(borderRadius: AppRadii.fieldRadius),
-          textStyle: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+          shape: const RoundedRectangleBorder(
+            borderRadius: AppRadii.fieldRadius,
+          ),
+          textStyle: textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: scheme.primary,
-          textStyle: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+          textStyle: textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: isDark ? const Color(0xFF1B2331) : AppColors.neutral100,
+        backgroundColor: Colors.white.withValues(alpha: isDark ? 0.08 : 0.55),
         selectedColor: scheme.primary.withValues(alpha: isDark ? 0.28 : 0.12),
         labelStyle: textTheme.labelLarge,
         side: BorderSide(color: semantic.subtleBorder),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(AppRadii.pill)),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 6),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: 6,
+        ),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: scheme.surface,
@@ -202,29 +245,39 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadii.lg),
         ),
-        titleTextStyle: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+        titleTextStyle: textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
         contentTextStyle: textTheme.bodyMedium,
       ),
-      bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: scheme.surface,
+      // Transparent, because the sheet's own panel is the glass: `GlassSheet`
+      // draws the fill, the rounded top and the drag handle inside the clip so
+      // the blur reaches the corners. A background here would sit behind that
+      // and there would be nothing left to see through.
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        showDragHandle: true,
-        dragHandleColor: semantic.subtleBorder,
-        shape: const RoundedRectangleBorder(borderRadius: AppRadii.sheetRadius),
+        showDragHandle: false,
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: isDark ? const Color(0xFF2A3444) : AppColors.neutral900,
+        backgroundColor: isDark
+            ? const Color(0xFF2A3444)
+            : AppColors.neutral900,
         contentTextStyle: textTheme.bodyMedium?.copyWith(color: Colors.white),
-        actionTextColor: isDark ? const Color(0xFF9FB6FF) : const Color(0xFFA8BEFF),
+        actionTextColor: isDark
+            ? const Color(0xFF9FB6FF)
+            : const Color(0xFFA8BEFF),
         insetPadding: const EdgeInsets.all(AppSpacing.lg),
         shape: const RoundedRectangleBorder(borderRadius: AppRadii.fieldRadius),
       ),
       listTileTheme: ListTileThemeData(
         iconColor: semantic.mutedText,
         contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.sm)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadii.sm),
+        ),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: scheme.primary,
@@ -232,12 +285,16 @@ class AppTheme {
         circularTrackColor: Colors.transparent,
       ),
       switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith((states) =>
-            states.contains(WidgetState.selected) ? Colors.white : semantic.mutedText),
-        trackColor: WidgetStateProperty.resolveWith((states) =>
-            states.contains(WidgetState.selected)
-                ? scheme.primary
-                : semantic.subtleBorder),
+        thumbColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? Colors.white
+              : semantic.mutedText,
+        ),
+        trackColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? scheme.primary
+              : semantic.subtleBorder,
+        ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: scheme.primary,

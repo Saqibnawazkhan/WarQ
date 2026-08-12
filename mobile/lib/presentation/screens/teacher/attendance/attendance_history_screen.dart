@@ -6,6 +6,7 @@ import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/routing/route_args.dart';
 import '../../../../core/routing/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/glass.dart';
 import '../../../../core/utils/date_utils.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/models.dart';
@@ -33,10 +34,10 @@ class AttendanceHistoryScreen extends StatelessWidget {
       create: (BuildContext context) {
         final AttendanceHistoryController controller =
             AttendanceHistoryController(
-          context.read<AppDependencies>(),
-          teacher,
-          initialClassId: args.classId,
-        );
+              context.read<AppDependencies>(),
+              teacher,
+              initialClassId: args.classId,
+            );
         if (args.studentId != null) {
           controller.setStudentFilter(args.studentId);
         } else {
@@ -58,14 +59,15 @@ class _AttendanceHistoryView extends StatelessWidget {
   ) async {
     await showAppSheet<void>(
       context,
-      builder: (BuildContext sheetContext) => _FilterSheet(controller: controller),
+      builder: (BuildContext sheetContext) =>
+          _FilterSheet(controller: controller),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final AttendanceHistoryController controller =
-        context.watch<AttendanceHistoryController>();
+    final AttendanceHistoryController controller = context
+        .watch<AttendanceHistoryController>();
 
     return Scaffold(
       appBar: AppBar(
@@ -98,8 +100,9 @@ class _AttendanceHistoryView extends StatelessWidget {
                   message: controller.hasActiveFilters
                       ? 'No records match the current filters.'
                       : 'Attendance you take will appear here, grouped by day.',
-                  actionLabel:
-                      controller.hasActiveFilters ? 'Clear filters' : null,
+                  actionLabel: controller.hasActiveFilters
+                      ? 'Clear filters'
+                      : null,
                   onAction: controller.hasActiveFilters
                       ? controller.clearFilters
                       : null,
@@ -139,7 +142,7 @@ class _SummaryBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: context.colors.surface,
+      color: Glass.fill(context),
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.sm,
@@ -152,8 +155,9 @@ class _SummaryBar extends StatelessWidget {
           children: <Widget>[
             Text(
               controller.filterSummary,
-              style: context.text.labelMedium
-                  ?.copyWith(color: context.semantic.mutedText),
+              style: context.text.labelMedium?.copyWith(
+                color: context.semantic.mutedText,
+              ),
             ),
             const Gap.sm(),
             Row(
@@ -217,8 +221,9 @@ class _Stat extends StatelessWidget {
         ),
         Text(
           label,
-          style: context.text.labelSmall
-              ?.copyWith(color: context.semantic.mutedText),
+          style: context.text.labelSmall?.copyWith(
+            color: context.semantic.mutedText,
+          ),
         ),
       ],
     );
@@ -245,17 +250,23 @@ class _SessionGroup extends StatelessWidget {
             AppSpacing.lg,
             AppSpacing.md,
           ),
-          shape: const RoundedRectangleBorder(borderRadius: AppRadii.cardRadius),
-          collapsedShape:
-              const RoundedRectangleBorder(borderRadius: AppRadii.cardRadius),
+          shape: const RoundedRectangleBorder(
+            borderRadius: AppRadii.cardRadius,
+          ),
+          collapsedShape: const RoundedRectangleBorder(
+            borderRadius: AppRadii.cardRadius,
+          ),
           title: Text(
             row.className,
-            style: context.text.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+            style: context.text.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
           subtitle: Text(
             '${AppDate.format(row.date)} · ${AppDate.formatWeekday(row.date)}',
-            style: context.text.bodySmall
-                ?.copyWith(color: context.semantic.mutedText),
+            style: context.text.bodySmall?.copyWith(
+              color: context.semantic.mutedText,
+            ),
           ),
           trailing: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -265,8 +276,9 @@ class _SessionGroup extends StatelessWidget {
               const SizedBox(height: 3),
               Text(
                 '${row.summary.present}/${row.summary.assessableSessions}',
-                style: context.text.labelSmall
-                    ?.copyWith(color: context.semantic.mutedText),
+                style: context.text.labelSmall?.copyWith(
+                  color: context.semantic.mutedText,
+                ),
               ),
             ],
           ),
@@ -287,8 +299,9 @@ class _SessionGroup extends StatelessWidget {
                     if (entry.rollNumber != null) ...<Widget>[
                       Text(
                         entry.rollNumber!,
-                        style: context.text.labelSmall
-                            ?.copyWith(color: context.semantic.mutedText),
+                        style: context.text.labelSmall?.copyWith(
+                          color: context.semantic.mutedText,
+                        ),
                       ),
                       const SizedBox(width: AppSpacing.md),
                     ],
@@ -371,11 +384,11 @@ class _FilterSheet extends StatelessWidget {
                   lastDate: AppDate.today(),
                   initialDateRange:
                       controller.from != null && controller.to != null
-                          ? DateTimeRange(
-                              start: controller.from!,
-                              end: controller.to!,
-                            )
-                          : null,
+                      ? DateTimeRange(
+                          start: controller.from!,
+                          end: controller.to!,
+                        )
+                      : null,
                 );
                 if (picked != null) {
                   await controller.setDateRange(picked.start, picked.end);

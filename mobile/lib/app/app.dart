@@ -5,6 +5,7 @@ import 'package:provider/single_child_widget.dart';
 import '../core/constants/app_constants.dart';
 import '../core/routing/app_router.dart';
 import '../core/theme/app_theme.dart';
+import '../core/theme/glass.dart';
 import '../presentation/state/app_settings_controller.dart';
 import '../presentation/state/session_controller.dart';
 import 'app_dependencies.dart';
@@ -62,7 +63,11 @@ class EduManagerApp extends StatelessWidget {
                     maxScaleFactor: 1.35,
                   ),
                 ),
-                child: child ?? const SizedBox.shrink(),
+                // One background for the whole app, painted here rather than
+                // per screen: the glass surfaces above it blur whatever is
+                // behind them, and a page that forgot to paint its own would
+                // have them blurring nothing.
+                child: GlassBackground(child: child ?? const SizedBox.shrink()),
               );
             },
           );

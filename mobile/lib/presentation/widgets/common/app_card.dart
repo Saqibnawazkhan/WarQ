@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/glass.dart';
 import '../layout/app_page.dart';
 
 /// The app's standard surface: bordered, flat, rounded.
@@ -31,12 +32,20 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Glass without the filter. A card has nothing moving behind it, so a
+    // BackdropFilter here would cost a saved layer per card — thirty of them on
+    // a register — to blur a background that is already a soft gradient. The
+    // translucent fill and the bright hairline edge are what the eye reads as
+    // glass; over the app's background they do it on their own.
+    //
+    // A caller that passes its own colour means it, so that wins: the tinted
+    // cards that carry a status still need to be that status's colour.
     final Widget content = Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: color ?? context.colors.surface,
+        color: color ?? Glass.fill(context),
         borderRadius: AppRadii.cardRadius,
-        border: Border.all(color: borderColor ?? context.semantic.subtleBorder),
+        border: Border.all(color: borderColor ?? Glass.edge(context)),
       ),
       child: child,
     );
@@ -101,15 +110,17 @@ class SectionCard extends StatelessWidget {
                     // put this heading level with the row names underneath it.
                     Text(
                       title,
-                      style: context.text.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w700),
+                      style: context.text.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     if (subtitle != null) ...<Widget>[
                       const Gap.xs(),
                       Text(
                         subtitle!,
-                        style: context.text.bodySmall
-                            ?.copyWith(color: context.semantic.mutedText),
+                        style: context.text.bodySmall?.copyWith(
+                          color: context.semantic.mutedText,
+                        ),
                       ),
                     ],
                   ],
@@ -119,7 +130,9 @@ class SectionCard extends StatelessWidget {
                 TextButton(
                   onPressed: onAction,
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                    ),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -165,15 +178,17 @@ class SectionHeader extends StatelessWidget {
               children: <Widget>[
                 Text(
                   title,
-                  style: context.text.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w700),
+                  style: context.text.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 if (subtitle != null) ...<Widget>[
                   const Gap.xs(),
                   Text(
                     subtitle!,
-                    style: context.text.bodySmall
-                        ?.copyWith(color: context.semantic.mutedText),
+                    style: context.text.bodySmall?.copyWith(
+                      color: context.semantic.mutedText,
+                    ),
                   ),
                 ],
               ],

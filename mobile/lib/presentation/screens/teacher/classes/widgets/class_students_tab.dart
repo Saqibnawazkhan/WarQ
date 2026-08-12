@@ -20,8 +20,11 @@ import '../class_detail_screen.dart';
 class ClassStudentsTab extends StatelessWidget {
   const ClassStudentsTab({super.key});
 
-  void _openStudent(BuildContext context, ClassDetailController controller,
-      StudentPerformance performance) {
+  void _openStudent(
+    BuildContext context,
+    ClassDetailController controller,
+    StudentPerformance performance,
+  ) {
     Navigator.of(context).pushNamed(
       Routes.studentDetail,
       arguments: StudentDetailArgs(
@@ -87,7 +90,9 @@ class ClassStudentsTab extends StatelessWidget {
                 final bool ok = await controller.removeFromClass(student.id);
                 if (!context.mounted) return;
                 if (ok) {
-                  context.showSuccess('${student.fullName} removed from the class.');
+                  context.showSuccess(
+                    '${student.fullName} removed from the class.',
+                  );
                 }
               },
             ),
@@ -159,26 +164,28 @@ class ClassStudentsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ClassDetailController controller =
-        context.watch<ClassDetailController>();
+    final ClassDetailController controller = context
+        .watch<ClassDetailController>();
     final List<StudentPerformance> students = controller.visibleStudents;
     final GradeScale? scale = controller.gradeScale;
 
     void addStudent() => Navigator.of(context).pushNamed(
-          Routes.studentForm,
-          arguments: StudentFormArgs(classId: controller.classId),
-        );
+      Routes.studentForm,
+      arguments: StudentFormArgs(classId: controller.classId),
+    );
 
     void enrollExisting() => Navigator.of(context).pushNamed(
-          Routes.enrollExisting,
-          arguments: EnrollStudentsArgs(
-            classId: controller.classId,
-            className: controller.schoolClass?.name ?? 'this class',
-          ),
-        );
+      Routes.enrollExisting,
+      arguments: EnrollStudentsArgs(
+        classId: controller.classId,
+        className: controller.schoolClass?.name ?? 'this class',
+      ),
+    );
 
     return Scaffold(
-      backgroundColor: context.semantic.canvas,
+      // Transparent so the app's gradient shows through: this is a tab inside
+      // another Scaffold, not a page of its own.
+      backgroundColor: Colors.transparent,
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'add-student',
         onPressed: addStudent,
@@ -225,28 +232,28 @@ class ClassStudentsTab extends StatelessWidget {
                     onEnrollExisting: enrollExisting,
                   )
                 : students.isEmpty
-                    ? EmptyView(
-                        icon: Icons.filter_alt_off_outlined,
-                        title: 'No students match',
-                        message: 'Adjust the search or filter to see students.',
-                        actionLabel: 'Clear filters',
-                        onAction: controller.clearFilters,
-                      )
-                    : RefreshIndicator(
-                        onRefresh: controller.refresh,
-                        child: ContentWidth(
-                          child: _RosterList(
-                            controller: controller,
-                            students: students,
-                            scale: scale,
-                            onOpen: (StudentPerformance p) =>
-                                _openStudent(context, controller, p),
-                            onActions: (StudentPerformance p) =>
-                                _showStudentActions(context, controller, p),
-                            onEnrollExisting: enrollExisting,
-                          ),
-                        ),
+                ? EmptyView(
+                    icon: Icons.filter_alt_off_outlined,
+                    title: 'No students match',
+                    message: 'Adjust the search or filter to see students.',
+                    actionLabel: 'Clear filters',
+                    onAction: controller.clearFilters,
+                  )
+                : RefreshIndicator(
+                    onRefresh: controller.refresh,
+                    child: ContentWidth(
+                      child: _RosterList(
+                        controller: controller,
+                        students: students,
+                        scale: scale,
+                        onOpen: (StudentPerformance p) =>
+                            _openStudent(context, controller, p),
+                        onActions: (StudentPerformance p) =>
+                            _showStudentActions(context, controller, p),
+                        onEnrollExisting: enrollExisting,
                       ),
+                    ),
+                  ),
           ),
         ],
       ),
@@ -338,8 +345,9 @@ class _RosterList extends StatelessWidget {
         Text(
           '${Format.plural(controller.studentCount, 'student')} in this class.',
           textAlign: TextAlign.center,
-          style: context.text.labelSmall
-              ?.copyWith(color: context.semantic.mutedText),
+          style: context.text.labelSmall?.copyWith(
+            color: context.semantic.mutedText,
+          ),
         ),
       ],
     );
@@ -363,8 +371,9 @@ class _TrailingActions extends StatelessWidget {
           children: <Widget>[
             Text(
               Format.percentOrDash(performance.percentage, decimals: 0),
-              style:
-                  context.text.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+              style: context.text.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 3),
             Text(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/glass.dart';
 
 /// One shortcut on the dashboard's quick-action row.
 class QuickAction {
@@ -67,7 +68,7 @@ class _QuickActionTile extends StatelessWidget {
         // sits on one line at the 1.35 text scale the app allows.
         width: 116,
         child: Material(
-          color: context.colors.surface,
+          color: Glass.fill(context),
           borderRadius: AppRadii.cardRadius,
           child: InkWell(
             onTap: enabled ? action.onTap : null,

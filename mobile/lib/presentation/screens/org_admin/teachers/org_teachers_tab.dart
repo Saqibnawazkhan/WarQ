@@ -12,6 +12,7 @@ import '../../../widgets/common/app_card.dart';
 import '../../../widgets/common/search_field.dart';
 import '../../../widgets/feedback/state_views.dart';
 import '../../../widgets/layout/app_page.dart';
+import '../../../widgets/layout/floating_nav_bar.dart';
 import '../dashboard/org_dashboard_screen.dart';
 
 /// Teacher directory for an organization admin.
@@ -39,14 +40,16 @@ class OrgTeachersTab extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'fab-org-teachers',
-        onPressed: () => Navigator.of(context).pushNamed(
-          Routes.orgInviteTeacher,
-          arguments: const InviteTeacherArgs(),
+      floatingActionButton: ClearOfNavBar(
+        child: FloatingActionButton.extended(
+          heroTag: 'fab-org-teachers',
+          onPressed: () => Navigator.of(context).pushNamed(
+            Routes.orgInviteTeacher,
+            arguments: const InviteTeacherArgs(),
+          ),
+          icon: const Icon(Icons.person_add_alt_1_rounded),
+          label: const Text('Invite teacher'),
         ),
-        icon: const Icon(Icons.person_add_alt_1_rounded),
-        label: const Text('Invite teacher'),
       ),
       body: SafeArea(
         bottom: false,
@@ -101,11 +104,14 @@ class OrgTeachersTab extends StatelessWidget {
                     onRefresh: controller.refresh,
                     child: ContentWidth(
                       child: ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(
+                        // Room for the action button, and for the nav bar the
+                        // list scrolls behind on top of that.
+                        padding: EdgeInsets.fromLTRB(
                           AppSpacing.lg,
                           0,
                           AppSpacing.lg,
-                          AppSpacing.fabClearance,
+                          AppSpacing.fabClearance +
+                              FloatingNavBar.reservedHeight(context),
                         ),
                         itemCount: teachers.length + 1,
                         separatorBuilder: (_, __) => const Gap.md(),

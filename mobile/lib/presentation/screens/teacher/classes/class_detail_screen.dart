@@ -6,6 +6,7 @@ import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/routing/route_args.dart';
 import '../../../../core/routing/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/glass.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/models.dart';
 import '../../../../domain/entities/student_performance.dart';
@@ -77,10 +78,8 @@ class _ClassDetailViewState extends State<_ClassDetailView>
       final GeneratedReport report = await withBlockingProgress(
         context,
         message: 'Building class report…',
-        () => deps.reports.classReport(
-          classId: schoolClass.id,
-          teacher: teacher,
-        ),
+        () =>
+            deps.reports.classReport(classId: schoolClass.id, teacher: teacher),
       );
       if (!mounted) return;
       Navigator.of(context).pushNamed(
@@ -100,7 +99,8 @@ class _ClassDetailViewState extends State<_ClassDetailView>
     final bool confirmed = await showConfirmDialog(
       context,
       title: 'Delete ${schoolClass.name}?',
-      message: 'Attendance history, assessments and marks for this class are '
+      message:
+          'Attendance history, assessments and marks for this class are '
           'deleted permanently. Student records remain in your account.',
       confirmLabel: 'Delete class',
       isDestructive: true,
@@ -114,14 +114,16 @@ class _ClassDetailViewState extends State<_ClassDetailView>
       Navigator.of(context).pop();
       context.showSuccess('${schoolClass.name} deleted.');
     } else {
-      context.showError(controller.errorMessage ?? 'Could not delete the class.');
+      context.showError(
+        controller.errorMessage ?? 'Could not delete the class.',
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final ClassDetailController controller =
-        context.watch<ClassDetailController>();
+    final ClassDetailController controller = context
+        .watch<ClassDetailController>();
     final SchoolClass? schoolClass = controller.schoolClass;
 
     return Scaffold(
@@ -139,8 +141,9 @@ class _ClassDetailViewState extends State<_ClassDetailView>
                 schoolClass.subtitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: context.text.bodySmall
-                    ?.copyWith(color: context.semantic.mutedText),
+                style: context.text.bodySmall?.copyWith(
+                  color: context.semantic.mutedText,
+                ),
               ),
           ],
         ),
@@ -164,8 +167,9 @@ class _ClassDetailViewState extends State<_ClassDetailView>
                 case 'history':
                   Navigator.of(context).pushNamed(
                     Routes.attendanceHistory,
-                    arguments:
-                        AttendanceHistoryArgs(classId: controller.classId),
+                    arguments: AttendanceHistoryArgs(
+                      classId: controller.classId,
+                    ),
                   );
                 case 'delete':
                   _deleteClass(controller);
@@ -214,7 +218,7 @@ class _ClassDetailViewState extends State<_ClassDetailView>
           children: <Widget>[
             _ClassOverviewHeader(controller: controller),
             Material(
-              color: context.colors.surface,
+              color: Glass.fill(context),
               child: TabBar(
                 controller: _tabController,
                 // Marks live on their own tab in the bottom bar, where a
@@ -254,7 +258,7 @@ class _ClassOverviewHeader extends StatelessWidget {
     final List<StudentPerformance> atRisk = controller.atRiskStudents;
 
     return Container(
-      color: context.colors.surface,
+      color: Glass.fill(context),
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.md,
@@ -364,13 +368,16 @@ class _MiniStat extends StatelessWidget {
         const SizedBox(height: AppSpacing.xs),
         Text(
           value,
-          style: context.text.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          style: context.text.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
         ),
         Text(
           label,
           textAlign: TextAlign.center,
-          style: context.text.labelSmall
-              ?.copyWith(color: context.semantic.mutedText),
+          style: context.text.labelSmall?.copyWith(
+            color: context.semantic.mutedText,
+          ),
         ),
       ],
     );
@@ -401,4 +408,3 @@ class ClassRosterEmptyState extends StatelessWidget {
     );
   }
 }
-

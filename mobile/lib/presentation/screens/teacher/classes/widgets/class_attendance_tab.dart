@@ -23,20 +23,22 @@ class ClassAttendanceTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ClassDetailController controller =
-        context.watch<ClassDetailController>();
+    final ClassDetailController controller = context
+        .watch<ClassDetailController>();
     final List<AttendanceSession> sessions = controller.sessions;
 
     return Scaffold(
-      backgroundColor: context.semantic.canvas,
+      // Transparent so the app's gradient shows through: this is a tab inside
+      // another Scaffold, not a page of its own.
+      backgroundColor: Colors.transparent,
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'mark-attendance',
         onPressed: controller.studentCount == 0
             ? null
             : () => Navigator.of(context).pushNamed(
-                  Routes.markAttendance,
-                  arguments: MarkAttendanceArgs(classId: controller.classId),
-                ),
+                Routes.markAttendance,
+                arguments: MarkAttendanceArgs(classId: controller.classId),
+              ),
         backgroundColor: controller.studentCount == 0
             ? context.colors.surfaceContainerHighest
             : null,
@@ -45,7 +47,9 @@ class ClassAttendanceTab extends StatelessWidget {
             : null,
         icon: const Icon(Icons.how_to_reg_rounded),
         label: Text(
-          controller.hasAttendanceToday ? 'Edit today' : "Mark today's attendance",
+          controller.hasAttendanceToday
+              ? 'Edit today'
+              : "Mark today's attendance",
         ),
       ),
       body: RefreshIndicator(
@@ -67,8 +71,9 @@ class ClassAttendanceTab extends StatelessWidget {
                     child: OutlinedButton.icon(
                       onPressed: () => Navigator.of(context).pushNamed(
                         Routes.attendanceHistory,
-                        arguments:
-                            AttendanceHistoryArgs(classId: controller.classId),
+                        arguments: AttendanceHistoryArgs(
+                          classId: controller.classId,
+                        ),
                       ),
                       icon: const Icon(Icons.history_rounded, size: 20),
                       label: const Text('Full history'),
@@ -89,8 +94,9 @@ class ClassAttendanceTab extends StatelessWidget {
               else ...<Widget>[
                 Text(
                   'Recent sessions',
-                  style: context.text.titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w700),
+                  style: context.text.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const Gap.md(),
                 for (final AttendanceSession session in sessions)
@@ -118,8 +124,7 @@ class _AttendanceSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AttendanceSummary summary = AttendanceSummary.combine(
-      controller.allStudents
-          .map((StudentPerformance p) => p.attendance),
+      controller.allStudents.map((StudentPerformance p) => p.attendance),
     );
 
     return AppCard(
@@ -131,8 +136,9 @@ class _AttendanceSummaryCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Attendance overview',
-                  style: context.text.titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w700),
+                  style: context.text.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
               AttendanceBadge(percent: summary.percentage),
@@ -175,8 +181,9 @@ class _AttendanceSummaryCard extends StatelessWidget {
                 const SizedBox(width: AppSpacing.sm),
                 Text(
                   "Today's attendance is already saved.",
-                  style: context.text.bodySmall
-                      ?.copyWith(color: context.semantic.mutedText),
+                  style: context.text.bodySmall?.copyWith(
+                    color: context.semantic.mutedText,
+                  ),
                 ),
               ],
             ),
@@ -188,7 +195,11 @@ class _AttendanceSummaryCard extends StatelessWidget {
 }
 
 class _Metric extends StatelessWidget {
-  const _Metric({required this.label, required this.value, required this.color});
+  const _Metric({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
 
   final String label;
   final String value;
@@ -208,8 +219,9 @@ class _Metric extends StatelessWidget {
           ),
           Text(
             label,
-            style: context.text.labelSmall
-                ?.copyWith(color: context.semantic.mutedText),
+            style: context.text.labelSmall?.copyWith(
+              color: context.semantic.mutedText,
+            ),
           ),
         ],
       ),
@@ -239,8 +251,8 @@ class _SessionTileState extends State<_SessionTile> {
 
   Future<void> _loadSummary() async {
     final AppDependencies deps = context.read<AppDependencies>();
-    final List<AttendanceRecord> records =
-        await deps.attendance.recordsForSession(widget.session.id);
+    final List<AttendanceRecord> records = await deps.attendance
+        .recordsForSession(widget.session.id);
     if (!mounted) return;
     setState(() {
       _summary = AttendanceSummary.fromStatuses(
@@ -254,7 +266,8 @@ class _SessionTileState extends State<_SessionTile> {
     final bool confirmed = await showConfirmDialog(
       context,
       title: 'Delete this session?',
-      message: 'Attendance recorded on '
+      message:
+          'Attendance recorded on '
           '${AppDate.format(widget.session.date)} will be removed permanently.',
       confirmLabel: 'Delete',
       isDestructive: true,
@@ -295,13 +308,15 @@ class _SessionTileState extends State<_SessionTile> {
               children: <Widget>[
                 Text(
                   '${widget.session.date.day}',
-                  style: context.text.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w700),
+                  style: context.text.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 Text(
                   AppDate.formatWeekday(widget.session.date),
-                  style: context.text.labelSmall
-                      ?.copyWith(color: context.semantic.mutedText),
+                  style: context.text.labelSmall?.copyWith(
+                    color: context.semantic.mutedText,
+                  ),
                 ),
               ],
             ),
@@ -319,15 +334,17 @@ class _SessionTileState extends State<_SessionTile> {
                 if (_loading)
                   Text(
                     'Loading…',
-                    style: context.text.bodySmall
-                        ?.copyWith(color: context.semantic.mutedText),
+                    style: context.text.bodySmall?.copyWith(
+                      color: context.semantic.mutedText,
+                    ),
                   )
                 else if (summary != null)
                   Text(
                     '${summary.present} present · ${summary.absent} absent'
                     '${summary.late > 0 ? ' · ${summary.late} late' : ''}',
-                    style: context.text.bodySmall
-                        ?.copyWith(color: context.semantic.mutedText),
+                    style: context.text.bodySmall?.copyWith(
+                      color: context.semantic.mutedText,
+                    ),
                   ),
               ],
             ),

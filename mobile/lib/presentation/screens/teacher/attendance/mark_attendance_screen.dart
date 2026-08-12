@@ -5,6 +5,7 @@ import '../../../../app/app_dependencies.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/routing/route_args.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/glass.dart';
 import '../../../../core/utils/date_utils.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/models.dart';
@@ -69,16 +70,18 @@ class _MarkAttendanceViewState extends State<_MarkAttendanceView> {
     final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
 
     setState(() => _error = null);
-    final AbsenceDispatchReport? report =
-        await controller.save(notifyGuardians: _notifyGuardians);
+    final AbsenceDispatchReport? report = await controller.save(
+      notifyGuardians: _notifyGuardians,
+    );
     if (!mounted) return;
 
     if (report == null) {
       // Reported inline rather than as a snackbar so it cannot be hidden
       // behind the save bar, and so it stays on screen while the teacher fixes
       // the problem.
-      setState(() =>
-          _error = controller.errorMessage ?? 'Could not save attendance.');
+      setState(
+        () => _error = controller.errorMessage ?? 'Could not save attendance.',
+      );
       return;
     }
 
@@ -94,7 +97,7 @@ class _MarkAttendanceViewState extends State<_MarkAttendanceView> {
 
     final String summary = report.isEmpty
         ? 'Attendance saved. ${controller.presentCount} present, '
-            '${controller.absentCount} absent.'
+              '${controller.absentCount} absent.'
         : 'Attendance saved. ${report.describe()}';
 
     navigator.pop(true);
@@ -116,8 +119,8 @@ class _MarkAttendanceViewState extends State<_MarkAttendanceView> {
 
   @override
   Widget build(BuildContext context) {
-    final AttendanceMarkingController controller =
-        context.watch<AttendanceMarkingController>();
+    final AttendanceMarkingController controller = context
+        .watch<AttendanceMarkingController>();
 
     return PopScope(
       canPop: !controller.hasUnsavedChanges,
@@ -146,8 +149,9 @@ class _MarkAttendanceViewState extends State<_MarkAttendanceView> {
                 AppDate.relativeDay(controller.date),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: context.text.bodySmall
-                    ?.copyWith(color: context.semantic.mutedText),
+                style: context.text.bodySmall?.copyWith(
+                  color: context.semantic.mutedText,
+                ),
               ),
             ],
           ),
@@ -174,8 +178,7 @@ class _MarkAttendanceViewState extends State<_MarkAttendanceView> {
           empty: const EmptyView(
             icon: Icons.people_outline_rounded,
             title: 'No students in this class',
-            message:
-                'Add students to the class before taking attendance.',
+            message: 'Add students to the class before taking attendance.',
           ),
           builder: (BuildContext context) => Column(
             children: <Widget>[
@@ -253,7 +256,7 @@ class _SummaryStrip extends StatelessWidget {
     // separate row of buttons underneath cost about a fifth of the screen to
     // say something a teacher reads in a glance.
     return Container(
-      color: context.colors.surface,
+      color: Glass.fill(context),
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         0,
@@ -315,7 +318,9 @@ class _SummaryStrip extends StatelessWidget {
                 onPressed: () => controller.markAll(AttendanceStatus.present),
                 style: TextButton.styleFrom(
                   foregroundColor: context.colors.primary,
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                  ),
                   minimumSize: const Size(0, 40),
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
@@ -394,8 +399,10 @@ class _AttendanceRow extends StatelessWidget {
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
       ),
-      borderColor: AttendanceStatusChip.colorFor(context, status)
-          .withValues(alpha: 0.35),
+      borderColor: AttendanceStatusChip.colorFor(
+        context,
+        status,
+      ).withValues(alpha: 0.35),
       child: Row(
         children: <Widget>[
           Expanded(
@@ -411,8 +418,10 @@ class _AttendanceRow extends StatelessWidget {
                   student.fullName,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: context.text.titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w600, height: 1.2),
+                  style: context.text.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    height: 1.2,
+                  ),
                 ),
                 if (showMeta) _StudentMeta(student: student),
               ],
@@ -434,8 +443,9 @@ class _StudentMeta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle? muted =
-        context.text.bodySmall?.copyWith(color: context.semantic.mutedText);
+    final TextStyle? muted = context.text.bodySmall?.copyWith(
+      color: context.semantic.mutedText,
+    );
     final bool needsContact = !student.hasAnyContact;
 
     // One text run rather than a row of them: a long roll number then eats into
@@ -451,8 +461,9 @@ class _StudentMeta extends StatelessWidget {
           if (needsContact)
             TextSpan(
               text: 'No contact number',
-              style: context.text.bodySmall
-                  ?.copyWith(color: context.semantic.warning),
+              style: context.text.bodySmall?.copyWith(
+                color: context.semantic.warning,
+              ),
             ),
         ],
       ),
@@ -563,69 +574,76 @@ class _SaveBar extends StatelessWidget {
     final int notifiable = controller.notifiableAbsentees.length;
     final int unreachable = controller.absenteesWithoutContact.length;
 
-    return SafeArea(
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.md,
-          AppSpacing.lg,
-          AppSpacing.md,
-        ),
-        decoration: BoxDecoration(
-          color: context.colors.surface,
-          border: Border(top: BorderSide(color: context.semantic.subtleBorder)),
-        ),
-        child: ContentWidth(
-          fillHeight: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            // Everywhere else in the app a primary button spans its container,
-            // because a list body stretches its children. This column did not,
-            // leaving the one button that ends the task sized to its label.
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              if (controller.absentCount > 0) ...<Widget>[
-                SwitchListTile.adaptive(
-                  value: notifyGuardians,
-                  onChanged: onToggleNotify,
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    'Notify guardians of absences',
-                    style: context.text.titleSmall,
+    // Blurred, not merely translucent: the register scrolls underneath this
+    // bar, and a see-through fill would show the student rows through it.
+    return GlassSurface(
+      blur: 20,
+      border: false,
+      raised: true,
+      child: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.md,
+            AppSpacing.lg,
+            AppSpacing.md,
+          ),
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: Glass.edge(context))),
+          ),
+          child: ContentWidth(
+            fillHeight: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              // Everywhere else in the app a primary button spans its container,
+              // because a list body stretches its children. This column did not,
+              // leaving the one button that ends the task sized to its label.
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                if (controller.absentCount > 0) ...<Widget>[
+                  SwitchListTile.adaptive(
+                    value: notifyGuardians,
+                    onChanged: onToggleNotify,
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      'Notify guardians of absences',
+                      style: context.text.titleSmall,
+                    ),
+                    subtitle: Text(
+                      <String>[
+                        if (notifiable > 0)
+                          '${Format.plural(notifiable, 'student')} will be messaged',
+                        if (unreachable > 0)
+                          '$unreachable without a phone number',
+                      ].join(' · '),
+                      style: context.text.bodySmall?.copyWith(
+                        color: context.semantic.mutedText,
+                      ),
+                    ),
                   ),
-                  subtitle: Text(
-                    <String>[
-                      if (notifiable > 0)
-                        '${Format.plural(notifiable, 'student')} will be messaged',
-                      if (unreachable > 0)
-                        '$unreachable without a phone number',
-                    ].join(' · '),
-                    style: context.text.bodySmall
-                        ?.copyWith(color: context.semantic.mutedText),
+                  const Gap.sm(),
+                ],
+                FilledButton.icon(
+                  onPressed: controller.isBusy ? null : onSave,
+                  icon: controller.isBusy
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.save_rounded),
+                  label: Text(
+                    controller.isExistingSession
+                        ? 'Update attendance'
+                        : 'Save attendance',
                   ),
                 ),
-                const Gap.sm(),
               ],
-              FilledButton.icon(
-                onPressed: controller.isBusy ? null : onSave,
-                icon: controller.isBusy
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.save_rounded),
-                label: Text(
-                  controller.isExistingSession
-                      ? 'Update attendance'
-                      : 'Save attendance',
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
